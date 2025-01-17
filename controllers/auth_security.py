@@ -21,7 +21,7 @@ def auth_login_post():
     login = request.form.get('login')
     password = request.form.get('password')
     tuple_select = (login)
-    sql = " requete_auth_security_1 "
+    sql = " SELECT * FROM utilisateur WHERE login = %s "
     retour = mycursor.execute(sql, (login))
     user = mycursor.fetchone()
     if user:
