@@ -9,8 +9,8 @@ def get_db():
         db = g._database = pymysql.connect(
             host="localhost",
             # host="serveurmysql",
-            user="login",
-            password="secret",
+            user="constantsuchet",
+            password="Password123!",
             database="BDD_login_sae",
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
@@ -32,14 +32,4 @@ def activate_db_options(db):
             db.commit()
         else:
             print('MYSQL : mode ONLY_FULL_GROUP_BY  ok')   # mettre en commentaire
-    # Vérifier et activer l'option lower_case_table_names si nécessaire
-    cursor.execute("SHOW VARIABLES LIKE 'lower_case_table_names'")
-    result = cursor.fetchone()
-    if result:
-        if result['Value'] != '0':
-            print('MYSQL : valeur de la variable globale lower_case_table_names differente de 0')   # mettre en commentaire
-            cursor.execute("SET GLOBAL lower_case_table_names = 0")
-            db.commit()
-        else :
-            print('MYSQL : variable globale lower_case_table_names=0  ok')    # mettre en commentaire
     cursor.close()
