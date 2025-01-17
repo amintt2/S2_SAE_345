@@ -1,0 +1,96 @@
+{% extends "client/layout_client.html" %}
+{% block body %}
+    <div class="container-fluid">
+            {% if articles_commande %}
+            <h3>Recapitulatifs de la commande selectionnée</h3>
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr><th>Nom</th><th>Quantite</th><th>Prix</th><th>Prix total</th></tr>
+                </thead>
+                <tbody>
+                        {% for ligne in articles_commande %}
+                            <tr>
+                                <td>{{ ligne.nom }}
+                                {% if ligne.nb_declinaisons is defined and ligne.nb_declinaisons > 1 %}
+                                    <span style="color:rgba(255,197,197,0.6);"> ( {{ ligne.nb_declinaisons }} declinaisons )</span>
+                                    <span style="color:#6dcea2">
+                                    {% if ligne.couleur_id != 1 %}
+                                        {{ ligne.libelle_couleur }} 
+                                    {% endif %}
+                                    </span>
+                                    <span  style="color:#d941c2">
+                                    {% if ligne.taille_id != 1 %}
+                                        {{ ligne.libelle_taille }} 
+                                    {% endif %}
+                                    </span>
+                                {% endif %}
+                                </td>
+                                <td>{{ ligne.quantite }}</td>
+                                <td>{{ ligne.prix }} €</td>
+                                <td>{{ ligne.prix_ligne }} €  </td>
+                            </tr>
+                        {% endfor %}
+
+                </tbody>
+            </table>
+                <br>
+                <div style="color: brown">
+                <strong>adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
+                <br>
+                <strong>adresse facturation : </strong>
+                {% if commande_adresses.adresse_identique == 'adresse_identique' %}
+                    adresse identique
+                {% else %}
+                    {{ commande_adresses.nom_facturation }} {{ commande_adresses.rue_facturation }} {{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}
+                {% endif %}
+                </div>
+            <hr>
+        {% endif %}
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <p class="text-primary m-0 font-weight-bold">Toutes mes commandes</p>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
+                    <table class="table my-0" id="dataTable">
+                        <thead>
+                        <tr>
+                            <th>Date de commande</th>
+                            <th>Nombre d'articles</th>
+                            <th>Coût total</th>
+                            <th>Etat de la commande</th>
+                            <th style="text-align: center;">Options</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for commande in commandes %}
+                            <tr id="" {% if commande.etat_id == 1 %} style="background: #FFD600; font-weight: bold;" {% endif %}>
+                                <td>{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
+                                <td> {{ commande.nbr_articles }} </td>
+                                <td>
+                                    {{ "{:,.2f} €".format(commande.prix_total) }}
+                                </td>
+                                <td style="text-align: center;">
+                                    {% if commande.etat_id == 1 %} <div style="background-color: #ba8b00; padding: 5px;">
+                                     {{ commande.libelle }}
+                                    </div>
+                                    {% else %} <div style="background-color: #34ce57; padding: 5px;">
+                                        {{ commande.libelle }} </div>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center;">
+                                    <a href="/client/commande/show?id_commande={{ commande.id_commande }}">
+                                        <button class="btn btn-primary" > Details </button>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div> <!-- end card-body-->
+
+        </div>
+    </div>
+
+{% endblock %}

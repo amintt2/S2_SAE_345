@@ -1,0 +1,95 @@
+{#  articles_panier  : tableau de dictionnaires
+        * dictionnaire : nom quantite prix article_id [stock]
+        *
+#}
+
+{% extends "client/layout_client.html" %}
+{% block body %}
+    <div class="container">
+        <div class="row align-self-right">
+        {% include('client/boutique/_panier.html') %}
+            <div class="col">
+              <h3>Les filtres</h3>
+              Articles dont le nom est composé par :<br>
+                 {% include('client/boutique/_filtre.html') %}
+            </div>
+        </div>
+
+        <div class="bg-light p-3">
+            <h1>Les articles</h1>
+        </div>
+
+        <div class="row">
+                {% for article in articles  %}
+                        <div class="card col-4 mt-4 p-1">
+                            <div class="card-body border-dark rounded p-1">
+                                <a href="/client/article/details?id_article={{ article.id_article }}" >
+                                <h3 class="card-title">
+                                    <span style="color: #0b2e13">{{ article.nom }}</span><br>
+                                    {{ article.prix }}
+                                    €
+                                </h3>
+                                     {%  if article.image is not none %}
+                                        <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ article.image }}"  alt="image  de {{ article.nom }}" >
+                                    {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ article.nom }}" >
+                                    {% endif %}
+                                    <hr>
+                                </a>
+                                <div class="row">
+{# #}                                {% if  article.stock is defined and article.stock != None %}
+{# #}                                    {% if article.stock > 0 %}
+                                        <form  action="/client/panier/add"  method="post" class="col-5">
+                                            <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                                            <div class="input-group">
+                                            <button class="btn  btn-success"  id="button-addon1">
+                                                <i class="fas fa-shopping-cart">Ajouter</i>
+                                            </button>
+                                            <input type="number" id="input-{{ article.id_article }}" step="1" min="0" max="{{ article.stock }}" class="form-control" value="1" name="quantite"  aria-describedby="button-addon1">
+                                            </div>
+                                        </form>
+{# #}                                    {% endif %}
+{# #}                                {% endif %}
+                                     <div class="col-2 align-content-end">
+                                    {% if article.liste_envie is defined %}
+                                         {%if  article.liste_envie== 1%}
+                                             <a href="/client/envie/add?id_article={{ article.id_article }}" style="text-decoration: none">💛</a>
+                                         {% else %}
+                                             <a href="/client/envie/add?id_article={{ article.id_article }}" style="text-decoration: none">🤍</a>
+                                         {% endif %}
+                                    {% endif %}
+                                     </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                            {% if article.stock is defined and article.stock != None %}
+                                 {% if article.stock > 0 %}
+                                    <small class="text-muted">Stock restant : {{ article.stock }}</small>
+                                 {% else %}
+                                    <small class="text-muted">article  momentanément indisponible</small>
+                                 {% endif %}
+                                {% if article.nb_declinaison is defined and article.nb_declinaison != None %}
+                                    ({{ article.nb_declinaison }} d.)
+                                {% endif %}
+                                <br>
+                            {% endif %}
+                            {% if article.nb_notes is defined %}
+                                {% if article.nb_notes > 0 %}
+                                 <a  href="/client/article/details?id_article={{ article.id_article }}" >
+                                    <span style="color: #3A7734"> note : {{  "{:,.1f}".format(article.moy_notes) }}({{ article.nb_notes }})</span>
+                                 </a>
+                                {% endif %}
+                            {% endif %}
+                            {% if article.nb_avis is defined %}
+                                {% if article.nb_avis > 0 %}
+                                 <a href="/client/article/details?id_article={{ article.id_article }}" >
+                                    <span style="color: #3A7734">({{ article.nb_avis }} avis)</span>
+                                 </a>
+                                {% endif %}
+                            {% endif %}
+                            </div>
+                        </div>
+                {% endfor %}
+        </div>
+    </div>
+{#    {{ articles | pprint }}#}
+{% endblock %}

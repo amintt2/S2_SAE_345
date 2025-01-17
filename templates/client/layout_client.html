@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>SAE BDD</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" >
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/bootstrap.css') }}" >
+        <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/mes_styles.css') }}" >
+    {% endblock %}
+</head>
+<body>
+{% include('client/_nav_client.html') %}
+<div class="container  container-md">
+{% block body %}
+    <h4 style="color:blue">page Client : templates\admin\layout_client.html</h4>
+    <h3 style="color: blue">Bonjour {{ session['login'] }} , votre Rôle : {{ session['role'] }}</h3>
+{% endblock %}
+</div>
+{% block javascripts %}
+    <script src="{{ url_for('static', filename='assets/js/bootstrap.bundle.js') }}" ></script>
+{% endblock %}
+</body>
+</html>
+

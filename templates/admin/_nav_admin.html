@@ -1,0 +1,66 @@
+<div class="m-2">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<div class="container-fluid">
+    <a class="navbar-brand" href="/">SAE BDD 2024 <span style="color:#ff0000;">  Menu Admin </span></a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Commandes</a>
+            <div class="dropdown-menu" aria-labelledby="DropdownCommandes">
+                <a class="dropdown-item"  href="/admin/commande/show" >Gestions des commandes</a>
+            </div>
+        </li>
+
+{#        <li class="nav-item dropdown">#}
+{#            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Clients</a>#}
+{#            <div class="dropdown-menu" aria-labelledby="DropdownClient">#}
+{#                <a class="dropdown-item" href="">Gestions des clients</a>#}
+{#            </div>#}
+{#        </li>#}
+
+        <li class="nav-item dropdown">
+             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Articles</a>
+            <div class="dropdown-menu" aria-labelledby="DropdownProduits">
+                <a class="dropdown-item" href="/admin/article/show"   >Gestion des articles</a>
+                <a class="dropdown-item" href="/admin/type-article/show"    > Gestion des types d'articles </a>
+                <a class="dropdown-item" href="/admin/dataviz/etat1"   > votre partie : Dataviz (exemple les types de articles) </a>
+                <a class="dropdown-item" href="/admin/dataviz/etat2"   > sujet 3  : Dataviz supplémentaire : Map </a>
+            </div>
+        </li>
+    </ul>
+</div>
+
+ <div class="d-flex">
+        <!-- Authentication Links -->
+        {% if session['role']  %}
+            <span class="navbar-text">
+                Bonjour {{ session['login'] }}
+                {% if session['role']=='ROLE_admin' %} (role :  Admin)
+                {% elif session['role']=='ROLE_client' %} (role : PB Client) {% endif %}
+
+            </span>
+           <a class="btn btn-outline-success" type="button" href="/logout"  >
+                Se déconnecter (Logout)
+            </a>
+        {% else %}
+            <a class="btn btn-outline-success" type="button" href="/login">
+                PB espace admin
+            </a>
+        {% endif %}
+
+</div>
+</div> <!--container fluid -->
+</nav>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+    {% for categorie, message in messages %}
+    <div role="alert" class="alert {{ categorie }}">
+           Information : <strong>{{ message }}</strong>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+

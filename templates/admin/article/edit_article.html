@@ -1,0 +1,116 @@
+{#
+article (dictionnaire)
+id_article, nom, type_article_id, prix, image
+    * option :
+        * stock ,
+        * nb_avis ,
+        * nb_declinaisons
+
+types_article : tableau de dictionnaires
+* tableau de "type_article"
+    * id_type_article, libelle
+#}
+
+{% extends 'admin/layout_admin.html' %}
+{% block title %}
+    <title>modifier un article</title>
+{% endblock %}
+
+{% block body %}
+    <h2>modifier un article</h2>
+        <div class="row mt-5">
+        {%  if article.image is not none %}
+            <img class="card-img-top rounded mx-4 d-block"  style="width:200px; height:200px; border: 1px solid black; padding: 25px;"   id="img_output" src="{{ url_for('static', filename = 'images/') }}{{ article.image}}"  alt="image  de {{ article.nom }}" >
+        {% endif %}
+            <div class="w-25">
+                <form class="w-190" method="post" action="/admin/article/edit" enctype="multipart/form-data">
+                    <input type="hidden" value="{{ article.id_article }}" name="id_article">
+                    <label for="nom">Nom :
+                        <input name="nom" type="text" value="{{ article.nom }}" class="form-control">
+                    </label>
+                    <label for="prix" > Prix (€) :
+                        <input name="prix" type="number" min="0.0" step="0.01" value="{{ article.prix }}" class="form-control" >
+                    </label>
+                    <label for="image">Image :                       {# à modifier #}
+                        <input name="image"  onchange="loadFile(event)" type="file" class="form-control" value="{{ article.image }}">             {# à modifier #}
+                    </label>                                         {# à modifier #}
+{#                https://blog.miguelgrinberg.com/post/handling-file-uploads-with-flask#}
+
+                <label for="type_article_id">Type de l'article :
+                    <select name="type_article_id" class="form-select">
+                            {% for type in types_article %}
+                                 <option value="{{ type.id_type_article }}" {% if type.id_type_article == article.type_article_id %} selected {% endif %}> {{ type.libelle }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label for="description">Description :
+                        <input name="description" type="text" value="{{ article.description }}" class="form-control">
+                    </label>
+                    <button class="btn btn-primary mt-2">
+                                Modifier
+                    </button>
+                    <a class="btn btn-secondary mt-2" href="/admin/article/show"  role="button">retour</a>
+                </form>
+
+                <div class="container-fluid " style="width: 1000px;">
+
+                    <div style="display: flex; justify-content: space-between">
+                        <h3>déclinaison en fonction de la taille/couleur (variante)</h3>
+                        <a class="img-fluid" href="/admin/declinaison_article/add?id_article={{ article.id_article }}">
+                            <button class="btn btn-primary">
+                                Ajouter une déclinaison (variante)
+                            </button>
+                        </a>
+                    </div>
+                    <table class="table table-hover table-responsive">
+
+                        <th style="width: 300px">taille</th>
+                        <th style="width: 300px">couleur</th>
+                        <th style="width: 300px">stock</th>
+                        <th style="width: 300px">opérations</th>
+
+                        {% if declinaisons_article | length == 0 %}
+                            <tr>
+                                <td>Aucun modèle</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {% else %}
+                            {% for declinaison_article in declinaisons_article %}
+                                <tr>
+                                    <td>
+                                        {{ declinaison_article.libelle_taille }}
+                                    </td>
+                                    <td>
+                                        {{ declinaison_article.libelle_couleur }}
+                                    </td>
+                                    <td>{{ declinaison_article.stock }}</td>
+                                    <td style="display: flex">
+                                        <a class="img-fluid" href="/admin/declinaison_article/delete?id_declinaison_article={{ declinaison_article.id_declinaison_article }}&amp;id_article={{ declinaison_article.article_id }}">
+                                            <button class="btn btn-primary mx-1">
+                                                supprimer
+                                            </button>
+                                        </a>
+                                        <a class="img-fluid" href="/admin/declinaison_article/edit?id_declinaison_article={{ declinaison_article.id_declinaison_article }}">
+                                            <button class="btn btn-primary mx-1">
+                                                editer
+                                            </button>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </table>
+
+                </div>
+
+            </div>
+            {% if pb_taille_uniq is defined and pb_taille_uniq==1 %}
+                    <br><span style="color: #fd7e14">(⚠️ pb sur les tailles : une taille unique est définie avec d'autres tailles)</span>
+            {% endif %}
+            {% if pb_couleur_uniq is defined and pb_couleur_uniq==1 %}
+                    <br><span style="color: #fd7e14">(⚠️ pb sur les couleurs : une couleur unique est définie avec d'autres couleurs)</span>
+            {% endif %}
+        </div>
+{% endblock %}

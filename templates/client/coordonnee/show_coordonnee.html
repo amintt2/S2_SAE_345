@@ -1,0 +1,85 @@
+{% extends "client/layout_client.html" %}
+{% block body %}
+<div class="m-auto" style="width: 700px">
+    <div style="text-align: center"><h2>Mes informations :</h2></div>
+    <div class="border m-auto p-3">
+        <table class="table">
+            <tr>
+                <td>Votre login :</td>
+                <td>{{ utilisateur.login }}</td>
+            </tr>
+            <tr>
+                <td>Votre nom : </td>
+                <td>{{ utilisateur.nom }}</td>
+            </tr>
+            <tr>
+                <td>Email : </td>
+                <td>{{ utilisateur.email }}</td>
+            </tr>
+        </table>
+        <div>
+            <a href="/client/coordonnee/edit"  class="btn btn-primary m-2" >Modifier son profil</a>
+        </div>
+    </div>
+    <br>
+
+    <div style="text-align: center"><h2 >Mes adresses :</h2></div>
+    <div class="border m-auto p-3">
+        <table class="table border">
+            <thead class="thead-dark">
+                <tr>
+                    <th>nom</th>
+                    <th>Rue</th>
+                     <th>Code Postal</th>
+                     <th>Ville</th>
+                    <th>nbr. utilisation commande</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for adresse in adresses %}
+                    <tr
+                            {% if adresse.valide is defined and adresse.valide==0 %} style="color: darkorange"{% endif %}
+                            {% if adresse.favori is defined and adresse.favori==1 %} style="color: blue; font-weight: bolder;"{% endif %}
+                    >
+
+                        <td>{{ adresse.nom }}
+                            {% if adresse.favori is defined and adresse.favori==1 %}💛{% endif %}
+                        </td>
+                        <td>{{ adresse.rue }}</td>
+                        <td>{{ adresse.code_postal }}</td>
+                        <td>{{ adresse.ville }}</td>
+                        <td> {% if adresse.nbr_commandes is defined %}{{ adresse.nbr_commandes }} {% endif %} </td>
+                        <td>
+                            {% if adresse.valide is defined and adresse.valide==0 %}
+                                <span style="color: darkorange">*</span>
+                            {% else %}
+                                <a class="btn btn-primary" href="/client/coordonnee/edit_adresse?id_adresse={{ adresse.id_adresse }}"> Modifier </a>
+                            <form action="/client/coordonnee/delete_adresse" style="display: inline-block;"  method="post">
+                                <input type="hidden"  name="id_adresse" value="{{ adresse.id_adresse }}">
+                                <button class="btn btn-primary" > Supprimer </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div>
+            {% if nb_adresses is defined %}
+                {% if nb_adresses <4 %}
+                        <span style="color: darkorange">* adresse non valide</span><br><span style="color: blue; font-weight: bolder;">* favori 💛</span>
+                  <a href="/client/coordonnee/add_adresse" class="btn btn-primary m-2">Ajouter une adresse</a>
+                {% endif %}
+                 <span style="color:green;">( <strong>{{ nb_adresses }}</strong> / 4 adresses valides ; <strong>{{ nb_adresses_tot }}</strong> adresses pour l'utilisateur)</span>
+            {% else %}
+                <a href="/client/coordonnee/add_adresse" class="btn btn-primary m-2">Ajouter une adresse</a>
+            {% endif %}
+        </div>
+    </div>
+        <div>
+            <a href="/client/article/show" class="btn btn-primary m-2">Retour aux articles </a>
+        </div>
+
+</div>
+
+{% endblock %}

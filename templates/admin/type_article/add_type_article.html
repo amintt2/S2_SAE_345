@@ -1,0 +1,24 @@
+{% extends 'admin/layout_admin.html' %}
+
+{% block title %}
+    <title>ajouter un type d'article</title>
+{% endblock %}
+
+{% block body %}
+{#  <h2>ajout d'un type d'article</h2>#}
+  {% if error %}
+    <p class=error><strong>Error:</strong> {{ error }}
+  {% endif %}
+  <form method="post" action="/admin/type-article/add" {#action="{{ url_for('valid_add_type_article') }}#}>
+    <fieldset>
+        <legend> Créer un type d'article</legend>
+<div class="mb-3">
+        <label class="form-label" for="libelle">libellé</label><br>
+        <input  class="form-select" id="libelle" type="text" name="libelle" size="18" value="" placeholder="Saisir le libelle du type de l'article"><br>
+</div>
+        <div class="col-12">
+        <button class="btn btn-primary" type="submit">Valider</button>
+        </div>
+    </fieldset>
+  </form>
+{% endblock %}

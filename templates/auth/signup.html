@@ -1,0 +1,32 @@
+<!-- templates/signup.html -->
+{% extends 'auth/layout.html' %}
+
+{% block body %}
+<form method="post" action="/signup" >
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <br>
+            <div class="alert alert-warning">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+        {% endwith %}
+
+    <h1 class="h3 mb-3 font-weight-normal">Inscription</h1>
+
+    <label>Pseudo</label>
+    <input type="text" name="login" class="form-control" value="" required autofocus  placeholder="login">
+
+    <label for="_email">Email</label>
+    <input type="text" name="email" class="form-control" value="" required  placeholder="Email"  >
+
+    <label for="_password">Mot de passe</label>
+    <input type="password" name="password" class="form-control" value="" required  placeholder="Password">
+
+    <button class="btn btn-lg btn-primary mt-4" type="submit">
+        Valider l'inscription (Sign Up)
+    </button>
+</form>
+{% endblock %}
+

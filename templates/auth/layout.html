@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>SAE BDD</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" >
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/bootstrap.css') }}" >
+        <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/mes_styles.css') }}" >
+    {% endblock %}
+</head>
+<body>
+
+{% include('auth/_nav.html') %}
+
+<div class="container">
+    {% block body %}
+        <h4>templates/auth/layout.html</h4>
+        <h2>Site de vente : projet SAE S2 BDD</h2>
+        <br><br>
+        <a href="/base/init">init.</a>
+    {% endblock %}
+</div><!-- /.container -->
+
+{% block javascripts %}
+    <script src="{{ url_for('static', filename='assets/js/bootstrap.bundle.js') }}" ></script>
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+{% extends 'admin/layout_admin.html' %}
+
+{% block title %}
+    <title>afficher les types d'article</title>
+{% endblock %}
+
+{% block body %}
+<h3>Déclinaison et/ou type d'article (catégorie)</h3>
+<a class="btn btn-outline-success" href="/admin/type-article/add">ajouter un type d'article</a>
+<br><br>
+
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+           <th>designation</th> <th>(id_type_article)</th><th>nombre d'articles</th><th>opération</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% if types_article | length >= 1 %}
+        {% for ligne in types_article %}
+           <tr>
+                  <td>{{ ligne.libelle }}</td>
+                  <td>{{ ligne.id_type_article }}</td>
+                   <td><span style="color: red">{{ ligne.nbr_articles }}</span></td>
+                  <td>
+                      <a class="btn btn-outline-danger" href="/admin/type-article/edit?id_type_article={{ ligne.id_type_article }}">editer</a>&nbsp;
+                      <a class="btn btn-outline-warning" href="/admin/type-article/delete?id_type_article={{ ligne.id_type_article }}">supprimer</a>
+                  </td>
+           </tr>
+        {% endfor %}
+    {% else %}
+            <tr>
+                  <td>
+                      pas de type d'article
+                  </td>
+           </tr>
+    {% endif %}
+    </tbody>
+</table>
+{% endblock %}

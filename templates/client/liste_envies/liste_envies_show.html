@@ -1,0 +1,155 @@
+{#
+articles (tableau de dictionnaires)
+* tableau de "article"
+    * id_article, nom, type_article_id, prix
+    * option :
+        * stock ,
+        * nb_avis ,
+        * nb_declinaisons
+#}
+{% extends 'client/layout_client.html' %}
+
+{% block title %}
+    <title>afficher les articles</title>
+{% endblock %}
+
+{% block body %}
+<h3>votre liste d'envies</h3>
+<br><br>
+
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th>nom</th><th>id</th><th>prix</th><th>stock</th><th>nb déclinaisons</th><th>image</th><th>opération</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% if articles_liste_envies | length >= 1 %}
+        {% for ligne in articles_liste_envies %}
+           <tr>
+                  <td><a href="/client/envies/show?id_article_detail_wishlist={{ ligne.id_article }}">{{ ligne.nom }}</a></td>
+                  <td>{{ ligne.id_article }}</td>
+                  <td>{#{ ligne.prix }#}  {{  "{:,.2f} €".format(ligne.prix) }}</td>
+                  <td>
+                  {% if ligne.stock is defined %}
+                     {% if ligne.stock > 0 %}
+                        <strong style="color: green">{{ ligne.stock }}</strong>
+                     {% else %}
+                        <strong class="text-muted">article momentanément indisponible</strong>
+                     {% endif %}
+                  {% else %}
+                      ND
+                  {% endif %}
+                  </td>
+
+                 {# <td>{{ ligne.date_create }} {{ ligne.date_create.strftime('%d-%m-%Y') }} </td> #}
+                  <td>
+                      {% if ligne.nb_declinaisons is defined %}
+                        {{ ligne.nb_declinaisons }}
+                      {% else %}
+                         decli ND
+                      {% endif %}
+                  </td>
+                  <td>
+                        {%  if ligne.image is not none %}
+                            <img style="width:40px;height:40px"  src="{{ url_for('static', filename = 'images/' + ligne['image']) }}"  alt="image  de {{ ligne.nom }}" >
+                        {% else %}
+                            <img style="width:40px;height:40px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="pas d image" >
+                        {% endif %}
+                  </td>
+                  <td>
+                      <div class="row">
+                          <div class="col-3">
+                              <a  class="btn btn-outline-danger" href="/client/envie/delete?id_article={{ ligne.id_article }}" >supprimer</a>
+                          </div>
+                          <div class="col-3">
+                          <form  action="/client/panier/add"  method="post" >
+                              <input type="hidden" name="id_article" value="{{ ligne.id_article }}">
+                              <input type="hidden" name="quantite" value="1">
+                                            <div class="input-group">
+                                            <button class="btn  btn-outline-success"  id="button-addon1">
+                                                <i class="fas fa-shopping-cart">commander</i>
+                                            </button>
+                                            </div>
+                          </form>
+                          </div>
+                          {% if loop.index !=1 %}
+                          <div class="col-1">
+                              <a  class="btn btn-outline-warning" href="/client/envies/up?id_article={{ ligne.id_article }}">⬆</a>
+                          </div>
+                          {% endif %}
+                          {% if loop.index != loop.length %}
+                          <div class="col-1">
+                              <a  class="btn btn-outline-warning" href="/client/envies/down?id_article={{ ligne.id_article }}">️⬇</a>
+                          </div>
+                          {% endif %}
+                          {% if  loop.index != 1 %}
+                          <div class="col-1">
+                              <a  class="btn btn-outline-warning" href="/client/envies/first?id_article={{ ligne.id_article }}">⏫</a>
+                          </div>
+                          {% endif %}
+                          {% if   loop.index != loop.length %}
+                          <div class="col-1">
+                              <a  class="btn btn-outline-warning" href="/client/envies/last?id_article={{ ligne.id_article }}">⏬</a>
+                          </div>
+                          {% endif %}
+                          <div class="col-1">{{ compteur_id_article }}</div>
+                      </div>
+                  </td>
+           </tr>
+        {% endfor %}
+    {% else %}
+            <tr>
+                  <td>
+                      pas d'article
+                  </td>
+           </tr>
+    {% endif %}
+    </tbody>
+</table>
+    <strong style="color: red">{{ nb_liste_envies }} article(s)</strong> <span style="color: red">dans la WishList</span><br>
+    {%  if info_wishlist is defined and info_wishlist.nb_wish_list_other is defined %}
+    {%  if  info_wishlist.nb_wish_list_other > 0 %}
+        <strong style="color: green">{{ info_wishlist.nb_wish_list_other }} </strong> <span style="color: green">article(s) de nom </span>
+        <strong style="color: green"> {{ info_wishlist.nom }}</strong> <span style="color: green">dans la WishList des autres</span>
+    {% else %}
+        <span style="color: green">Vous êtes le seul à avoir cet article dans votre wishlist</span>
+    {% endif %}
+
+    <br>   <span style="color: blue">  il y a <strong>
+        {%  if  info_wishlist_categorie.nb_wish_list_other_categorie is defined and info_wishlist_categorie.nb_wish_list_other_categorie > 0 %}
+        {{ info_wishlist_categorie.nb_wish_list_other_categorie }}
+        {% else %}
+        aucun
+        {% endif %}</strong>
+            article(s) dans la même catégorie : "<strong>{{ info_wishlist_categorie.libelle }}</strong>"  que ce produit dans votre wishlist
+
+    </span>
+    {% endif %}
+
+    <hr>  <!-- ------------------------------------------------------------------------------------------------------------- -->
+    <h3>Derniers articles consultés (6 maximum)</h3>
+    <div class="row">
+                {% for article in articles_historique  %}
+                        <div class="card col-2 mt-2 p-1">
+                            <div class="card-body border-dark rounded p-1">
+                                <a href="/client/article/details?id_article={{ article.id_article }}" >
+                                <h3 class="card-title">
+                                    <span style="color: #0b2e13">{{ article.nom }}</span><br>
+                                    {{ article.prix }}
+                                    €
+                                </h3>
+                                     {%  if article.image is not none %}
+                                        <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ article.image }}"  alt="image  de {{ article.nom }}" >
+                                    {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ article.nom }}" >
+                                    {% endif %}
+                                    <hr>
+                                </a>
+                            </div>
+                        </div>
+                {% endfor %}
+        </div>
+    <strong style="color: red">{{ nb_liste_historique }} article(s)/6</strong>  <span style="color: red">dans l'historique</span>
+    </div>
+
+{% endblock %}

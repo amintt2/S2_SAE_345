@@ -1,0 +1,169 @@
+{% extends "client/layout_client.html" %}
+{% block stylesheets%}
+    {{ super() }}
+     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/star_rating.css') }}" >
+{% endblock %}
+
+
+{% block body %}
+<div class="container">
+    <div class="text-center card w-auto">
+         <h2 class="card-title">
+             <span style="color: #0b2e13">{{ article.nom }}</span> &nbsp;{{ article.prix }} €
+         </h2>
+        <div class="card-body">
+        {%  if article.image is not none %}
+            <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ article.image }}"  alt="image  de {{ article.nom }}" >
+        {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ article.nom }}" >
+        {% endif %}
+
+
+       {% if commandes_articles.nb_commandes_article is defined and commandes_articles.nb_commandes_article > 0 %}
+                 <br>Vous avez commandé <strong>{{ commandes_articles.nb_commandes_article }} </strong>fois  ce produit
+        {% endif %}
+
+        </div>
+        <div class="card-footer text-left"><h6>Description : {{ article.description }}</h6></div>
+    </div>
+
+    <hr>  <!-- les notes -->
+
+    <div class="row">
+
+    <div class="col-12">
+        {% if article.moyenne_notes is not defined or  article.nb_notes is not defined or  article.moyenne_notes == None %}
+            <strong>Pas de Note</strong>
+        {% else %}
+            <strong>Note moyenne de cet article : {{ article.moyenne_notes }}</strong>&nbsp;({{ article.nb_notes }} note(s))
+        {% endif %}
+    </div>
+        {% if commandes_articles.nb_commandes_article is defined and commandes_articles.nb_commandes_article > 0 %}
+            <div class="col-12">
+                {% if note is defined and note is number %}
+
+                    <form  action="/client/note/edit"   method="post" class="row">
+                    <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                    <div class="col-md-3">
+                        <label for="input_note" class="d-flex justify-content-end align-items-end pe-3">Modifier votre note sur cet article : </label>
+                    </div>
+                    <div class="col-md-1">
+                        <input type="number" name="note" id="input_note" step="0.1" min="0" max="5" class="form-control col-md-2" value="{{ note }}" >
+                    </div>
+                     <div class="col-md-2">
+                         <button class="btn btn-primary" > Modifier votre note </button>
+                     </div>
+                    </form>
+                    <form  action="/client/note/delete"   method="post" class="row">
+                    <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                     <div class="col-md-2">
+                         <button class="btn btn-primary" > Supprimer votre note </button>
+                     </div>
+                    </form>
+                {% else %}
+                    <form  action="/client/note/add"   method="post" class="row">
+                    <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                    <div class="col-md-3">
+                        <label for="input_note" class="d-flex justify-content-end align-items-end pe-3">Mettre une note  sur cet article : </label>
+                    </div>
+                    <div class="col-md-1">
+                        <input type="number" name="note" id="input_note" step="0.1" min="0" max="5" class="form-control col-md-2" value="" >
+                    </div>
+                     <div class="col-md-2">
+                        <button class="btn btn-primary" > Mettre une note </button></div>
+                    </form>
+                {% endif %}
+            </div>
+        {% else %}
+            <small>(seul les clients qui ont acheté cet article peuvent le noter)</small>
+        {% endif %}
+    </div>
+
+    <br>
+    <hr>
+
+  <div class="row" style="background-color: #faf1d7">
+      <div class="col-12">
+      {% if nb_commentaires.nb_commentaires_total is not defined or nb_commentaires.nb_commentaires_utilisateur is not defined %}
+         <strong>NB commentaire(s) not defined</strong>
+                {% else %}
+            <strong>Nombre de commentaire(s) : {{ nb_commentaires.nb_commentaires_utilisateur }} commentaire(s) / 3 maxi pour un article acheté </strong><br>
+            <strong>Nombre de commentaire(s) total :  {{nb_commentaires.nb_commentaires_total }}</strong><br>
+          {% if nb_commentaires.nb_commentaires_utilisateur_valide is not defined or nb_commentaires.nb_commentaires_total_valide is not defined %}
+               <strong>NB commentaire(s) valide(s) not defined</strong>
+              {% else %}
+           Nombre de commentaire(s) validé(s) total de l'utilisateur :  {{nb_commentaires.nb_commentaires_utilisateur_valide }} /  Nombre de commentaire(s) validé(s) {{nb_commentaires.nb_commentaires_total_valide }}<br>
+          {% endif %}
+        {% endif %}
+      </div>
+      {% if commandes_articles.nb_commandes_article is defined and commandes_articles.nb_commandes_article > 0 and
+            ((nb_commentaires.nb_commentaires_utilisateur is defined and nb_commentaires.nb_commentaires_utilisateur <3) or nb_commentaires.nb_commentaires_utilisateur is not defined) %}
+          <form  action="/client/commentaire/add"   method="post">
+                <div class="col">
+                  <label for="input_commentaire" class="form-label">Mettez un commentaire sur cet article : </label>
+                     <textarea name="commentaire" class="form-control" aria-label="Votre commentaire" id="input_commentaire"  placeholder="Votre commentaire"></textarea>
+                </div>
+              <input type="hidden" name="action" value="add_commentaire">
+              <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                <form  action="/client/comment/add"  style="display: inline-block;"  method="post" >
+                        <button class="btn btn-primary mt-2" > Ajouter un commentaire </button>
+                </form>
+            </form>
+        {% else %}
+            <small>(seul les clients qui ont acheté cet article peuvent le commenter ou nombre maxi de commentaires sur cet article (5) atteind)</small>
+        {% endif %}
+
+    </div>
+
+    <div class="row">
+            <div class="col-5 bg-light p-3">
+        <h3>Les commentaires</h3>
+            </div>
+        <table class="table" style="border: solid #8959A8 1px ">
+        {% if commentaires %}
+            <thead class="thead-dark">
+            <tr>
+                <th>nom(pseudo)</th>
+                <th>Commentaires</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+
+                {% for commentaire in commentaires %}
+                    <tr>
+                        <td>{{ commentaire.nom }}({{ commentaire.id_utilisateur }})</td>
+                        <td>{% if commentaire.utilisateur_id == 1 %}
+                            <span style="color: red">(réponse de l'administrateur du site (webmaster) ) :</span>
+                            {% endif %}
+                            {{ commentaire.commentaire }}
+                            {% if commentaire.valider == 1 %}
+                            <span style="color: red">(v)</span>
+                            {% endif %}
+                        </td>
+{#                        <td>{{ commentaire.note }}#}
+{#                        {{ commentaire.__dict__ }}#}
+{#                        </td>#}
+                        <td>
+                            {% if commentaire.id_utilisateur == session['id_user'] %}
+                                  <form  action="/client/commentaire/delete"  style="display: inline-block;"  method="post" >
+                                      <input type="hidden" name="id_article" value="{{ commentaire.id_article }}">
+                                      <input type="hidden" name="id_utilisateur" value="{{ commentaire.id_utilisateur }}">
+                                      <input type="hidden" name="date_publication" value="{{ commentaire.date_publication }}">
+                                      <button class="btn btn-primary" > supprimer </button>
+                                  </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr class="table-warning"><td>Pas de commentaire</td><td></td></tr>
+            {% endif %}
+            </tbody>
+        </table>
+        <a class="btn btn-outline-primary btn-lg" href="/client/article/show">Retour vers la page d'accueil</a>
+    </div>
+</div>
+
+
+
+{% endblock %}

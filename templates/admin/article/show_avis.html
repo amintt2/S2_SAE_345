@@ -1,0 +1,72 @@
+{# PAGE POUR AJOUTER ET COMMENTER LES ARTICLES#}
+{# non utilisée pour le moment mais pour la deuxieme partie sur les commentaires #}
+{% extends "admin/layout_admin.html" %}
+{% block body %}
+<div class="container">
+    <div class="text-center">
+         <h2 class="card-title">
+             <span style="color: #0b2e13">{{ article.libelle }}</span> &nbsp;{{ article.prix }} €
+         </h2>
+
+        <div class="card-body">
+        <h4>{{ article.description }}</h4>
+        {%  if article.image is not none %}
+            <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/' + article['image']) }}"  alt="image  de {{ article.nom }}" >
+        {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ article.nom }}" >
+        {% endif %}
+
+        </div>
+    </div>
+
+    <div class="row">
+            <div class="col-5 bg-light p-3">
+        <h3>Les commentaires</h3>
+            </div>
+        <table class="table" style="border: solid #8959A8 1px ">
+            <thead class="thead-dark">
+            <tr>
+                <th>user</th>
+                <th>Commentaires</th>
+                <th>Note</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if commentaires %}
+                {% for commentaire in commentaires %}
+                    <tr style="background-color:
+                        {% if commentaire.note < 3 %}
+                            firebrick
+                        {% else %}
+                            forestgreen
+                        {% endif %}
+                    ;"
+                    >
+                        <td>{{ commentaire.user_id }}</td>
+                        <td>{{ commentaire.texte }}</td>
+                        <td>{{ commentaire.note }}
+                        {{ commentaire.__dict__ }}
+                        </td>
+                        <td>
+                              <form  action="/admin/comment/delete"  style="display: inline-block;"  method="post" >
+                                  <input type="hidden" name="idArticle" value="{{ commentaire.declinaison_article_id }}">
+                                  <input type="hidden" name="idUser" value="{{ commentaire.user_id }}">
+                                  <label for="malus">Ajouter un malus</label>
+                                  <input type="checkbox" name="malus" value="malus">
+                                  <button class="btn btn-primary" > supprimer </button>
+                              </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr class="table-warning"><td>Pas de commentaire</td><td></td><td></td></tr>
+            {% endif %}
+            </tbody>
+        </table>
+        <a class="btn btn-outline-primary btn-lg" href="/admin/article/show" >Retour vers la page d'accueil</a>
+    </div>
+</div>
+
+
+
+{% endblock %}

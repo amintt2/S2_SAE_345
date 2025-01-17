@@ -1,0 +1,122 @@
+{% extends 'admin/layout_admin.html' %}
+
+
+{% block javascripts %}
+{#    attention il faut importer la bibliotheque chart.js avant de définir l'objet chart#}
+    {{ super() }}
+   {# <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}" ></script>#}
+{% endblock %}
+
+{% block javascripts_head %}
+{#    attention il faut importer la bibliotheque chart.js avant de définir l'objet chart#}
+{#    <script src="{{ url_for('static', filename='chart.js') }}" ></script>#}
+      <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+{% endblock %}
+
+{% block title %}
+    <title>afficher les types d'article</title>
+{% endblock %}
+
+{% block body %}
+<br>
+
+    <h2> nombre d'articles :
+{#    <span style="color: red;">{{ cout_total.nbr_articles }}</span></h2>#}
+
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+           <th>type d'article</th> <th>(id)</th><th>nombre d'articles</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% if types_articles_nb | length >= 1 %}
+        {% for ligne in types_articles_nb %}
+           <tr>
+                  <td>{{ ligne.libelle }}</td>
+                  <td>{{ ligne.id_type_article }}</td>
+                   <td><span style="color: red">
+                       {% if ligne.nbr_articles_stock is not none %}  {{ ligne.nbr_articles }} {% else %}
+                       pas d'article {% endif %}
+                   </span></td>
+
+           </tr>
+        {% endfor %}
+    {% else %}
+        pas de stock
+    {% endif %}
+    </tbody>
+</table>
+    <br>
+{#    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>#}
+
+<h2>visualisation de données : graph.js</h2>
+<h3>Documentation</h3>
+<br>
+    <a href="https://tobiasahlin.com/blog/chartjs-charts-to-get-you-started/" target="_blank"> tuto partie1 graph.js</a><br>
+    <a href="https://tobiasahlin.com/blog/introduction-to-chartjs" target="_blank"> tuto partie2 graph.js</a>&nbsp;
+<br>
+    <a href="https://www.youtube.com/watch?v=E2hytuQvLlE" target="_blank"> vidéo : flask + graph.js</a>&nbsp;
+    <br>
+
+{# https://jinja.palletsprojects.com/en/3.0.x/templates/#html-escaping #}
+    <div style="width: 900px; height: 500px; border: #0a53be 1px solid;">
+        <canvas id="Chart1" ></canvas>
+    </div>
+    graphique 1
+    <script>
+	var ctx1 = document.getElementById("Chart1").getContext("2d");
+	var Chart1 = new Chart( ctx1, {
+  		type: "bar",
+  		data: {
+  			labels: {{ labels | safe }},
+  			datasets: [
+  				{
+  				label: "Type d'articles (nombre)",
+  				data: {{ values | safe }},
+  				fill: false,
+                 backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850",
+             "#faf24c"
+             , "#6a6ce7","#55f68f","#D0c309","#c45000"],
+  				borderColor: "rgb(75,192,192)",
+  				lineTension: 0.1
+  				}
+  			]
+  		},
+  		option: {
+  			responsive: false
+  		}
+	});
+    </script>
+
+
+    <h2>demo graphique à secteurs : "camenberd" ,"donut" ( "pie-chart"  "doughtnut")</h2>
+
+    <canvas id="pie-chart" width="800" height="450"></canvas>
+
+    <script>
+	var Chart2 = new Chart(document.getElementById("pie-chart"), {
+    type: 'pie',
+    data: {
+      labels: {{ labels | safe }},
+      datasets: [{
+        label: "Type d'articles (nombre)",
+         backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850",
+             "#faf24c"
+             , "#6a6ce7","#55f68f","#D0c309","#c45000"],
+        data: {{ values | safe }},
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: 'Type article : nombre'
+      }
+     }
+    });
+    </script>
+
+    <a href="https://www.youtube.com/watch?v=TcwYXIIM-fs" target="_blank">dataviz, c'est quoi en 1 mn ? (juste la première minute)</a>
+    <br>
+    <a href="https://www.youtube.com/watch?v=bZDnSUjfMt8" target="_blank">dataviz, c'est quoi ? (juste la première minute)</a>
+{% endblock %}

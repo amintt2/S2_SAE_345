@@ -1,0 +1,33 @@
+{% extends "client/layout_client.html" %}
+{% block body %}
+
+    <div class="container  container-md">
+      <form method="post" action="/client/coordonnee/edit" >
+        <fieldset>
+            <legend> Modifier ses informations personnelles</legend>
+        <input id="id_user" type="hidden" value="{{ utilisateur.id_utilisateur }}" >
+
+        <div class="mb-3">
+            <label class="form-label" for="login">login utilisateur : </label>
+            <input class="form-control" id="login" type="text" required name="login" {% if utilisateur.login != "None" %}value="{{ utilisateur.login }}" {% endif %} >
+        </div>
+        <div class="mb-3">
+                <label class="form-label" for="nom">nom : </label>
+                <input class="form-control" id="nom" type="text" required name="nom" {% if utilisateur.nom != "None" %}value="{{ utilisateur.nom }}" {% endif %} >
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="email">email : </label>
+            <input class="form-control" id="email" type="email" required name="email" {% if utilisateur.email != "None" %}value="{{ utilisateur.email }}" {% endif %} >
+        </div>
+
+            <div class="col-12">
+                <button class="btn btn-primary" type="submit">Valider</button>
+                <a href="/client/coordonnee/show" class="btn btn-primary">Retour</a>
+            </div>
+
+        </fieldset>
+      </form>
+
+</div>
+
+{% endblock %}

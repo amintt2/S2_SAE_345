@@ -1,0 +1,27 @@
+{% extends 'admin/layout_admin.html' %}
+
+{% block title %}
+    <title>commentaire d'un article</title>
+{% endblock %}
+
+{% block body %}
+<h3>article</h3>
+   <div class="row">
+            <div class="col-5 bg-light p-3">
+        <h3>répondre à un commentaire</h3>
+            </div>
+                 <form  action="/admin/article/commentaires/repondre"  style="display: inline-block;"  method="post" >
+                      <input type="hidden" name="id_article" value="{{ id_article }}">
+                      <input type="hidden" name="id_utilisateur" value="{{ id_utilisateur }}">
+                      <input type="hidden" name="date_publication" value="{{ date_publication }}">
+                      <div class="col">
+                       <label for="input_commentaire" class="form-label">Mettez un commentaire sur cet article : </label>
+                      <textarea name="commentaire" class="form-control" aria-label="Votre commentaire" id="input_commentaire"  placeholder="Votre commentaire"></textarea>
+                      </div>
+                      <button class="btn btn-primary mt-4 mb-4" href="/admin/article/commentaires/repondre"> répondre </button>
+                 </form>
+
+        <a class="btn btn-outline-primary btn-lg" href="/admin/article/show">Retour vers la page d'accueil</a>
+    </div>
+
+{% endblock %}

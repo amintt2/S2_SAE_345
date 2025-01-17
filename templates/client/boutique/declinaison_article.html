@@ -1,0 +1,57 @@
+{% extends "client/layout_client.html" %}
+{% block body %}
+   <h5>choix "déclinaison" d'articles</h5> {# {{ declinaisons | pprint }}#}
+
+    <div class="container">
+        <div class="row align-self-right">
+        <div class="card col-4 mt-4 p-1">
+                            <div class="card-body border-dark rounded p-1">
+                                <a href="/client/article/details?id_article={{ article.id_article }}" >
+                                <h2 class="card-title">
+                                    <span style="color: #0b2e13">{{ article.nom }}</span><br>
+                                    {{ article.prix }}
+                                    €
+                                </h2>
+                                     {%  if article.image is not none %}
+                                        <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ article.image }}"  alt="image  de {{ article.nom }}" >
+                                    {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ article.nom }}" >
+                                    {% endif %}
+                                    <hr>
+                                </a>
+                            </div>
+        </div>
+
+            <ul>
+                {% for item_declinaison in declinaisons  %}
+                    <li>
+                    {% if item_declinaison.id_couleur is defined and  item_declinaison.id_couleur > 1 %}
+                        couleur : <stong style="color:{{ item_declinaison.code_couleur }}">{{ item_declinaison.libelle_couleur }}</stong>
+                    {% endif %}
+                    {% if item_declinaison.id_taille is defined and  item_declinaison.id_taille > 1 %}
+                      - taille : <span> {{ item_declinaison.libelle_taille }}</span>
+                    {% endif %}
+                    {% if item_declinaison.stock is defined and item_declinaison.stock != None %}
+                        {% if item_declinaison.stock > 0 %}
+                            <form  action="/client/panier/add"  method="post" class="col-2">
+                                 <input type="radio" name="id_declinaison_article" value="{{ item_declinaison.id_declinaison_article }}" required>
+                                    <small class="text-muted">Stock restant : {{ item_declinaison.stock }}</small>
+                                 <div class="input-group">
+                                    <button class="btn  btn-success"  id="button-addon1">
+                                            <i class="bi bi-cart"></i>
+                                        <i class="fas fa-shopping-cart"></i>Ajouter
+                                    </button>
+                                        <input type="number" id="input-{{ item_declinaison.id_declinaison_article }}" step="1" min="0" max="{{ item_declinaison.stock }}" class="form-control col-2" value="1" name="quantite"  aria-describedby="button-addon1">
+                                 </div>
+                            </form>
+                       {% else %}
+                                 <small class="text-muted">article  momentanément indisponible</small>
+                        {% endif %}
+                        </li>
+                      {% endif %}
+                    <hr class="col-5">
+                {% endfor %}
+            </ul>
+
+        </div>
+    </div>
+{% endblock %}

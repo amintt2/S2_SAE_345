@@ -1,0 +1,25 @@
+{% extends 'admin/layout_admin.html' %}
+
+{% block title %}
+    <title>modifier un type d'article</title>
+{% endblock %}
+
+{% block body %}
+  {% if error %}
+    <p class=error><strong>Error:</strong> {{ error }}
+  {% endif %}
+  <form method="post" action="/admin/type-article/edit">
+    <fieldset>
+        <legend> Modifier un type d'article</legend>
+        <div class="mb-3">
+        <input type="hidden" name="id_type_article" size="18" value="{{ type_article.id_type_article }}" id="id">
+        <label for="libelle">libellé</label><br>
+
+        <input class="form-select" type="text" name="libelle" size="18" value="{{ type_article.libelle }}" id="libelle"><br>
+        </div>
+        <div class="col-12">
+        <button class="btn btn-primary" type="submit">Valider</button>
+        </div>
+    </fieldset>
+  </form>
+{% endblock %}

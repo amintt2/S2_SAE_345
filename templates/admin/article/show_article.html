@@ -1,0 +1,97 @@
+{#
+articles (tableau de dictionnaires)
+* tableau de "article"
+    * id_article, nom, type_article_id, prix
+    * option :
+        * stock ,
+        * nb_avis ,
+        * nb_declinaisons
+#}
+{% extends 'admin/layout_admin.html' %}
+
+{% block title %}
+    <title>afficher les articles</title>
+{% endblock %}
+
+{% block body %}
+<h3>article</h3>
+<a  class="btn btn-outline-success" href="/admin/article/add">ajouter un article</a>
+<br><br>
+{#{{ articles }}#}
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th>nom</th><th>id</th><th>type article (id)</th><th>prix</th><th style="color: green">stock</th>
+            <th>nouveaux avis</th><th>nb déclinaisons</th><th>image</th><th>opération</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% if articles | length >= 1 %}
+        {% for ligne in articles %}
+           <tr>
+                  <td>{{ ligne.nom }}</td>
+                  <td>{{ ligne.id_article }}</td>
+                  <td><span style="color: red">{{ ligne.libelle }}</span> ({{ ligne.type_article_id }})</td>
+                  <td>{#{ ligne.prix }#}  {{  "{:,.2f} €".format(ligne.prix) }}</td>
+                  <td>
+                  {% if ligne.stock is defined %}
+                     {% if ligne.stock != None  %}
+                        {% if ligne.stock > 0 %}
+                            <strong style="color: green">{{ ligne.stock }}</strong>
+                            {% if ligne.min_stock is defined  and ligne.min_stock <= 0 %}
+                                <span style="color: #fd7e14">(⚠️ déclinaison(s) en rupture)</span>
+                            {% endif %}
+                        {% else %}
+                            <strong class="text-muted">article momentanément indisponible</strong>
+                        {% endif %}
+                     {% else %}
+                             <strong class="text-muted">déclinaison ND</strong>
+                     {% endif %}
+                  {% else %}
+                      ND
+                  {% endif %}
+                  </td>
+                   <td>
+                  {% if ligne.nb_commentaires_nouveaux is defined %}
+                     {% if ligne.nb_commentaires_nouveaux > 0 %}
+                         <a href="/admin/article/commentaires?id_article={{ ligne.id_article }}"><strong style="color: red">{{ ligne.nb_commentaires_nouveaux }} avis non lu(s) ⚠️ </strong></a>
+                     {% else %}
+                        <strong class="text-muted"></strong>
+                     {% endif %}
+                  {% else %}
+                      nb_avis ND
+                  {% endif %}
+                  </td>
+
+                 {# <td>{{ ligne.date_create }} {{ ligne.date_create.strftime('%d-%m-%Y') }} </td> #}
+                  <td>
+                      {% if ligne.nb_declinaisons is defined %}
+                        {{ ligne.nb_declinaisons }}
+                      {% else %}
+                         decli ND
+                      {% endif %}
+                  </td>
+                  <td>{{ ligne.image }}
+                        {%  if ligne.image is not none %}
+                            <img style="width:40px;height:40px"  src="{{ url_for('static', filename = 'images/' + ligne['image']) }}"  alt="image  de {{ ligne.nom }}" >
+                        {% else %}
+                            <img style="width:40px;height:40px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="pas d image" >
+                        {% endif %}
+                  </td>
+                  <td>
+                      <a  class="btn btn-outline-danger" href="/admin/article/delete?id_article={{ ligne.id_article }}" onclick="return confirm('Are you sure?')" >supprimer</a>
+                      <a  class="btn btn-outline-warning" href="/admin/article/edit?id_article={{ ligne.id_article }}">editer</a>
+                      <a  class="btn btn-outline-warning" href="/admin/article/commentaires?id_article={{ ligne.id_article }}">commentaires</a>
+                  </td>
+           </tr>
+        {% endfor %}
+    {% else %}
+            <tr>
+                  <td>
+                      pas d'article
+                  </td>
+           </tr>
+    {% endif %}
+    </tbody>
+</table>
+{% endblock %}
