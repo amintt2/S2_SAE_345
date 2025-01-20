@@ -14,28 +14,21 @@ def client_article_show():                                 # remplace client_ind
     mycursor = get_db().cursor()
     id_client = session['id_user']
 
-    sql = '''   selection des articles   '''
-    list_param = []
-    condition_and = ""
-    # utilisation du filtre
-    sql3=''' prise en compte des commentaires et des notes dans le SQL    '''
-    articles =[]
+    # Sélection des articles avec leurs informations
+    sql = '''
+    SELECT a.idArticle, a.designation, a.photo, a.prix
+    FROM ARTICLE a
+    ORDER BY a.designation
+    '''
+    mycursor.execute(sql)
+    articles = mycursor.fetchall()
 
-
-    # pour le filtre
-    types_article = []
-
-
+    # Récupération des articles dans le panier de l'utilisateur (si nécessaire)
     articles_panier = []
+    prix_total = 0
 
-    if len(articles_panier) >= 1:
-        sql = ''' calcul du prix total du panier '''
-        prix_total = None
-    else:
-        prix_total = None
-    return render_template('client/boutique/panier_article.html'
-                           , articles=articles
-                           , articles_panier=articles_panier
-                           #, prix_total=prix_total
-                           , items_filtre=types_article
+    return render_template('client/boutique/panier_article.html',
+                           articles=articles,
+                           articles_panier=articles_panier,
+                           prix_total=prix_total
                            )
