@@ -51,6 +51,7 @@ CREATE TABLE Skin(
    ID_spécial INT NOT NULL,
    ID_usure INT NOT NULL,
    ID_type_skin INT NOT NULL,
+   Image VARCHAR(255),
    PRIMARY KEY(ID_skin),
    FOREIGN KEY(ID_spécial) REFERENCES Spécial(ID_spécial),
    FOREIGN KEY(ID_usure) REFERENCES Usure(ID_usure),
@@ -97,3 +98,61 @@ INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) 
 (3,'client2','client2@client2.fr',
     'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
     'ROLE_client','client2','1');
+
+-- Insertion des types de skins
+INSERT INTO Type_skin (Libelle_type_skin) VALUES
+('AK-47'),
+('STICKER'),
+('STICKERBOX'),
+('AWP');
+
+-- Insertion des états d'usure
+INSERT INTO Usure (Libelle_usure) VALUES
+('Neuve'),
+('Trés peu usée'),
+('Testé sur le terrain'),
+('Usée'),
+('Marqué par les combats');
+
+-- Insertion des attributs spéciaux
+INSERT INTO Spécial (Libelle_spécial) VALUES
+('Normal'),
+('StatTrak™'),
+('Souvenir');
+
+-- Insertion des états de commande
+INSERT INTO Etat (Libelle_etat) VALUES
+('En cours'),
+('Validée'),
+('Expédiée'),
+('Livrée'),
+('Annulée');
+
+-- Insertion des skins
+INSERT INTO Skin (Nom_skin, Prix_skin, Stock, ID_spécial, ID_usure, ID_type_skin, Image) VALUES
+-- AK-47s
+('AK-47 | Inheritance', 180.50, 3, 1, 1, 1, 'FN_AK_INHERITANCE.png'),
+('AK-47 | Inheritance', 80.00, 3, 1, 5, 1, 'BS_AK_INHERITANCE.png'),
+
+-- AWPs
+('AWP | Gungnir', 11200.00, 1, 1, 1, 4, 'FN_GUNGNIR.png'),
+
+-- Stickers
+('Sticker | iBUYPOWER (Holo) | Katowice 2014', 75000.00, 1, 1, 1, 2, 'IBUYPOWER-HOLO.png'),
+('Sticker | Titan (Holo) | Katowice 2014', 55000.00, 1, 1, 1, 2, 'TITAN-HOLO.png'),
+
+-- Sticker Boxes
+('Katowice 2014 Challengers', 24000.00, 2, 1, 1, 3, 'KATOWICE-CHALLENGERS.png');
+
+-- Exemple de panier pour le client (id=2)
+INSERT INTO Ligne_panier (ID_skin, ID_utilisateur, Quantite, Date_ajout) VALUES
+(1, 2, 1, '2024-03-20 10:30:00');
+
+-- Exemple de commande pour le client (id=2)
+INSERT INTO Commande (Date_achat, ID_etat, ID_utilisateur) VALUES
+('2024-03-19', 2, 2);
+
+-- Lignes de la commande
+INSERT INTO Ligne_commande (ID_skin, ID_commande, Prix, Quantite) VALUES
+(2, 1, 80.00, 1);
+
