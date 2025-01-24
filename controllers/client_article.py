@@ -19,11 +19,33 @@ def client_article_show():                                 # remplace client_ind
     condition_and = ""
     # utilisation du filtre
     sql3=''' prise en compte des commentaires et des notes dans le SQL    '''
-    articles =[]
+    articles = []
 
+    sql =   '''
+            SELECT  id_skin AS id_article
+                    , nom_skin AS nom
+                    , prix_skin AS prix
+                    , stock AS stock
+                    , image AS image
+            FROM skin
+            ORDER BY id_skin
+            '''
+    mycursor.execute(sql)
+    skins = mycursor.fetchall()
+    articles = skins
+    
 
     # pour le filtre
     types_article = []
+    sql =   '''
+            SELECT  id_type_skin AS id_type_article
+                    , libelle
+            FROM type_skin
+            ORDER BY libelle
+            '''
+    mycursor.execute(sql)
+    types_skin = mycursor.fetchall()
+    types_article = types_skin
 
 
     articles_panier = []
