@@ -26,8 +26,14 @@ def client_article_show():                                 # remplace client_ind
                 , nom_skin AS nom
                 , prix_skin AS prix
                 , stock AS stock
-                , image AS photo
+                , image
+                , libelle_usure
+                , libelle_type_skin
+                , libelle_special
         FROM skin
+        INNER JOIN usure ON skin.usure_id = usure.usure_id
+        INNER JOIN type_skin ON skin.type_skin_id = type_skin.type_skin_id
+        INNER JOIN special ON skin.special_id = special.special_id
         ORDER BY skin_id
         '''
     mycursor.execute(sql)

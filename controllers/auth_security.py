@@ -20,8 +20,15 @@ def auth_login_post():
     mycursor = get_db().cursor()
     login = request.form.get('login')
     password = request.form.get('password')
-    tuple_select = (login)
-    sql = " SELECT login, password, role , id_utilisateur, password FROM utilisateur WHERE login = %s "
+    sql = '''
+    SELECT utilisateur_id AS id_user
+           , login
+           , password
+           , role
+           , nom
+    FROM utilisateur
+    WHERE login = %s
+    '''
     retour = mycursor.execute(sql, (login))
     user = mycursor.fetchone()
     if user:
@@ -32,7 +39,7 @@ def auth_login_post():
         else:
             session['login'] = user['login']
             session['role'] = user['role']
-            session['id_user'] = user['id_utilisateur']
+            session['id_user'] = user['id_user']
             print(user['login'], user['role'])
             if user['role'] == 'ROLE_admin':
                 return redirect('/admin/commande/index')
