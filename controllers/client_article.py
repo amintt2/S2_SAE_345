@@ -26,7 +26,7 @@ def client_article_show():                                 # remplace client_ind
                 , nom_skin AS nom
                 , prix_skin AS prix
                 , stock AS stock
-                , image AS image
+                , image AS photo
         FROM skin
         ORDER BY skin_id
         '''
