@@ -1,8 +1,10 @@
-DROP DATABASE IF EXISTS BDD_login_sae;
-CREATE DATABASE IF NOT EXISTS BDD_login_sae;
-USE BDD_login_sae;
+DROP TABLE IF EXISTS LIGNE;
+DROP TABLE IF EXISTS COMMANDE;
+DROP TABLE IF EXISTS ARTICLE;
+DROP TABLE IF EXISTS utilisateur;
 
-CREATE TABLE IF NOT EXISTS utilisateur(
+
+CREATE TABLE utilisateur(
     id_utilisateur INT AUTO_INCREMENT,
     login VARCHAR(255),
     email VARCHAR(255),
@@ -13,29 +15,32 @@ CREATE TABLE IF NOT EXISTS utilisateur(
     PRIMARY KEY (id_utilisateur)
 ) DEFAULT CHARSET utf8mb4;
 
-INSERT INTO utilisateur(id_utilisateur, login, email, password, role, nom, est_actif) VALUES
-(1, "admin", "admin@admin.fr", "shaez2323233232232323233223323232", "ROLE_admin", "admin", 1),
-(2, "user1", "user1@example.com", "hash123456789abcdef", "ROLE_user", "User One", 1),
-(3, "user2", "user2@example.com", "hash234567891bcdef", "ROLE_user", "User Two", 1), 
-(4, "user3", "user3@example.com", "hash345678912cdef", "ROLE_user", "User Three", 1),
-(5, "user4", "user4@example.com", "hash456789123def", "ROLE_user", "User Four", 1),
-(6, "user5", "user5@example.com", "hash567891234ef", "ROLE_user", "User Five", 1);
+INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) VALUES
+(1,'admin','admin@admin.fr',
+    'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
+    'ROLE_admin','admin','1'),
+(2,'client','client@client.fr',
+    'pbkdf2:sha256:1000000$jTcSUnFLWqDqGBJz$bf570532ed29dc8e3836245f37553be6bfea24d19dfb13145d33ab667c09b349',
+    'ROLE_client','client','1'),
+(3,'client2','client2@client2.fr',
+    'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
+    'ROLE_client','client2','1');
 
-CREATE TABLE IF NOT EXISTS ARTICLE (
+CREATE TABLE  ARTICLE (
     idArticle INT PRIMARY KEY AUTO_INCREMENT,
     designation VARCHAR(255),
     photo VARCHAR(255),
     prix INT
 ) CHARACTER SET 'utf8';
 
-CREATE TABLE IF NOT EXISTS COMMANDE (
+CREATE TABLE COMMANDE (
     idCommande INT PRIMARY KEY AUTO_INCREMENT,
     dateCommande DATE,
     idUtilisateur INT,
     FOREIGN KEY (idUtilisateur) REFERENCES utilisateur(id_utilisateur)
 ) CHARACTER SET 'utf8';
 
-CREATE TABLE IF NOT EXISTS LIGNE (
+CREATE TABLE LIGNE (
     idCommande INT,
     idArticle INT,
     quantite INT,
