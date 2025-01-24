@@ -21,15 +21,15 @@ def client_article_show():                                 # remplace client_ind
     sql3=''' prise en compte des commentaires et des notes dans le SQL    '''
     articles = []
 
-    sql =   '''
-            SELECT  id_skin AS id_article
-                    , nom_skin AS nom
-                    , prix_skin AS prix
-                    , stock AS stock
-                    , image AS image
-            FROM skin
-            ORDER BY id_skin
-            '''
+    sql = '''
+        SELECT  skin_id AS id_article
+                , nom_skin AS nom
+                , prix_skin AS prix
+                , stock AS stock
+                , image AS image
+        FROM skin
+        ORDER BY skin_id
+        '''
     mycursor.execute(sql)
     skins = mycursor.fetchall()
     articles = skins
@@ -37,12 +37,12 @@ def client_article_show():                                 # remplace client_ind
 
     # pour le filtre
     types_article = []
-    sql =   '''
-            SELECT  id_type_skin AS id_type_article
-                    , libelle
-            FROM type_skin
-            ORDER BY libelle
-            '''
+    sql = '''
+        SELECT  type_skin_id AS id_type_article
+                , libelle_type_skin AS libelle
+        FROM type_skin
+        ORDER BY libelle_type_skin
+        '''
     mycursor.execute(sql)
     types_skin = mycursor.fetchall()
     types_article = types_skin
