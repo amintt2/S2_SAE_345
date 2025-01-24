@@ -1,19 +1,91 @@
-DROP TABLE IF EXISTS LIGNE;
-DROP TABLE IF EXISTS COMMANDE;
-DROP TABLE IF EXISTS ARTICLE;
+DROP TABLE IF EXISTS Ligne_panier;
+DROP TABLE IF EXISTS Ligne_commande;
+DROP TABLE IF EXISTS Commande;
+DROP TABLE IF EXISTS Skin;
+DROP TABLE IF EXISTS Type_skin;
+DROP TABLE IF EXISTS Usure;
+DROP TABLE IF EXISTS Spécial;
+DROP TABLE IF EXISTS Etat;
 DROP TABLE IF EXISTS utilisateur;
-
 
 CREATE TABLE utilisateur(
     id_utilisateur INT AUTO_INCREMENT,
     login VARCHAR(255),
     email VARCHAR(255),
-    nom VARCHAR(255),
+    nom VARCHAR(255), 
     password VARCHAR(255),
     role VARCHAR(50),
     est_actif TINYINT(1),
     PRIMARY KEY (id_utilisateur)
 ) DEFAULT CHARSET utf8mb4;
+
+CREATE TABLE Type_skin(
+   ID_type_skin INT AUTO_INCREMENT,
+   Libelle_type_skin VARCHAR(50),
+   PRIMARY KEY(ID_type_skin)
+);
+
+CREATE TABLE Usure(
+   ID_usure INT AUTO_INCREMENT,
+   Libelle_usure VARCHAR(50),
+   PRIMARY KEY(ID_usure)
+);
+
+CREATE TABLE Spécial(
+   ID_spécial INT AUTO_INCREMENT,
+   Libelle_spécial VARCHAR(50),
+   PRIMARY KEY(ID_spécial)
+);
+
+CREATE TABLE Etat(
+   ID_etat INT AUTO_INCREMENT,
+   Libelle_etat VARCHAR(50),
+   PRIMARY KEY(ID_etat)
+);
+
+CREATE TABLE Skin(
+   ID_skin INT AUTO_INCREMENT,
+   Nom_skin VARCHAR(50),
+   Prix_skin DECIMAL(10,2),
+   Stock INT,
+   ID_spécial INT NOT NULL,
+   ID_usure INT NOT NULL,
+   ID_type_skin INT NOT NULL,
+   PRIMARY KEY(ID_skin),
+   FOREIGN KEY(ID_spécial) REFERENCES Spécial(ID_spécial),
+   FOREIGN KEY(ID_usure) REFERENCES Usure(ID_usure),
+   FOREIGN KEY(ID_type_skin) REFERENCES Type_skin(ID_type_skin)
+);
+
+CREATE TABLE Commande(
+   ID_commande INT AUTO_INCREMENT,
+   Date_achat DATE,
+   ID_etat INT NOT NULL,
+   ID_utilisateur INT NOT NULL,
+   PRIMARY KEY(ID_commande),
+   FOREIGN KEY(ID_etat) REFERENCES Etat(ID_etat),
+   FOREIGN KEY(ID_utilisateur) REFERENCES utilisateur(id_utilisateur)
+);
+
+CREATE TABLE Ligne_commande(
+   ID_skin INT,
+   ID_commande INT,
+   Prix DECIMAL(10,2),
+   Quantite INT,
+   PRIMARY KEY(ID_skin, ID_commande),
+   FOREIGN KEY(ID_skin) REFERENCES Skin(ID_skin),
+   FOREIGN KEY(ID_commande) REFERENCES Commande(ID_commande)
+);
+
+CREATE TABLE Ligne_panier(
+   ID_skin INT,
+   ID_utilisateur INT,
+   Quantite INT,
+   Date_ajout DATETIME,
+   PRIMARY KEY(ID_skin, ID_utilisateur),
+   FOREIGN KEY(ID_skin) REFERENCES Skin(ID_skin),
+   FOREIGN KEY(ID_utilisateur) REFERENCES utilisateur(id_utilisateur)
+);
 
 INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) VALUES
 (1,'admin','admin@admin.fr',
@@ -25,38 +97,3 @@ INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) 
 (3,'client2','client2@client2.fr',
     'pbkdf2:sha256:1000000$qDAkJlUehmaARP1S$39044e949f63765b785007523adcde3d2ad9c2283d71e3ce5ffe58cbf8d86080',
     'ROLE_client','client2','1');
-
-CREATE TABLE  ARTICLE (
-    idArticle INT PRIMARY KEY AUTO_INCREMENT,
-    designation VARCHAR(255),
-    photo VARCHAR(255),
-    prix INT
-) CHARACTER SET 'utf8';
-
-CREATE TABLE COMMANDE (
-    idCommande INT PRIMARY KEY AUTO_INCREMENT,
-    dateCommande DATE,
-    idUtilisateur INT,
-    FOREIGN KEY (idUtilisateur) REFERENCES utilisateur(id_utilisateur)
-) CHARACTER SET 'utf8';
-
-CREATE TABLE LIGNE (
-    idCommande INT,
-    idArticle INT,
-    quantite INT,
-    FOREIGN KEY (idCommande) REFERENCES COMMANDE(idCommande),
-    FOREIGN KEY (idArticle) REFERENCES ARTICLE(idArticle),
-    PRIMARY KEY (idCommande, idArticle)
-) CHARACTER SET 'utf8';
-
--- Load data from CSV files
-SET GLOBAL local_infile = 1;
-LOAD DATA LOCAL INFILE 'data/article.csv' INTO TABLE ARTICLE FIELDS TERMINATED BY ',';
-LOAD DATA LOCAL INFILE 'data/commande.csv' INTO TABLE COMMANDE FIELDS TERMINATED BY ',';
-LOAD DATA LOCAL INFILE 'data/ligne.csv' INTO TABLE LIGNE FIELDS TERMINATED BY ',';
-
--- Verify data
-SELECT * FROM utilisateur;
-SELECT * FROM ARTICLE;
-SELECT * FROM COMMANDE;
-SELECT * FROM LIGNE;
