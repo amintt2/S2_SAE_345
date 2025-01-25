@@ -22,7 +22,7 @@ def client_article_show():                                 # remplace client_ind
     articles = []
 
     sql = '''
-        SELECT  skin_id AS id_article
+        SELECT  id_skin AS id_article
                 , nom_skin AS nom
                 , prix_skin AS prix
                 , stock AS stock
@@ -31,10 +31,10 @@ def client_article_show():                                 # remplace client_ind
                 , libelle_type_skin
                 , libelle_special
         FROM skin
-        INNER JOIN usure ON skin.usure_id = usure.usure_id
-        INNER JOIN type_skin ON skin.type_skin_id = type_skin.type_skin_id
-        INNER JOIN special ON skin.special_id = special.special_id
-        ORDER BY skin_id
+        INNER JOIN usure ON skin.usure_id = usure.id_usure
+        INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
+        INNER JOIN special ON skin.special_id = special.id_special
+        ORDER BY id_skin
         '''
     mycursor.execute(sql)
     skins = mycursor.fetchall()
@@ -44,7 +44,7 @@ def client_article_show():                                 # remplace client_ind
     # pour le filtre
     types_article = []
     sql = '''
-        SELECT  type_skin_id AS id_type_article
+        SELECT  id_type_skin AS id_type_article
                 , libelle_type_skin AS libelle
         FROM type_skin
         ORDER BY libelle_type_skin

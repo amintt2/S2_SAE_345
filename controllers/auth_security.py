@@ -21,7 +21,7 @@ def auth_login_post():
     login = request.form.get('login')
     password = request.form.get('password')
     sql = '''
-    SELECT utilisateur_id AS id_user
+    SELECT id_utilisateur AS id_user
            , login
            , password
            , role

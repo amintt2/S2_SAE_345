@@ -9,42 +9,42 @@ DROP TABLE IF EXISTS etat;
 DROP TABLE IF EXISTS utilisateur;
 
 CREATE TABLE utilisateur(
-    utilisateur_id INT AUTO_INCREMENT,
-    login VARCHAR(255),
-    email VARCHAR(255),
-    nom VARCHAR(255), 
-    password VARCHAR(255),
-    role VARCHAR(50),
-    est_actif TINYINT(1),
-    PRIMARY KEY (utilisateur_id)
+   id_utilisateur INT AUTO_INCREMENT,
+   login VARCHAR(255),
+   email VARCHAR(255),
+   nom VARCHAR(255), 
+   password VARCHAR(255),
+   role VARCHAR(50),
+   est_actif TINYINT(1),
+   PRIMARY KEY (id_utilisateur)
 ) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE type_skin(
-   type_skin_id INT AUTO_INCREMENT,
+   id_type_skin INT AUTO_INCREMENT,
    libelle_type_skin VARCHAR(50),
-   PRIMARY KEY(type_skin_id)
-);
+   PRIMARY KEY(id_type_skin)
+) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE usure(
-   usure_id INT AUTO_INCREMENT,
+   id_usure INT AUTO_INCREMENT,
    libelle_usure VARCHAR(50),
-   PRIMARY KEY(usure_id)
-);
+   PRIMARY KEY(id_usure)
+) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE special(
-   special_id INT AUTO_INCREMENT,
+   id_special INT AUTO_INCREMENT,
    libelle_special VARCHAR(50),
-   PRIMARY KEY(special_id)
-);
+   PRIMARY KEY(id_special)
+) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE etat(
-   etat_id INT AUTO_INCREMENT,
+   id_etat INT AUTO_INCREMENT,
    libelle_etat VARCHAR(50),
-   PRIMARY KEY(etat_id)
-);
+   PRIMARY KEY(id_etat)
+) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE skin(
-   skin_id INT AUTO_INCREMENT,
+   id_skin INT AUTO_INCREMENT,
    nom_skin VARCHAR(50),
    prix_skin DECIMAL(10,2),
    stock INT,
@@ -52,21 +52,21 @@ CREATE TABLE skin(
    usure_id INT NOT NULL,
    type_skin_id INT NOT NULL,
    image VARCHAR(255),
-   PRIMARY KEY(skin_id),
-   FOREIGN KEY(special_id) REFERENCES special(special_id),
-   FOREIGN KEY(usure_id) REFERENCES usure(usure_id),
-   FOREIGN KEY(type_skin_id) REFERENCES type_skin(type_skin_id)
-);
+   PRIMARY KEY(id_skin),
+   FOREIGN KEY(special_id) REFERENCES special(id_special),
+   FOREIGN KEY(usure_id) REFERENCES usure(id_usure),
+   FOREIGN KEY(type_skin_id) REFERENCES type_skin(id_type_skin)
+) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE commande(
-   commande_id INT AUTO_INCREMENT,
+   id_commande INT AUTO_INCREMENT,
    date_achat DATE,
    etat_id INT NOT NULL,
    utilisateur_id INT NOT NULL,
-   PRIMARY KEY(commande_id),
-   FOREIGN KEY(etat_id) REFERENCES etat(etat_id),
-   FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(utilisateur_id)
-);
+   PRIMARY KEY(id_commande),
+   FOREIGN KEY(etat_id) REFERENCES etat(id_etat),
+   FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE ligne_commande(
    skin_id INT,
@@ -74,9 +74,9 @@ CREATE TABLE ligne_commande(
    prix DECIMAL(10,2),
    quantite INT,
    PRIMARY KEY(skin_id, commande_id),
-   FOREIGN KEY(skin_id) REFERENCES skin(skin_id),
-   FOREIGN KEY(commande_id) REFERENCES commande(commande_id)
-);
+   FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+   FOREIGN KEY(commande_id) REFERENCES commande(id_commande)
+) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE ligne_panier(
    skin_id INT,
@@ -84,11 +84,11 @@ CREATE TABLE ligne_panier(
    quantite INT,
    date_ajout DATETIME,
    PRIMARY KEY(skin_id, utilisateur_id),
-   FOREIGN KEY(skin_id) REFERENCES skin(skin_id),
-   FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(utilisateur_id)
-);
+   FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+   FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+) DEFAULT CHARSET utf8mb4;
 
-INSERT INTO utilisateur(utilisateur_id,login,email,password,role,nom,est_actif) VALUES
+INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) VALUES
 (1,'admin','admin@admin.fr',
     'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
     'ROLE_admin','admin','1'),
