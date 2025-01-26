@@ -88,7 +88,6 @@ CREATE TABLE ligne_panier(
    FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
 ) DEFAULT CHARSET utf8mb4;
 
--- 1. First, insert base tables with no foreign key dependencies
 INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) VALUES
 (1,'admin','admin@admin.fr',
     'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
@@ -140,9 +139,7 @@ INSERT INTO etat (libelle_etat) VALUES
 ('Livrée'),
 ('Annulée');
 
--- 2. Then insert skin data (depends on type_skin, usure, and special)
 INSERT INTO skin (nom_skin, prix_skin, stock, special_id, usure_id, type_skin_id, image) VALUES
--- From test.csv
 ('Karambit | Gamma Doppler', 1005.34, 522, 2, 1, 7, 'karambit_gamma_doppler.png'),
 ('AWP | Dragon Lore', 11244.54, 917, 1, 1, 4, 'awp_dragon_lore.png'),
 ('Sport Gloves | Amphibious', 897.35, 636, 2, 2, 8, 'gloves_amphibious.png'),
@@ -193,13 +190,12 @@ INSERT INTO skin (nom_skin, prix_skin, stock, special_id, usure_id, type_skin_id
 ('Recoil Case', 0.18, 1000, 1, 1, 9, 'case_recoil.png'),
 ('Natus Vincere Glitter', 0.15, 1000, 1, 1, 2, 'sticker_navi_glitter.png');
 
--- 3. Finally, insert commande and ligne_commande (depends on previous tables)
+
 INSERT INTO commande (date_achat, etat_id, utilisateur_id) VALUES
 ('2024-03-19', 2, 2);
 
 INSERT INTO ligne_commande (skin_id, commande_id, prix, quantite) VALUES
 (1, 1, 80.00, 1);
 
--- 4. Insert panier data last
 INSERT INTO ligne_panier (skin_id, utilisateur_id, quantite, date_ajout) VALUES
 (1, 2, 1, '2024-03-20 10:30:00');
