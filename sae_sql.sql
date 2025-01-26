@@ -142,7 +142,7 @@ INSERT INTO skin (nom_skin, prix_skin, stock, special_id, usure_id, type_skin_id
 ('M4A1-S | Knight', 2959.66, 872, 1, 1, 1, 'm4a1s_knight.png'),
 ('Glock-18 | Fade', 1464.47, 337, 2, 1, 1, 'glock_fade.png'),
 ('M9 Bayonet | Doppler', 1262.63, 942, 2, 1, 1, 'm9_doppler.png'),
-('AWP | Lightning Strike', 338.29, 896, 1, 2, 4, 'awp_lightning.png'),
+('AWP | Lightning Strike', 74.32, 244, 2, 1, 4, 'awp_lightning_st.png'),  -- StatTrak™ version
 ('Glock-18 | Bullet Queen', 32.37, 253, 2, 1, 1, 'glock_bullet_queen.png'),
 ('Desert Eagle | Blaze', 433.59, 314, 1, 1, 1, 'deagle_blaze.png'),
 ('AK-47 | Inheritance', 180.50, 3, 1, 1, 1, 'FN_AK_INHERITANCE.png'),
@@ -165,7 +165,21 @@ INSERT INTO skin (nom_skin, prix_skin, stock, special_id, usure_id, type_skin_id
 ('Skeleton Knife | Fade', 1346.34, 416, 1, 1, 1, 'skeleton_fade.png'),
 ('Flip Knife | Doppler', 453.49, 450, 1, 1, 1, 'flip_doppler.png'),
 ('Glock-18 | Gamma Doppler', 75.01, 792, 1, 1, 1, 'glock_gamma_doppler.png'),
-('Desert Eagle | Mecha Industries', 8.47, 690, 1, 1, 1, 'deagle_mecha.png');
+('Desert Eagle | Mecha Industries', 8.47, 690, 1, 1, 1, 'deagle_mecha.png'),
+('MAG-7 | Heat', 0.92, 950, 1, 2, 1, 'mag7_heat.png'),
+('Cmdr. Mae Dead Cold Jamison', 8.02, 500, 1, 1, 1, 'agent_mae_jamison.png'),
+('Sir Bloody Silent Darryl', 23.85, 400, 1, 1, 1, 'agent_darryl.png'),
+('Five-SeveN | Monkey Business', 6.67, 300, 1, 3, 1, 'fiveseven_monkey.png'),
+('FAMAS | Rapid Eye Movement', 0.93, 450, 1, 4, 1, 'famas_rapid_eye.png'),
+('UMP-45 | Wild Child', 1.12, 500, 1, 4, 1, 'ump_wild_child.png'),
+('MAG-7 | Monster Call', 1.74, 400, 1, 1, 1, 'mag7_monster.png'),
+('Sawed-Off | Limelight', 0.81, 600, 1, 2, 1, 'sawedoff_limelight.png'),
+('M4A1-S | Mud-Spec', 0.15, 115, 1, 3, 1, 'm4a1s_mudspec.png'),
+('Rezan the Redshirt', 4.10, 300, 1, 1, 1, 'agent_rezan.png'),
+('Lil SAS Charm', 23.74, 84, 1, 1, 1, 'charm_sas.png'),
+('Kilowatt Case', 0.56, 1000, 1, 1, 1, 'case_kilowatt.png'),
+('Recoil Case', 0.18, 1000, 1, 1, 1, 'case_recoil.png'),
+('Natus Vincere Glitter', 0.15, 1000, 1, 1, 2, 'sticker_navi_glitter.png'),
 
 -- Exemple de panier pour le client (id=2)
 INSERT INTO ligne_panier (skin_id, utilisateur_id, quantite, date_ajout) VALUES
