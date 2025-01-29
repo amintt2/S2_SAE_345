@@ -21,3 +21,4 @@ Reamrque du prof :
 Remetre le filtre inisial du prof 
 il veux moins de truc a cocher.
 Garde en memoir le filtre et ne retire rien meme si il est modifier
+filtre texte obligatoire. 
