@@ -1,62 +1,75 @@
 <div class="m-2">
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">SAE BDD 2024<span style="color:blue;">  Menu Client </span></a>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Commandes</a>
-                <div class="dropdown-menu" aria-labelledby="DropdownCommandes">
-                    <a class="dropdown-item" href="/client/article/show">
-                        Faire une commande(Produits/panier)</a>
-                </div>
-            </li>
+<nav class="bg-dark-secondary shadow-lg">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex justify-between items-center h-16">
+      <div class="flex items-center">
+        <a class="text-xl font-bold text-white" href="#">SAE BDD 2024<span class="text-accent-blue ml-2">Menu Client</span></a>
+      </div>
 
-            <li class="nav-item dropdown">
-               <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                    mon compte
-                </a>
-                <div class="dropdown-menu" aria-labelledby="DropdownComptes">
-                    <a class="dropdown-item" href="/client/commande/show" >
-                        mes commandes</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="/client/coordonnee/show">mes coordonnées</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="/client/envies/show">ma liste d'envies - historique</a>
-                </div>
-            </li>
-        </ul>
-    </div>
+      <div class="hidden md:block">
+        <div class="flex items-center space-x-4">
+          <!-- Commandes Dropdown -->
+          <div class="relative group">
+            <button class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+              Commandes
+            </button>
+            <div class="absolute z-10 hidden group-hover:block w-48 bg-dark-accent rounded-md shadow-lg py-1">
+              <a href="/client/article/show" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
+                Faire une commande
+              </a>
+            </div>
+          </div>
 
-     <div class="d-flex">
-            <!-- Authentication Links -->
-            {% if session['role']  %}
-                <span class="navbar-text">
-                    Bonjour {{ session['login'] }}
-                    {% if session['role']=='ROLE_admin' %} (role : PB Admin)
-                    {% elif session['role']=='ROLE_client' %} (role : Client) {% endif %}
-                    &nbsp
-                </span>
-               <a class="btn btn-outline-success" type="button" href="/logout"  >
-                    Se déconnecter (Logout)
-                </a>
-            {% else %}
-                <a class="btn btn-outline-success mr-1" type="button" href="/login">
-                    PB espace client
-                </a>
+          <!-- Mon Compte Dropdown -->
+          <div class="relative group">
+            <button class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+              Mon compte
+            </button>
+            <div class="absolute z-10 hidden group-hover:block w-48 bg-dark-accent rounded-md shadow-lg py-1">
+              <a href="/client/commande/show" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
+                Mes commandes
+              </a>
+              <a href="/client/coordonnee/show" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
+                Mes coordonnées
+              </a>
+              <a href="/client/envies/show" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
+                Ma liste d'envies
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        {% if session['role'] %}
+          <span class="text-gray-300">
+            Bonjour {{ session['login'] }}
+            {% if session['role']=='ROLE_admin' %}
+              <span class="text-accent-blue">(Admin)</span>
+            {% elif session['role']=='ROLE_client' %}
+              <span class="text-accent-blue">(Client)</span>
             {% endif %}
-
+          </span>
+          <a href="/logout" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+            Se déconnecter
+          </a>
+        {% else %}
+          <a href="/login" class="bg-accent-blue hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+            PB espace client
+          </a>
+        {% endif %}
+      </div>
     </div>
-  </div> <!--container fluid -->
+  </div>
 </nav>
-</div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for categorie, message in messages %}
-        <div role="alert" class="alert {{ categorie }}">
-               Information : <strong>{{ message }}</strong>
-        </div>
-        {% endfor %}
-    {% endif %}
+  {% if messages %}
+    {% for categorie, message in messages %}
+      <div class="mt-4 p-4 rounded-md {% if categorie == 'alert-success' %}bg-green-100 text-green-700{% elif categorie == 'alert-danger' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+        <strong>Information :</strong> {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
 {% endwith %}
+</div>

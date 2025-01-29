@@ -1,21 +1,38 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>SAE BDD</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" >
     {% block stylesheets %}
-        <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/bootstrap.css') }}" >
-        <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/mes_styles.css') }}" >
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {
+                        colors: {
+                            'dark-primary': '#1a1c24',
+                            'dark-secondary': '#22242c',
+                            'dark-accent': '#2a2e3b',
+                            'accent-blue': '#3b82f6'
+                        }
+                    }
+                }
+            }
+        </script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='mes_styles.css') }}" >
     {% endblock %}
 </head>
-<body>
+<body class="bg-dark-primary text-gray-200 min-h-screen">
 {% include('client/_nav_client.html') %}
-<div class="container  container-md">
+<div class="container mx-auto px-4 py-8">
 {% block body %}
-    <h4 style="color:blue">page Client : templates\admin\layout_client.html</h4>
-    <h3 style="color: blue">Bonjour {{ session['login'] }} , votre Rôle : {{ session['role'] }}</h3>
+    <div class="bg-dark-secondary rounded-lg p-6 shadow-lg">
+        <h4 class="text-accent-blue text-xl font-semibold mb-4">page Client : templates\admin\layout_client.html</h4>
+        <h3 class="text-accent-blue text-lg">Bonjour {{ session['login'] }} , votre Rôle : {{ session['role'] }}</h3>
+    </div>
 {% endblock %}
 </div>
 {% block javascripts %}

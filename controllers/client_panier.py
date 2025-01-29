@@ -12,6 +12,11 @@ client_panier = Blueprint('client_panier', __name__,
 @client_panier.route('/client/panier/add', methods=['POST'])
 def client_panier_add():
     mycursor = get_db().cursor()
+    print("Form data:")
+    print("id_client:", session['id_user'])
+    print("id_article:", request.form.get('id_article'))
+    print("quantite:", request.form.get('quantite'))
+    print("id_declinaison_article:", request.form.get('id_declinaison_article', None))
     id_client = session['id_user']
     id_article = request.form.get('id_article')
     quantite = request.form.get('quantite')
