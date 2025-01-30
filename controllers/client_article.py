@@ -36,10 +36,18 @@ def client_article_show():                                 # remplace client_ind
         INNER JOIN special ON skin.special_id = special.id_special
         ORDER BY id_skin
         '''
-    mycursor.execute(sql)
-    skins = mycursor.fetchall()
-    articles = skins
     
+    mycursor.execute(sql)
+    articles = mycursor.fetchall()
+
+
+    # pour les déclinaisons
+    declinaisons = []
+    for article in articles:
+        declinaisons = get_declinaison(article['nom'])
+        article['declinaisons'] = declinaisons
+
+
 
     # pour le filtre
     types_article = []
@@ -67,3 +75,20 @@ def client_article_show():                                 # remplace client_ind
                            #, prix_total=prix_total
                            , items_filtre=types_article
                            )
+
+
+def get_declinaison(nom):
+    mycursor = get_db().cursor()
+
+    sql = '''
+        SELECT DISTINCT libelle_usure
+        FROM skin
+        INNER JOIN usure ON skin.usure_id = usure.id_usure
+        WHERE nom_skin = %s
+        '''
+    mycursor.execute(sql, nom)
+    declinaisons = mycursor.fetchall()
+
+    return [declinaison['libelle_usure'] for declinaison in declinaisons]
+
+

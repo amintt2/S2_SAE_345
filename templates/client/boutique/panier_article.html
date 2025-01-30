@@ -49,9 +49,11 @@
                 <h3 class="text-lg font-semibold text-white">{{ article.nom }}</h3>
                 {% if article.libelle_type_skin not in ['Sticker', 'Capsule'] %}
                 <div class="mt-1 mb-3">
-                    <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
-                        {{ article.libelle_usure }}
-                    </span>
+                    {% for declinaison in article.declinaisons %}
+                        <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
+                            {{ declinaison }}
+                        </span>
+                    {% endfor %}
                 </div>
                 {% endif %}
                 <div class="flex justify-between items-center mb-4">
