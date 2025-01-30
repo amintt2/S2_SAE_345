@@ -81,6 +81,7 @@ def fct_fixtures_load():
           usure_id INT NOT NULL,
           type_skin_id INT NOT NULL,
           image VARCHAR(255),
+          description TEXT,
           PRIMARY KEY(id_skin),
           FOREIGN KEY(special_id) REFERENCES special(id_special),
           FOREIGN KEY(usure_id) REFERENCES usure(id_usure),
@@ -183,33 +184,33 @@ def fct_fixtures_load():
      mycursor.execute(sql)
      
      sql='''
-     INSERT INTO skin (nom_skin, prix_skin, stock, special_id, usure_id, type_skin_id, image) VALUES
-     ('Karambit | Gamma Doppler', 1005.34, 2, 2, 1, 4, 'karambit_gamma_doppler.png'),
-     ('AWP | Dragon Lore', 11244.54, 1, 1, 1, 3, 'awp_dragon_lore.png'),
-     ('Sport Gloves | Amphibious', 897.35, 3, 2, 2, 5, 'gloves_amphibious.png'),
-     ('Skeleton Knife | Crimson Web', 490.76, 2, 2, 2, 4, 'skeleton_crimson.png'),
-     ('AK-47 | Gold Arabesque', 4023.26, 0, 2, 1, 1, 'ak_gold_arabesque.png'),
-     ('Butterfly Knife | Marble Fade', 2083.06, 2, 2, 1, 4, 'butterfly_marble.png'),
-     ('Driver Gloves | Snow Leopard', 83.90, 4, 1, 5, 5, 'gloves_snow_leopard.png'),
-     ('M4A1-S | Knight', 2959.66, 1, 1, 1, 6, 'm4a1s_knight.png'),
-     ('M9 Bayonet | Doppler', 1262.63, 2, 2, 1, 4, 'm9_doppler.png'),
-     ('AWP | Lightning Strike', 74.32, 3, 2, 1, 3, 'awp_lightning_st.png'),
-     ('AK-47 | Inheritance', 180.50, 3, 1, 1, 1, 'FN_AK_INHERITANCE.png'),
-     ('AWP | Gungnir', 11200.00, 1, 1, 1, 3, 'FN_GUNGNIR.png'),
-     ('Sticker | iBUYPOWER (Holo) | Katowice 2014', 75000.00, 1, 1, 1, 2, 'IBUYPOWER-HOLO.png'),
-     ('Sticker | Titan (Holo) | Katowice 2014', 55000.00, 1, 1, 1, 2, 'TITAN-HOLO.png'),
-     ('Karambit | Crimson Web', 433.53, 2, 1, 2, 4, 'karambit_crimson_web.png'),
-     ('AWP | Wildfire', 47.93, 4, 1, 3, 3, 'awp_wildfire.png'),
-     ('Flip Knife | Bright Water', 206.29, 3, 1, 1, 4, 'flip_bright_water.png'),
-     ('Bowie Knife | Autotronic', 147.36, 2, 1, 3, 4, 'bowie_autotronic.png'),
-     ('Huntsman Knife | Gamma Doppler', 378.27, 1, 1, 1, 4, 'huntsman_gamma_doppler.png'),
-     ('Navaja Knife | Rust Coat', 93.19, 3, 1, 5, 4, 'navaja_rust.png'),
-     ('Specialist Gloves | Fade', 343.02, 2, 1, 3, 5, 'specialist_fade.png'),
-     ('Bowie Knife | Black Laminate', 113.87, 2, 1, 2, 4, 'bowie_black_laminate.png'),
-     ('Skeleton Knife | Fade', 1346.34, 0, 1, 1, 4, 'skeleton_fade.png'),
-     ('Flip Knife | Doppler', 453.49, 2, 1, 1, 4, 'flip_doppler.png'),
-     ('M4A1-S | Mud-Spec', 0.15, 5, 1, 3, 6, 'm4a1s_mudspec.png'),
-     ('Natus Vincere Glitter', 0.15, 5, 1, 1, 2, 'sticker_navi_glitter.png');
+     INSERT INTO skin (nom_skin, prix_skin, stock, special_id, usure_id, type_skin_id, image, description) VALUES
+     ('Karambit | Gamma Doppler', 1005.34, 2, 2, 1, 4, 'karambit_gamma_doppler.png', 'Un couteau hypnotisant avec des couleurs changeantes de vert et noir dans un motif galactique.'),
+     ('AWP | Dragon Lore', 11244.54, 1, 1, 1, 3, 'awp_dragon_lore.png', 'Le légendaire skin Dragon Lore avec un design complexe de dragon doré.'),
+     ('Sport Gloves | Amphibious', 897.35, 3, 2, 2, 5, 'gloves_amphibious.png', 'Gants de sport élégants avec un motif aquatique bleu et vert.'),
+     ('Skeleton Knife | Crimson Web', 490.76, 2, 2, 2, 4, 'skeleton_crimson.png', 'Un couteau menaçant avec un motif de toile cramoisie.'),
+     ('AK-47 | Gold Arabesque', 4023.26, 0, 2, 1, 1, 'ak_gold_arabesque.png', 'Un AK-47 doré avec des motifs arabesques complexes.'),
+     ('Butterfly Knife | Marble Fade', 2083.06, 2, 2, 1, 4, 'butterfly_marble.png', 'Un couteau papillon avec un effet dégradé marbré.'),
+     ('Driver Gloves | Snow Leopard', 83.90, 4, 1, 5, 5, 'gloves_snow_leopard.png', 'Gants avec un imprimé léopard des neiges.'),
+     ('M4A1-S | Knight', 2959.66, 1, 1, 1, 6, 'm4a1s_knight.png', 'Un M4A1-S sur le thème des chevaliers avec des détails complexes.'),
+     ('M9 Bayonet | Doppler', 1262.63, 2, 2, 1, 4, 'm9_doppler.png', 'Une baïonnette avec un effet Doppler.'),
+     ('AWP | Lightning Strike', 74.32, 3, 2, 1, 3, 'awp_lightning_st.png', 'Un AWP avec un effet éclair.'),
+     ('AK-47 | Inheritance', 180.50, 3, 1, 1, 1, 'FN_AK_INHERITANCE.png', 'Un AK-47 spécial sur le thème de l''héritage.'),
+     ('AWP | Gungnir', 11200.00, 1, 1, 1, 3, 'FN_GUNGNIR.png', 'Un AWP puissant avec un thème nordique.'),
+     ('Sticker | iBUYPOWER (Holo) | Katowice 2014', 75000.00, 1, 1, 1, 2, 'IBUYPOWER-HOLO.png', 'Un autocollant holographique iBUYPOWER de Katowice 2014.'),
+     ('Sticker | Titan (Holo) | Katowice 2014', 55000.00, 1, 1, 1, 2, 'TITAN-HOLO.png', 'Un autocollant holographique Titan de Katowice 2014.'),
+     ('Karambit | Crimson Web', 433.53, 2, 1, 2, 4, 'karambit_crimson_web.png', 'Un couteau menaçant avec un motif de toile cramoisie.'),
+     ('AWP | Wildfire', 47.93, 4, 1, 3, 3, 'awp_wildfire.png', 'Un AWP avec un effet de feu sauvage.'),
+     ('Flip Knife | Bright Water', 206.29, 3, 1, 1, 4, 'flip_bright_water.png', 'Un couteau flip avec un effet d''eau claire.'),
+     ('Bowie Knife | Autotronic', 147.36, 2, 1, 3, 4, 'bowie_autotronic.png', 'Un couteau Bowie avec un thème autotronique.'),
+     ('Huntsman Knife | Gamma Doppler', 378.27, 1, 1, 1, 4, 'huntsman_gamma_doppler.png', 'Un couteau Huntsman avec un effet Gamma Doppler.'),
+     ('Navaja Knife | Rust Coat', 93.19, 3, 1, 5, 4, 'navaja_rust.png', 'Un couteau navaja avec un effet rouillé.'),
+     ('Specialist Gloves | Fade', 343.02, 2, 1, 3, 5, 'specialist_fade.png', 'Gants avec un effet dégradé.'),
+     ('Bowie Knife | Black Laminate', 113.87, 2, 1, 2, 4, 'bowie_black_laminate.png', 'Un couteau Bowie avec un motif laminé noir.'),
+     ('Skeleton Knife | Fade', 1346.34, 0, 1, 1, 4, 'skeleton_fade.png', 'Un couteau squelette avec un effet dégradé.'),
+     ('Flip Knife | Doppler', 453.49, 2, 1, 1, 4, 'flip_doppler.png', 'Un couteau flip avec un effet Doppler.'),
+     ('M4A1-S | Mud-Spec', 0.15, 5, 1, 3, 6, 'm4a1s_mudspec.png', 'Un motif de camouflage basique dans des tons marron boueux.'),
+     ('Natus Vincere Glitter', 0.15, 5, 1, 1, 2, 'sticker_navi_glitter.png', 'Un autocollant brillant de l''équipe Natus Vincere avec des effets holographiques.');
      '''
      mycursor.execute(sql)
      
@@ -227,7 +228,7 @@ def fct_fixtures_load():
      
      sql='''
      INSERT INTO ligne_commande (skin_id, commande_id, prix, quantite) VALUES 
-          (2, 1, 80.00, 1);
+          (1, 1, 80.00, 1);
      '''
      mycursor.execute(sql)
      

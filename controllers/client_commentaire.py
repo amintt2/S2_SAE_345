@@ -25,6 +25,7 @@ def client_article_details():
         id_skin AS id_article,
         nom_skin AS nom, 
         prix_skin AS prix,
+        description,
         image
     FROM skin 
     WHERE id_skin = %s;
