@@ -228,7 +228,7 @@ def fct_fixtures_load():
      
      sql='''
      INSERT INTO ligne_commande (skin_id, commande_id, prix, quantite) VALUES 
-          (2, 1, 80.00, 1);
+          (1, 1, 80.00, 1);
      '''
      mycursor.execute(sql)
      

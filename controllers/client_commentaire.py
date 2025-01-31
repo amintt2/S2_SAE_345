@@ -21,10 +21,19 @@ def client_article_details():
     # client_historique_add(id_article, id_client)
 
     sql = '''
+    SELECT 
+        id_skin AS id_article,
+        nom_skin AS nom, 
+        prix_skin AS prix,
+        description,
+        image
+    FROM skin 
+    WHERE id_skin = %s;
     '''
-    #mycursor.execute(sql, id_article)
-    #article = mycursor.fetchone()
-    article=[]
+    # -- Description, moyenne_notes, nb_notes
+    mycursor.execute(sql, id_article)
+    article = mycursor.fetchone()
+    #article=[]
     commandes_articles=[]
     nb_commentaires=[]
     if article is None:
@@ -34,10 +43,16 @@ def client_article_details():
     # '''
     # mycursor.execute(sql, ( id_article))
     # commentaires = mycursor.fetchall()
-    # sql = '''
-    # '''
-    # mycursor.execute(sql, (id_client, id_article))
-    # commandes_articles = mycursor.fetchone()
+    sql = '''
+    SELECT COUNT(skin_id) AS nb_commandes_article
+    FROM ligne_commande
+    JOIN commande ON commande.id_commande = ligne_commande.commande_id
+    WHERE commande.utilisateur_id=%s and ligne_commande.skin_id=%s;
+    '''
+    mycursor.execute(sql, (id_client, id_article))
+    commandes_articles = mycursor.fetchone()
+    print(f"id_client: {id_client} - id_article: {id_article}")
+    print(commandes_articles)
     # sql = '''
     # '''
     # mycursor.execute(sql, (id_client, id_article))
