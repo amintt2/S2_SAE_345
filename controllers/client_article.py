@@ -22,19 +22,20 @@ def client_article_show():                                 # remplace client_ind
     articles = []
 
     sql = '''
-        SELECT  id_skin AS id_article
-                , nom_skin AS nom
-                , prix_skin AS prix
-                , stock AS stock
-                , image
-                , libelle_usure
-                , libelle_type_skin
-                , libelle_special
+        SELECT DISTINCT nom_skin AS nom
+                , MIN(id_skin) AS id_article
+                , MIN(prix_skin) AS prix
+                , MIN(stock) AS stock
+                , MIN(image) AS image
+                , MIN(libelle_usure) AS libelle_usure
+                , MIN(libelle_type_skin) AS libelle_type_skin
+                , MIN(libelle_special) AS libelle_special
         FROM skin
         INNER JOIN usure ON skin.usure_id = usure.id_usure
         INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
         INNER JOIN special ON skin.special_id = special.id_special
-        ORDER BY id_skin
+        GROUP BY nom_skin
+        ORDER BY id_article;
         '''
     
     mycursor.execute(sql)
