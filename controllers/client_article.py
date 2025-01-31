@@ -28,7 +28,7 @@ def client_article_show():                                 # remplace client_ind
                 , MIN(stock) AS stock
                 , MIN(image) AS image
                 , MIN(libelle_usure) AS libelle_usure
-                , MIN(libelle_type_skin) AS libelle_type_skin
+                , MIN(libelle_type_skin) AS libelle_type_article
                 , MIN(libelle_special) AS libelle_special
         FROM skin
         INNER JOIN usure ON skin.usure_id = usure.id_usure
@@ -85,7 +85,7 @@ def get_declinaison(nom):
         SELECT DISTINCT libelle_usure
         FROM skin
         INNER JOIN usure ON skin.usure_id = usure.id_usure
-        WHERE nom_skin = %s
+        WHERE nom_skin = %s AND stock > 0
         '''
     mycursor.execute(sql, nom)
     declinaisons = mycursor.fetchall()
