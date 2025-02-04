@@ -210,7 +210,22 @@ def fct_fixtures_load():
      ('Skeleton Knife | Fade', 1346.34, 0, 1, 1, 4, 'skeleton_fade.png', 'Un couteau squelette avec un effet dégradé.'),
      ('Flip Knife | Doppler', 453.49, 2, 1, 1, 4, 'flip_doppler.png', 'Un couteau flip avec un effet Doppler.'),
      ('M4A1-S | Mud-Spec', 0.15, 5, 1, 3, 6, 'm4a1s_mudspec.png', 'Un motif de camouflage basique dans des tons marron boueux.'),
-     ('Natus Vincere Glitter', 0.15, 5, 1, 1, 2, 'sticker_navi_glitter.png', 'Un autocollant brillant de l''équipe Natus Vincere avec des effets holographiques.');
+     ('Natus Vincere Glitter', 0.15, 5, 1, 1, 2, 'sticker_navi_glitter.png', 'Un autocollant brillant de l''équipe Natus Vincere avec des effets holographiques.'),
+     
+     ('AWP | Dragon Lore', 8244.54, 1, 1, 2, 3, 'awp_dragon_lore_mw.png', 'Le légendaire skin Dragon Lore avec un design complexe de dragon doré - Très peu usée'),
+     ('AWP | Dragon Lore', 6244.54, 2, 1, 3, 3, 'awp_dragon_lore_ft.png', 'Le légendaire skin Dragon Lore avec un design complexe de dragon doré - Testé sur le terrain'),
+     ('AWP | Dragon Lore', 4244.54, 3, 1, 4, 3, 'awp_dragon_lore_ww.png', 'Le légendaire skin Dragon Lore avec un design complexe de dragon doré - Usée'),
+     ('AWP | Dragon Lore', 2244.54, 4, 1, 5, 3, 'awp_dragon_lore_bs.png', 'Le légendaire skin Dragon Lore avec un design complexe de dragon doré - Marqué par les combats'),
+     
+     ('Karambit | Gamma Doppler', 805.34, 2, 2, 2, 4, 'karambit_gamma_doppler_mw.png', 'Un couteau hypnotisant avec des couleurs changeantes - Très peu usée'),
+     ('Karambit | Gamma Doppler', 605.34, 3, 2, 3, 4, 'karambit_gamma_doppler_ft.png', 'Un couteau hypnotisant avec des couleurs changeantes - Testé sur le terrain'),
+     ('Karambit | Gamma Doppler', 405.34, 3, 2, 4, 4, 'karambit_gamma_doppler_ww.png', 'Un couteau hypnotisant avec des couleurs changeantes - Usée'),
+     ('Karambit | Gamma Doppler', 305.34, 4, 2, 5, 4, 'karambit_gamma_doppler_bs.png', 'Un couteau hypnotisant avec des couleurs changeantes - Marqué par les combats'),
+     
+     ('AK-47 | Gold Arabesque', 3023.26, 1, 2, 2, 1, 'ak_gold_arabesque_mw.png', 'Un AK-47 doré avec des motifs arabesques complexes - Très peu usée'),
+     ('AK-47 | Gold Arabesque', 2023.26, 2, 2, 3, 1, 'ak_gold_arabesque_ft.png', 'Un AK-47 doré avec des motifs arabesques complexes - Testé sur le terrain'),
+     ('AK-47 | Gold Arabesque', 1523.26, 2, 2, 4, 1, 'ak_gold_arabesque_ww.png', 'Un AK-47 doré avec des motifs arabesques complexes - Usée'),
+     ('AK-47 | Gold Arabesque', 1023.26, 3, 2, 5, 1, 'ak_gold_arabesque_bs.png', 'Un AK-47 doré avec des motifs arabesques complexes - Marqué par les combats');
      '''
      mycursor.execute(sql)
      
