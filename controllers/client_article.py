@@ -13,13 +13,7 @@ client_article = Blueprint('client_article', __name__,
 def client_article_show():                                 # remplace client_index
     mycursor = get_db().cursor()
     id_client = session['id_user']
-
-    sql = '''   selection des articles   '''
     list_param = []
-    condition_and = ""
-    # utilisation du filtre
-    sql3=''' prise en compte des commentaires et des notes dans le SQL    '''
-    articles = []
 
     sql = '''
         SELECT DISTINCT nom_skin AS nom
@@ -34,20 +28,22 @@ def client_article_show():                                 # remplace client_ind
         INNER JOIN usure ON skin.usure_id = usure.id_usure
         INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
         INNER JOIN special ON skin.special_id = special.id_special
-        GROUP BY nom_skin
-        ORDER BY id_article;
         '''
-    
-    mycursor.execute(sql)
-    articles = mycursor.fetchall()
+    if 'filter_types' in session and session['filter_types']:
+        placeholders = ','.join(['%s'] * len(session['filter_types']))
+        sql += f' WHERE type_skin.id_type_skin IN ({placeholders})'
+        list_param.extend(session['filter_types'])
 
+    sql += ' GROUP BY nom_skin ORDER BY id_article'
+    
+    mycursor.execute(sql, tuple(list_param) if list_param else None)
+    articles = mycursor.fetchall()
 
     # pour les déclinaisons
     declinaisons = []
     for article in articles:
         declinaisons = get_declinaison(article['nom'])
         article['declinaisons'] = declinaisons
-
 
     # pour le filtre
     types_article = []

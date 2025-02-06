@@ -148,9 +148,13 @@ def client_panier_filtre():
     filter_word = request.form.get('filter_word', None)
     filter_prix_min = request.form.get('filter_prix_min', None)
     filter_prix_max = request.form.get('filter_prix_max', None)
-    filter_types = request.form.getlist('filter_types', None)
-    # test des variables puis
-    # mise en session des variables
+    filter_types = request.form.getlist('filter_types')
+
+    if filter_types:
+        session['filter_types'] = filter_types
+    elif 'filter_types' in session:
+        session.pop('filter_types')
+
     return redirect('/client/article/show')
 
 
