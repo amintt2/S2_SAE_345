@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 from flask import Blueprint
 from flask import request, render_template, redirect, abort, flash, session
-
+ 
 from connexion_db import get_db
 
 client_panier = Blueprint('client_panier', __name__,
@@ -17,31 +17,72 @@ def client_panier_add():
     print("id_article:", request.form.get('id_article'))
     print("quantite:", request.form.get('quantite'))
     print("id_declinaison_article:", request.form.get('id_declinaison_article', None))
+    
     id_client = session['id_user']
     id_article = request.form.get('id_article')
-    quantite = request.form.get('quantite')
-    # ---------
-    #id_declinaison_article=request.form.get('id_declinaison_article',None)
-    id_declinaison_article = 1
+    quantite = request.form.get('quantite', 1)
 
+    # ---------
+    id_declinaison_article=request.form.get('id_declinaison_article',None)
+    
 # ajout dans le panier d'une déclinaison d'un article (si 1 declinaison : immédiat sinon => vu pour faire un choix
-    # sql = '''    '''
-    # mycursor.execute(sql, (id_article))
-    # declinaisons = mycursor.fetchall()
-    # if len(declinaisons) == 1:
-    #     id_declinaison_article = declinaisons[0]['id_declinaison_article']
-    # elif len(declinaisons) == 0:
-    #     abort("pb nb de declinaison")
-    # else:
-    #     sql = '''   '''
-    #     mycursor.execute(sql, (id_article))
-    #     article = mycursor.fetchone()
-    #     return render_template('client/boutique/declinaison_article.html'
-    #                                , declinaisons=declinaisons
-    #                                , quantite=quantite
-    #                                , article=article)
+    if id_declinaison_article is None:
+        sql = '''
+            SELECT id_skin AS id_declinaison_article
+            FROM skin
+            WHERE nom_skin = (
+                SELECT nom_skin
+                FROM skin
+                WHERE id_skin = %s
+            );
+        '''
+        mycursor.execute(sql, (id_article))
+        declinaisons = mycursor.fetchall()
+        print("Decli: ", declinaisons)
+
+        if len(declinaisons) == 1:
+            id_declinaison_article = declinaisons[0]['id_declinaison_article']
+        elif len(declinaisons) == 0:
+            abort("pb nb de declinaison")
+        else:
+            sql = '''
+                SELECT  nom_skin AS nom,
+                        prix_skin AS prix,
+                        image
+                FROM skin
+                WHERE id_skin = %s;
+            '''
+            mycursor.execute(sql, (id_article))
+            article = mycursor.fetchone()
+            return render_template('client/boutique/declinaison_article.html'
+                                    , declinaisons=declinaisons
+                                    , quantite=quantite
+                                    , article=article)
 
 # ajout dans le panier d'un article
+
+    sql = '''
+        SELECT *  FROM ligne_panier 
+        WHERE skin_id = %s AND utilisateur_id = %s
+    '''
+    mycursor.execute(sql, (id_article, id_client))
+    article_panier = mycursor.fetchone()
+    print("article_panier: ", article_panier)
+
+    if article_panier is not None:
+        sql = '''
+            UPDATE ligne_panier
+            SET quantite = quantite + %s
+            WHERE skin_id = %s AND utilisateur_id = %s;
+        '''
+        mycursor.execute(sql, (quantite, id_article, id_client))
+    else:
+        sql = '''
+            INSERT INTO ligne_panier (utilisateur_id, skin_id, quantite, date_ajout)
+            VALUES (%s, %s, %s, NOW());
+        '''
+        mycursor.execute(sql, (id_client, id_declinaison_article, quantite))
+    get_db().commit()
 
 
     return redirect('/client/article/show')
