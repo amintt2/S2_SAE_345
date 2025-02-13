@@ -64,20 +64,44 @@ def client_commande_add():
 
 @client_commande.route('/client/commande/show', methods=['get','post'])
 def client_commande_show():
+    print('client_commande_show')
+    
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    sql = '''  selection des commandes ordonnées par état puis par date d'achat descendant '''
-    commandes = []
+    sql = '''
+        SELECT 
+            commande.id_commande,
+            commande.date_achat,
+            etat.libelle_etat as libelle,
+            etat.id_etat as etat_id,
+            COUNT(ligne_commande.commande_id) as nbr_articles,
+            SUM(ligne_commande.prix * ligne_commande.quantite) as prix_total
+        FROM commande
+        INNER JOIN etat ON commande.etat_id = etat.id_etat
+        LEFT JOIN ligne_commande ON commande.id_commande = ligne_commande.commande_id
+        WHERE commande.utilisateur_id = %s
+        GROUP BY commande.id_commande, commande.date_achat, etat.libelle_etat, etat.id_etat
+        ORDER BY commande.date_achat DESC
+        '''
+    mycursor.execute(sql, (id_client,))
+    commandes = mycursor.fetchall()
 
     articles_commande = None
     commande_adresses = None
     id_commande = request.args.get('id_commande', None)
     if id_commande != None:
         print(id_commande)
-        sql = ''' selection du détails d'une commande '''
+        sql = ''' SELECT * FROM ligne_commande WHERE commande_id = %s '''
+        mycursor.execute(sql, (id_commande,))
+        articles_commande = mycursor.fetchall()
+        sql = ''' SELECT * FROM adresse WHERE id = %s '''
+        mycursor.execute(sql, (id_commande,))
+        commande_adresses = mycursor.fetchall()
 
         # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
-        sql = ''' selection des adressses '''
+        sql = ''' SELECT * FROM adresse WHERE id = %s '''
+        mycursor.execute(sql, (id_commande,))
+        commande_adresses = mycursor.fetchall()
 
     return render_template('client/commandes/show.html'
                            , commandes=commandes

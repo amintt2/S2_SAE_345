@@ -155,11 +155,22 @@ INSERT INTO skin (nom_skin, prix_skin, stock, special_id, usure_id, type_skin_id
 ('Natus Vincere Glitter', 0.15, 1000, 1, 1, 2, 'sticker_navi_glitter.png');
 
 
-INSERT INTO commande (date_achat, etat_id, utilisateur_id) VALUES
-('2024-03-19', 2, 2);
+INSERT INTO commande (date_achat, etat_id, utilisateur_id) VALUES 
+    ('2024-03-19', 2, 2),
+    ('2024-03-15', 4, 2),
+    ('2024-03-18', 3, 3),
+    ('2024-03-20', 1, 3),
+    ('2024-03-10', 5, 2);
 
-INSERT INTO ligne_commande (skin_id, commande_id, prix, quantite) VALUES
-(1, 1, 80.00, 1);
+INSERT INTO ligne_commande (skin_id, commande_id, prix, quantite) VALUES 
+    (1, 1, 80.00, 1),
+    (3, 1, 897.35, 2),
+    (7, 2, 83.90, 1),
+    (10, 2, 74.32, 3),
+    (4, 3, 490.76, 1),
+    (15, 3, 433.53, 2),
+    (2, 4, 11244.54, 1),
+    (5, 5, 4023.26, 1);
 
 INSERT INTO ligne_panier (skin_id, utilisateur_id, quantite, date_ajout) VALUES
 (1, 2, 1, '2024-03-20 10:30:00');

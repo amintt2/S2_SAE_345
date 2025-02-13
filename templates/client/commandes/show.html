@@ -63,6 +63,8 @@
                         </tr>
                         </thead>
                         <tbody>
+        
+                            
                         {% for commande in commandes %}
                             <tr id="" {% if commande.etat_id == 1 %} style="background: #FFD600; font-weight: bold;" {% endif %}>
                                 <td>{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
