@@ -91,18 +91,25 @@ def client_commande_show():
     id_commande = request.args.get('id_commande', None)
     if id_commande != None:
         print(id_commande)
-        sql = ''' SELECT * FROM ligne_commande WHERE commande_id = %s '''
+        sql = '''
+            SELECT 
+                skin.nom_skin AS nom,
+                ligne_commande.quantite,
+                ligne_commande.prix,
+                (ligne_commande.prix * ligne_commande.quantite) AS prix_ligne,
+                usure.libelle_usure,
+                type_skin.libelle_type_skin,
+                special.libelle_special
+            FROM ligne_commande
+            INNER JOIN skin ON ligne_commande.skin_id = skin.id_skin
+            INNER JOIN usure ON skin.usure_id = usure.id_usure
+            INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
+            INNER JOIN special ON skin.special_id = special.id_special
+            WHERE ligne_commande.commande_id = %s
+        '''
         mycursor.execute(sql, (id_commande,))
         articles_commande = mycursor.fetchall()
-        sql = ''' SELECT * FROM adresse WHERE id = %s '''
-        mycursor.execute(sql, (id_commande,))
-        commande_adresses = mycursor.fetchall()
-
-        # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
-        sql = ''' SELECT * FROM adresse WHERE id = %s '''
-        mycursor.execute(sql, (id_commande,))
-        commande_adresses = mycursor.fetchall()
-
+        
     return render_template('client/commandes/show.html'
                            , commandes=commandes
                            , articles_commande=articles_commande
