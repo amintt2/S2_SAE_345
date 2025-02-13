@@ -18,8 +18,10 @@ def client_article_show():                                 # remplace client_ind
     sql = '''
         SELECT DISTINCT nom_skin AS nom
                 , MIN(id_skin) AS id_article
-                , MIN(prix_skin) AS prix
-                , MIN(stock) AS stock
+                , MIN(prix_skin) AS prix_min
+                , MAX(prix_skin) AS prix_max
+                , MIN(stock) AS stock_min
+                , MAX(stock) AS stock_max
                 , MIN(image) AS image
                 , MIN(libelle_usure) AS libelle_usure
                 , MIN(libelle_type_skin) AS libelle_type_article
@@ -28,6 +30,7 @@ def client_article_show():                                 # remplace client_ind
         INNER JOIN usure ON skin.usure_id = usure.id_usure
         INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
         INNER JOIN special ON skin.special_id = special.id_special
+        WHERE stock > 0
         '''
     if 'filter_types' in session and session['filter_types']:
         placeholders = ','.join(['%s'] * len(session['filter_types']))
