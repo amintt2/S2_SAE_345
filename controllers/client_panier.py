@@ -1,13 +1,36 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 from flask import Blueprint
-from flask import request, render_template, redirect, abort, flash, session
+from flask import request, render_template, redirect, abort, flash, session, url_for
  
 from connexion_db import get_db
 
 client_panier = Blueprint('client_panier', __name__,
                         template_folder='templates')
 
+
+def update_stock(quantite, id_article):
+    mycursor = get_db().cursor()    
+    sql = '''
+        SELECT stock 
+        FROM skin
+        WHERE id_skin = %s
+    '''
+    mycursor.execute(sql, (id_article))
+    quantite_article = mycursor.fetchone()['stock']
+    if quantite > quantite_article:
+        print("Quantité trop élevé")
+        quantite = quantite_article
+
+    sql = '''
+        UPDATE skin
+        SET stock = stock - %s
+        WHERE id_skin = %s
+    '''
+    mycursor.execute(sql, (quantite, id_article))
+
+    # renvoie la quantité qui peut être réellement ajouter au panier
+    return quantite
 
 @client_panier.route('/client/panier/add', methods=['POST'])
 def client_panier_add():
@@ -20,7 +43,7 @@ def client_panier_add():
     
     id_client = session['id_user']
     id_article = request.form.get('id_article')
-    quantite = request.form.get('quantite', 1)
+    quantite = int(request.form.get('quantite', 1))
 
     # ---------
     id_declinaison_article=request.form.get('id_declinaison_article',None)
@@ -60,25 +83,7 @@ def client_panier_add():
                                     , article=article)
 
 # mise à jour des quantités
-
-    sql = '''
-        SELECT stock 
-        FROM skin
-        WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (id_article))
-    quantite_article = mycursor.fetchone()['stock']
-    if quantite > quantite_article:
-        print("Quantité trop élevé")
-        quantite = quantite_article
-
-    sql = '''
-        UPDATE skin
-        SET stock = stock - %s
-        WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (quantite, id_article))
-
+    quantite = update_stock(quantite, id_article)
 
 # ajout dans le panier d'un article
 
@@ -108,16 +113,46 @@ def client_panier_add():
 
     return redirect('/client/article/show')
 
-@client_panier.route('/client/panier/delete', methods=['POST'])
-def client_panier_delete():
-    mycursor = get_db().cursor()
-    id_client = session['id_user']
-    id_article = request.form.get('id_article','')
-    quantite = 1
 
-    # ---------
-    # partie 2 : on supprime une déclinaison de l'article
-    # id_declinaison_article = request.form.get('id_declinaison_article', None)
+@client_panier.route('/client/panier/update', methods=['POST'])
+def client_panier_update():
+    id_client = session['id_user']
+    id_article = request.form.get('id_article')
+    quantite = int(request.form.get('quantite', 1))
+    print('Change quantity to', quantite)
+    
+    mycursor = get_db().cursor()
+
+    sql = '''
+        SELECT quantite
+        FROM ligne_panier
+        WHERE skin_id = %s AND utilisateur_id = %s
+    '''
+    mycursor.execute(sql, (id_article, id_client))
+    quantite_panier = mycursor.fetchone()['quantite']
+    quantite = quantite - quantite_panier
+    print('Update quantity with', quantite, 'articles')
+
+    if quantite > 0:
+        quantite = update_stock(quantite, id_article)
+        print('Will add', quantite, 'articles')
+        sql = '''
+            UPDATE ligne_panier
+            SET quantite = quantite + %s
+            WHERE skin_id = %s AND utilisateur_id = %s
+        '''
+        mycursor.execute(sql, (quantite, id_article, id_client))
+    elif quantite < 0:
+        delete_article_from_panier(-quantite, id_article, id_client)
+
+
+    get_db().commit()
+    return redirect('/client/article/show') 
+    
+
+def delete_article_from_panier(quantite, id_article, id_client):
+    
+    mycursor = get_db().cursor()
 
     sql = ''' 
         SELECT quantite
@@ -127,20 +162,23 @@ def client_panier_delete():
     mycursor.execute(sql, (id_article, id_client))
     article_panier=mycursor.fetchone()
 
+    if article_panier['quantite'] < quantite:
+        quantite = article_panier['quantite']
+
     sql = '''
         UPDATE skin
-        SET stock = stock + 1
+        SET stock = stock + %s
         WHERE id_skin = %s
     '''
-    mycursor.execute(sql, (id_article))
+    mycursor.execute(sql, (quantite, id_article))
 
-    if not(article_panier is None) and article_panier['quantite'] > 1:
+    if not(article_panier is None) and article_panier['quantite'] > quantite:
         sql = '''
             UPDATE ligne_panier
-            SET quantite = quantite - 1
+            SET quantite = quantite - %s
             WHERE skin_id = %s AND utilisateur_id = %s
         '''
-        mycursor.execute(sql, (id_article, id_client))
+        mycursor.execute(sql, (quantite, id_article, id_client))
     else:
         sql = '''
             DELETE FROM ligne_panier 
@@ -150,6 +188,21 @@ def client_panier_delete():
 
     # mise à jour du stock de l'article disponible
     get_db().commit()
+
+@client_panier.route('/client/panier/delete', methods=['POST'])
+def client_panier_delete():
+    mycursor = get_db().cursor()
+    id_client = session['id_user']
+    id_article = request.form.get('id_article','')
+    quantite = int(request.form.get('quantite', 1))
+
+    # ---------
+    # partie 2 : on supprime une déclinaison de l'article
+    # id_declinaison_article = request.form.get('id_declinaison_article', None)
+
+
+    delete_article_from_panier(quantite, id_article, id_client)
+ 
     return redirect('/client/article/show')
 
 
