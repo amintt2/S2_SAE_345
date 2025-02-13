@@ -44,7 +44,7 @@
                      class="w-full h-48 object-cover" 
                      alt="{{ article.nom }}">
                 <div class="absolute top-2 right-2 flex flex-col space-y-2">
-                    <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-gray-300 px-2 py-1 rounded text-sm font-medium">
+                    <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-gray-300 px-2 py-1 rounded text-sm font-medium justify self-end">
                         {{ article.libelle_type_article }}
                     </span>
                     {% if article.libelle_special != 'Normal' %}
@@ -66,10 +66,21 @@
                 </div>
                 {% endif %}
                 <div class="flex justify-between items-center mb-4">
-                    <span class="text-accent-blue font-bold text-xl">{{ article.prix }}€</span>
+                    <div class="text-accent-blue font-bold text-xl">
+                        <span style="color: #3498db">
+                            {% if article.prix_min == article.prix_max %}
+                            {{ article.prix_max }}€
+                            {% else %}
+                            {{ article.prix_min }}€ - {{ article.prix_max }}€
+                            {% endif %}
+                        </span>
+                    </div>
+
                     <div class="flex items-center">
-                        {% if article.stock > 0 %}
-                        <span class="text-gray-400 text-sm">Stock: {{ article.stock }}</span>
+                        {% if article.stock_max > 0 and article.stock_min == article.stock_max %}
+                        <span class="text-gray-400 text-sm">Stock: {{ article.stock_max }}</span>
+                        {% elif article.stock_max > 0 %}
+                        <span class="text-gray-400 text-sm">Stock: {{ article.stock_min }} à {{ article.stock_max }}</span>
                         {% else %}
                         <span class="text-red-500 text-sm">Rupture de stock</span>
                         {% endif %}
@@ -78,9 +89,9 @@
                 <form action="{{ url_for('client_panier.client_panier_add') }}" method="post">
                     <input type="hidden" name="id_article" value="{{ article.id_article }}">
                     <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
-                            {% if article.stock <= 0 %}disabled{% endif %}
-                            {% if article.stock <= 0 %}class="w-full bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
-                        {% if article.stock > 0 %}
+                            {% if article.stock_min <= 0 %}disabled{% endif %}
+                            {% if article.stock_min <= 0 %}class="w-full bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
+                        {% if article.stock_min > 0 %}
                             Ajouter au panier
                         {% else %}
                             Indisponible
@@ -122,7 +133,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-gray-300">
                             {{ article.libelle_type_skin }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ article.prix }}€</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ article.prix_min }}€</td>
                         <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ article.quantite }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <form action="{{ url_for('client_panier.client_panier_delete') }}" method="post" class="inline">

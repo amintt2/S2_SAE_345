@@ -213,7 +213,7 @@ def fct_fixtures_load():
      ('Natus Vincere Glitter', 0.15, 8, 1, 1, 2, 'sticker_navi_glitter.png'),
      ('AWP | Dragon Lore', 9244.54, 3, 1, 2, 3, 'awp_dragon_lore.png'),
      ('AWP | Dragon Lore', 8244.54, 5, 1, 3, 3, 'awp_dragon_lore.png'),
-     ('AWP | Dragon Lore', 7244.54, 2, 1, 4, 3, 'awp_dragon_lore.png'),
+     ('AWP | Dragon Lore', 7244.54, 0, 1, 4, 3, 'awp_dragon_lore.png'),
      ('Karambit | Gamma Doppler', 905.34, 2, 2, 2, 4, 'karambit_gamma_doppler.png'),
      ('Karambit | Gamma Doppler', 805.34, 4, 2, 3, 4, 'karambit_gamma_doppler.png'),
      ('AK-47 | Gold Arabesque', 3523.26, 1, 2, 2, 1, 'ak_gold_arabesque.png'),
