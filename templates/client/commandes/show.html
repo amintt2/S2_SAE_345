@@ -15,8 +15,8 @@
                         <label for="status" class="block text-sm font-medium text-gray-200 mb-2">STATUT</label>
                         <select id="status" name="status" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
                             <option value="">Sélectionner...</option>
-                            <option value="validated">Validée</option>
-                            <option value="delivered">Livrée</option>
+                            <option value="submitted">En attente</option>
+                            <option value="invoiced">Facturée</option>
                         </select>
                     </div>
                     <div class="flex gap-2">
@@ -27,7 +27,12 @@
             </div>
 
             {% if articles_commande %}
-            <h3 class="text-2xl font-bold text-gray-900 mb-6">Recapitulatifs de la commande selectionnée</h3>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Recapitulatifs de la commande selectionnée</h3>
+                <a href="/client/commande/show" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
+                    Retour
+                </a>
+            </div>
             <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
                 <thead>
                     <tr>
@@ -69,7 +74,7 @@
                 {% endif %}
                 </div>
             <hr class="my-8 border-gray-200">
-        {% endif %}
+            {% endif %}
         <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
             <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
                 <h3 class="text-lg font-medium leading-6 text-gray-200">Toutes mes commandes</h3>
