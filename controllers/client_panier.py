@@ -200,8 +200,9 @@ def client_panier_delete():
     # partie 2 : on supprime une déclinaison de l'article
     # id_declinaison_article = request.form.get('id_declinaison_article', None)
 
+
     delete_article_from_panier(quantite, id_article, id_client)
-    
+ 
     return redirect('/client/article/show')
 
 
