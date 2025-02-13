@@ -42,6 +42,7 @@ def admin_commande_show():
     id_commande = request.args.get('id_commande', None)
     print(id_commande)
     if id_commande != None:
+        # Get order details
         sql = '''
             SELECT 
                 skin.nom_skin AS nom,
@@ -64,7 +65,20 @@ def admin_commande_show():
         '''
         mycursor.execute(sql, (id_commande,))
         articles_commande = mycursor.fetchall()
-        commande_adresses = []
+
+        # Get customer information
+        sql = '''
+            SELECT 
+                utilisateur.login,
+                utilisateur.email,
+                utilisateur.nom
+            FROM commande
+            INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
+            WHERE commande.id_commande = %s
+        '''
+        mycursor.execute(sql, (id_commande,))
+        commande_adresses = mycursor.fetchone()
+
     return render_template('admin/commandes/show.html'
                            , commandes=commandes
                            , articles_commande=articles_commande
