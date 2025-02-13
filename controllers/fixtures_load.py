@@ -81,6 +81,7 @@ def fct_fixtures_load():
           usure_id INT NOT NULL,
           type_skin_id INT NOT NULL,
           image VARCHAR(255),
+          description TEXT,
           PRIMARY KEY(id_skin),
           FOREIGN KEY(special_id) REFERENCES special(id_special),
           FOREIGN KEY(usure_id) REFERENCES usure(id_usure),
@@ -215,7 +216,9 @@ def fct_fixtures_load():
      
      sql='''
      INSERT INTO ligne_panier (skin_id, utilisateur_id, quantite, date_ajout) VALUES 
-          (1, 2, 1, '2024-03-20 10:30:00');
+          (1, 2, 1, '2024-03-20 10:30:00'),
+          (2, 2, 4, '2023-06-24'),
+          (2, 3, 3, '2023-06-24');
      '''
      mycursor.execute(sql)
      

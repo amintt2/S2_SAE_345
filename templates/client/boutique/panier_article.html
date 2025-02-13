@@ -5,23 +5,32 @@
 
 {% block body %}
 <div class="w-full">
-    <!-- Filters Section -->
+    <!-- Filter Section -->
     <div class="bg-dark-secondary rounded-lg p-4 mb-6 shadow-lg">
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold text-white">Marketplace de Skins</h1>
             <div class="flex space-x-4">
-                <select aria-label="Filtrer par type" class="bg-dark-accent text-gray-300 px-4 py-2 rounded-md text-sm font-medium">
-                    <option value="">Tous les types</option>
-                    {% for type in items_filtre %}
-                    <option value="{{ type.id_type_article }}">{{ type.libelle }}</option>
-                    {% endfor %}
-                </select>
-                <button class="bg-dark-accent hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-md text-sm font-medium flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                    </svg>
-                    Plus de filtres
-                </button>
+                <form action="{{ url_for('client_panier.client_panier_filtre') }}" method="post" class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-6">
+                        {% for type in items_filtre %}
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" 
+                                   name="filter_types" 
+                                   value="{{ type.id_type_article }}"
+                                   onchange="this.form.submit()"
+                                   class="form-checkbox h-4 w-4 text-accent-blue bg-dark-primary border-gray-600 rounded focus:ring-accent-blue focus:ring-opacity-25"
+                                   {% if session.filter_types and type.id_type_article|string in session.filter_types %}checked{% endif %}>
+                            <span class="ml-2 text-sm text-gray-300">{{ type.libelle }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="bg-dark-accent hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-md text-sm font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                        </svg>
+                        Plus de filtres
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -31,15 +40,15 @@
         {% for article in articles %}
         <div class="bg-dark-secondary rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div class="relative">
-                <img src="{{ url_for('static', filename='photos/' + article.image) }}" 
+                <img src="{{ url_for('static', filename='images/' + article.image) }}" 
                      class="w-full h-48 object-cover" 
                      alt="{{ article.nom }}">
                 <div class="absolute top-2 right-2 flex flex-col space-y-2">
-                    <span class="bg-dark-primary bg-opacity-90 text-gray-300 px-2 py-1 rounded text-sm font-medium">
-                        {{ article.libelle_type_skin }}
+                    <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-gray-300 px-2 py-1 rounded text-sm font-medium">
+                        {{ article.libelle_type_article }}
                     </span>
                     {% if article.libelle_special != 'Normal' %}
-                    <span class="bg-dark-primary bg-opacity-90 text-yellow-400 px-2 py-1 rounded text-sm font-medium">
+                    <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-yellow-400 px-2 py-1 rounded text-sm font-medium">
                         {{ article.libelle_special }}
                     </span>
                     {% endif %}
@@ -47,11 +56,13 @@
             </div>
             <div class="p-4">
                 <h3 class="text-lg font-semibold text-white">{{ article.nom }}</h3>
-                {% if article.libelle_type_skin not in ['Sticker', 'Capsule'] %}
+                {% if article.libelle_type_skin not in ['Sticker'] %}
                 <div class="mt-1 mb-3">
-                    <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
-                        {{ article.libelle_usure }}
-                    </span>
+                    {% for declinaison in article.declinaisons %}
+                        <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
+                            {{ declinaison }}
+                        </span>
+                    {% endfor %}
                 </div>
                 {% endif %}
                 <div class="flex justify-between items-center mb-4">

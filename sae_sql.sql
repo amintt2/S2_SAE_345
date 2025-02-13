@@ -52,6 +52,7 @@ CREATE TABLE skin(
    usure_id INT NOT NULL,
    type_skin_id INT NOT NULL,
    image VARCHAR(255),
+   description TEXT,
    PRIMARY KEY(id_skin),
    FOREIGN KEY(special_id) REFERENCES special(id_special),
    FOREIGN KEY(usure_id) REFERENCES usure(id_usure),
@@ -154,7 +155,6 @@ INSERT INTO skin (nom_skin, prix_skin, stock, special_id, usure_id, type_skin_id
 ('M4A1-S | Mud-Spec', 0.15, 115, 1, 3, 6, 'm4a1s_mudspec.png'),
 ('Natus Vincere Glitter', 0.15, 1000, 1, 1, 2, 'sticker_navi_glitter.png');
 
-
 INSERT INTO commande (date_achat, etat_id, utilisateur_id) VALUES 
     ('2024-03-19', 2, 2),
     ('2024-03-15', 4, 2),
@@ -173,4 +173,6 @@ INSERT INTO ligne_commande (skin_id, commande_id, prix, quantite) VALUES
     (5, 5, 4023.26, 1);
 
 INSERT INTO ligne_panier (skin_id, utilisateur_id, quantite, date_ajout) VALUES
-(1, 2, 1, '2024-03-20 10:30:00');
+(1, 2, 1, '2024-03-20 10:30:00'),
+(2, 2, 4, '2023-06-24'),
+(2, 3, 3, '2023-06-24');
