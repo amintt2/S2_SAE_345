@@ -1,111 +1,120 @@
 {% extends "client/layout_client.html" %}
 {% block body %}
-    <div class="container mx-auto px-4 py-8">
-        {% if articles_commande %}
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h3 class="text-2xl font-bold text-gray-800 mb-6">Récapitulatif de la commande</h3>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix total</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow-sm ring-1 ring-gray-700">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-4 items-end">
+                    <div>
+                        <label for="from_date" class="block text-sm font-medium text-gray-200 mb-2">DATE DE DÉBUT</label>
+                        <input type="date" id="from_date" name="from_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                    </div>
+                    <div>
+                        <label for="to_date" class="block text-sm font-medium text-gray-200 mb-2">DATE DE FIN</label>
+                        <input type="date" id="to_date" name="to_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                    </div>
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-200 mb-2">STATUT</label>
+                        <select id="status" name="status" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                            <option value="">Sélectionner...</option>
+                            <option value="validated">Validée</option>
+                            <option value="delivered">Livrée</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">EFFACER</button>
+                        <button type="button" class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">RECHERCHER</button>
+                    </div>
+                </div>
+            </div>
+
+            {% if articles_commande %}
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">Recapitulatifs de la commande selectionnée</h3>
+            <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+                <thead>
+                    <tr>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
+                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Quantite</th>
+                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix</th>
+                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
                         {% for ligne in articles_commande %}
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ ligne.nom }}
-                                    {% if ligne.nb_declinaisons is defined and ligne.nb_declinaisons > 1 %}
-                                        <span class="text-pink-200 ml-2">({{ ligne.nb_declinaisons }} déclinaisons)</span>
-                                        {% if ligne.couleur_id != 1 %}
-                                            <span class="text-green-500 ml-2">{{ ligne.libelle_couleur }}</span>
-                                        {% endif %}
-                                        {% if ligne.taille_id != 1 %}
-                                            <span class="text-purple-500 ml-2">{{ ligne.libelle_taille }}</span>
-                                        {% endif %}
+                            <tr class="hover:bg-gray-700">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ ligne.nom }}
+                                {% if ligne.nb_declinaisons is defined and ligne.nb_declinaisons > 1 %}
+                                    <span class="text-gray-400"> ( {{ ligne.nb_declinaisons }} declinaisons )</span>
+                                    {% if ligne.couleur_id != 1 %}
+                                        <span class="text-emerald-400"> {{ ligne.libelle_couleur }} </span>
                                     {% endif %}
-                                    </div>
+                                    {% if ligne.taille_id != 1 %}
+                                        <span class="text-pink-400"> {{ ligne.libelle_taille }} </span>
+                                    {% endif %}
+                                {% endif %}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ligne.quantite }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ligne.prix }} €</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ligne.prix_ligne }} €</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.quantite }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix }} €</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix_ligne }} €</td>
                             </tr>
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="mt-8 space-y-4 text-gray-700">
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <p class="font-semibold">Adresse de livraison:</p>
-                    <p class="mt-1">{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}</p>
+                </tbody>
+            </table>
+                <div class="mt-8 bg-amber-50 p-6 rounded-lg shadow-sm ring-1 ring-amber-200">
+                <strong class="text-amber-900">adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
+                <br>
+                <strong class="text-amber-900">adresse facturation : </strong>
+                {% if commande_adresses.adresse_identique == 'adresse_identique' %}
+                    adresse identique
+                {% else %}
+                    {{ commande_adresses.nom_facturation }} {{ commande_adresses.rue_facturation }} {{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}
+                {% endif %}
                 </div>
-                
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <p class="font-semibold">Adresse de facturation:</p>
-                    <p class="mt-1">
-                    {% if commande_adresses.adresse_identique == 'adresse_identique' %}
-                        Identique à l'adresse de livraison
-                    {% else %}
-                        {{ commande_adresses.nom_facturation }} {{ commande_adresses.rue_facturation }} {{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}
-                    {% endif %}
-                    </p>
-                </div>
-            </div>
-        </div>
+            <hr class="my-8 border-gray-200">
         {% endif %}
-
-        <div class="bg-white rounded-lg shadow-lg">
-            <div class="border-b border-gray-200 px-6 py-4">
-                <h3 class="text-lg font-semibold text-gray-800">Toutes mes commandes</h3>
+        <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+            <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
+                <h3 class="text-lg font-medium leading-6 text-gray-200">Toutes mes commandes</h3>
             </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead>
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de commande</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre d'articles</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coût total</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">État</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Options</th>
+                            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Date de commande</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Nombre d'articles</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Coût total</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Etat de la commande</th>
+                            <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Options</th>
                         </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for commande in commandes %}
-                            <tr class="{% if commande.etat_id == 1 %}bg-yellow-100 font-semibold{% endif %} hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ commande.date_achat.strftime('%d-%m-%Y') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ commande.nbr_articles }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            {% for commande in commandes %}
+                            <tr class="{% if commande.etat_id == 1 %}bg-amber-900/50{% else %}bg-gray-800{% endif %} hover:bg-gray-700">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.nbr_articles }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
                                     {{ "{:,.2f} €".format(commande.prix_total) }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full
-                                        {% if commande.etat_id == 1 %}
-                                            bg-yellow-100 text-yellow-800
-                                        {% else %}
-                                            bg-green-100 text-green-800
-                                        {% endif %}">
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
+                                    {% if commande.etat_id == 1 %}
+                                    <span class="inline-flex items-center rounded-full bg-amber-900/50 px-2.5 py-0.5 text-sm font-medium text-amber-200">
                                         {{ commande.libelle }}
                                     </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-green-900/50 px-2.5 py-0.5 text-sm font-medium text-green-200">
+                                        {{ commande.libelle }}
+                                    </span>
+                                    {% endif %}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                    <a href="/client/commande/show?id_commande={{ commande.id_commande }}"
-                                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                        Détails
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
+                                    <a href="/client/commande/show?id_commande={{ commande.id_commande }}">
+                                        <button class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Details</button>
                                     </a>
                                 </td>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
