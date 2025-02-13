@@ -119,13 +119,34 @@ def client_panier_delete():
     # partie 2 : on supprime une déclinaison de l'article
     # id_declinaison_article = request.form.get('id_declinaison_article', None)
 
-    sql = ''' selection de la ligne du panier pour l'article et l'utilisateur connecté'''
-    article_panier=[]
+    sql = ''' 
+        SELECT quantite
+        FROM ligne_panier
+        WHERE skin_id = %s AND utilisateur_id = %s
+    '''
+    mycursor.execute(sql, (id_article, id_client))
+    article_panier=mycursor.fetchone()
+
+    sql = '''
+        UPDATE skin
+        SET stock = stock + 1
+        WHERE id_skin = %s
+    '''
+    mycursor.execute(sql, (id_article))
 
     if not(article_panier is None) and article_panier['quantite'] > 1:
-        sql = ''' mise à jour de la quantité dans le panier => -1 article '''
+        sql = '''
+            UPDATE ligne_panier
+            SET quantite = quantite - 1
+            WHERE skin_id = %s AND utilisateur_id = %s
+        '''
+        mycursor.execute(sql, (id_article, id_client))
     else:
-        sql = ''' suppression de la ligne de panier'''
+        sql = '''
+            DELETE FROM ligne_panier 
+            WHERE skin_id = %s AND utilisateur_id = %s
+        '''
+        mycursor.execute(sql, (id_article, id_client))
 
     # mise à jour du stock de l'article disponible
     get_db().commit()
