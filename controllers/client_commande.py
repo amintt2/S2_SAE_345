@@ -94,11 +94,11 @@ def client_commande_show():
         sql = '''
             SELECT 
                 skin.nom_skin AS nom,
-                skin.image,
-                ligne_commande.prix,
                 ligne_commande.quantite,
+                ligne_commande.prix,
+                (ligne_commande.prix * ligne_commande.quantite) AS prix_ligne,
                 usure.libelle_usure,
-                type_skin.libelle_type_skin AS type_article,
+                type_skin.libelle_type_skin,
                 special.libelle_special
             FROM ligne_commande
             INNER JOIN skin ON ligne_commande.skin_id = skin.id_skin
@@ -107,10 +107,9 @@ def client_commande_show():
             INNER JOIN special ON skin.special_id = special.id_special
             WHERE ligne_commande.commande_id = %s
         '''
-
-        # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
-        sql = ''' selection des adressses '''
-
+        mycursor.execute(sql, (id_commande,))
+        articles_commande = mycursor.fetchall()
+        
     return render_template('client/commandes/show.html'
                            , commandes=commandes
                            , articles_commande=articles_commande
