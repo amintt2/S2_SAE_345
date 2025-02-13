@@ -12,11 +12,11 @@ Le livrable 2 comprend:
 
 ### 🌐 Fonctionnalités Front Office (Client) 
 - Affichage des articles et panier (même vue) 👤 Maxime MIGUET
-  - Prix total du panier 🏗️
-  - Stock restant 🏗️
+  - Prix total du panier ✅
+  - Stock restant ✅
   - Filtrage par catégorie ✅
 - Gestion du panier 👤 Timothé SANDT
-  - Ajout/modification des quantités 🏗️
+  - Ajout/modification des quantités ✅
   - Suppression d'articles 🏗️
   - Validation et génération de commande 🏗️
 - Espace client 👤 Constant SUCHET
