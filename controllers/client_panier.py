@@ -59,6 +59,27 @@ def client_panier_add():
                                     , quantite=quantite
                                     , article=article)
 
+# mise à jour des quantités
+
+    sql = '''
+        SELECT stock 
+        FROM skin
+        WHERE id_skin = %s
+    '''
+    mycursor.execute(sql, (id_article))
+    quantite_article = mycursor.fetchone()['stock']
+    if quantite > quantite_article:
+        print("Quantité trop élevé")
+        quantite = quantite_article
+
+    sql = '''
+        UPDATE skin
+        SET stock = stock - %s
+        WHERE id_skin = %s
+    '''
+    mycursor.execute(sql, (quantite, id_article))
+
+
 # ajout dans le panier d'un article
 
     sql = '''
