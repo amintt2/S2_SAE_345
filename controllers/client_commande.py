@@ -94,6 +94,7 @@ def client_commande_show():
         sql = '''
             SELECT 
                 skin.nom_skin AS nom,
+                skin.image,
                 ligne_commande.quantite,
                 ligne_commande.prix,
                 (ligne_commande.prix * ligne_commande.quantite) AS prix_ligne,

@@ -36,6 +36,7 @@
             <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
                 <thead>
                     <tr>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
                         <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
                         <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Quantite</th>
                         <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix</th>
@@ -45,6 +46,17 @@
                 <tbody class="divide-y divide-gray-700">
                         {% for ligne in articles_commande %}
                             <tr class="hover:bg-gray-700">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
+                                    {% if ligne.image %}
+                                        <img class="h-12 w-12 rounded-full object-cover" 
+                                             src="{{ url_for('static', filename='images/' + ligne.image) }}" 
+                                             alt="Image de {{ ligne.nom }}">
+                                    {% else %}
+                                        <img class="h-12 w-12 rounded-full object-cover"
+                                             src="{{ url_for('static', filename='images/no_photo.jpeg') }}" 
+                                             alt="Pas d'image">
+                                    {% endif %}
+                                </td>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ ligne.nom }}
                                 {% if ligne.nb_declinaisons is defined and ligne.nb_declinaisons > 1 %}
                                     <span class="text-gray-400"> ( {{ ligne.nb_declinaisons }} declinaisons )</span>
