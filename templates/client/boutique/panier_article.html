@@ -5,8 +5,75 @@
 
 {% block body %}
 <div class="w-full">
+    <!-- Shopping Cart -->
+    {% if articles_panier|length > 0 %}
+    <div class="mb-8 bg-dark-secondary rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-bold text-white mb-4">Votre panier</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-dark-accent">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Article</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Prix</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Quantité</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    {% for article in articles_panier %}
+                    <tr class="hover:bg-dark-accent transition-colors duration-200">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-gray-300">{{ article.designation }}</div>
+                            {% if article.libelle_type_skin not in ['Sticker', 'Capsule'] %}
+                            <div class="text-accent-blue text-xs mt-1">{{ article.libelle_usure }}</div>
+                            {% endif %}
+                            {% if article.libelle_special != 'Normal' %}
+                            <div class="text-yellow-400 text-xs mt-1">{{ article.libelle_special }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-300">
+                            {{ article.libelle_type_skin }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ article.prix }}€</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <form action="{{ url_for('client_panier.client_panier_update') }}" method="post" class="inline">
+                                <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                                <input type="number" name="quantite" value="{{ article.quantite }}" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue">
+                            </form>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <form action="{{ url_for('client_panier.client_panier_delete') }}" method="post" class="inline">
+                                <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-dark-accent">
+                    <tr>
+                        <td colspan="3" class="px-6 py-4 text-right font-bold text-white">Total:</td>
+                        <td colspan="2" class="px-6 py-4 text-accent-blue font-bold">{{ prix_total }}€</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% if prix_total > 0 %}
+        <div class="mt-6 text-right">
+            <a href="{{ url_for('client_commande.client_commande_add') }}" 
+               class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">
+                Valider la commande
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
     <!-- Filter Section -->
-    <div class="bg-dark-secondary rounded-lg p-4 mb-6 shadow-lg">
+    <div class="bg-dark-secondary rounded-lg p-4 mb-3 shadow-lg">
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold text-white">Marketplace de Skins</h1>
             <div class="flex space-x-4">
@@ -91,67 +158,5 @@
         </div>
         {% endfor %}
     </div>
-
-    <!-- Shopping Cart -->
-    {% if articles_panier|length > 0 %}
-    <div class="mt-8 bg-dark-secondary rounded-lg shadow-lg p-6">
-        <h2 class="text-xl font-bold text-white mb-4">Votre panier</h2>
-        <div class="overflow-x-auto">
-            <table class="min-w-full">
-                <thead class="bg-dark-accent">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Article</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Prix</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Quantité</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-700">
-                    {% for article in articles_panier %}
-                    <tr class="hover:bg-dark-accent transition-colors duration-200">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-gray-300">{{ article.designation }}</div>
-                            {% if article.libelle_type_skin not in ['Sticker', 'Capsule'] %}
-                            <div class="text-accent-blue text-xs mt-1">{{ article.libelle_usure }}</div>
-                            {% endif %}
-                            {% if article.libelle_special != 'Normal' %}
-                            <div class="text-yellow-400 text-xs mt-1">{{ article.libelle_special }}</div>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-300">
-                            {{ article.libelle_type_skin }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ article.prix }}€</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ article.quantite }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <form action="{{ url_for('client_panier.client_panier_delete') }}" method="post" class="inline">
-                                <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
-                                    Supprimer
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot class="bg-dark-accent">
-                    <tr>
-                        <td colspan="3" class="px-6 py-4 text-right font-bold text-white">Total:</td>
-                        <td colspan="2" class="px-6 py-4 text-accent-blue font-bold">{{ prix_total }}€</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-        {% if prix_total > 0 %}
-        <div class="mt-6 text-right">
-            <a href="{{ url_for('client_commande.client_commande_add') }}" 
-               class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">
-                Valider la commande
-            </a>
-        </div>
-        {% endif %}
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
