@@ -20,8 +20,8 @@ Le livrable 2 comprend:
   - Suppression d'articles 🏗️
   - Validation et génération de commande 🏗️
 - Espace client 👤 Constant SUCHET
-  - Visualisation des commandes 🏗️
-  - Détail des commandes 🏗️ 
+  - Visualisation des commandes ✅
+  - Détail des commandes ✅
   - Suivi de l'état des commandes 🏗️
 
 ### 🔧 Fonctionnalités Back Office (Vendeur)
