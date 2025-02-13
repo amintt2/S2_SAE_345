@@ -1,66 +1,126 @@
 <div class="m-2">
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-<div class="container-fluid">
-    <a class="navbar-brand" href="/">SAE BDD 2024 <span style="color:#ff0000;">  Menu Admin </span></a>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-        <li class="nav-item dropdown">
-            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Commandes</a>
-            <div class="dropdown-menu" aria-labelledby="DropdownCommandes">
-                <a class="dropdown-item"  href="/admin/commande/show" >Gestions des commandes</a>
+<nav class="bg-dark-secondary shadow-lg rounded-lg">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo Section -->
+      <div class="flex items-center">
+        <a class="flex items-center text-xl font-bold text-white hover:text-accent-blue transition-colors duration-200" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+          SAE BDD 2024<span class="text-red-500 ml-2">Menu Admin</span>
+        </a>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="hidden md:block">
+        <div class="flex items-center space-x-6">
+          <!-- Commandes Dropdown -->
+          <div class="relative group">
+            <button class="flex items-center text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              Commandes
+            </button>
+            <div class="absolute z-10 hidden group-hover:block w-56 bg-dark-accent rounded-lg shadow-lg py-2 mt-0 transform opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out">
+              <a href="/admin/commande/show" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Gestion des commandes
+              </a>
             </div>
-        </li>
+          </div>
 
-{#        <li class="nav-item dropdown">#}
-{#            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Clients</a>#}
-{#            <div class="dropdown-menu" aria-labelledby="DropdownClient">#}
-{#                <a class="dropdown-item" href="">Gestions des clients</a>#}
-{#            </div>#}
-{#        </li>#}
-
-        <li class="nav-item dropdown">
-             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Articles</a>
-            <div class="dropdown-menu" aria-labelledby="DropdownProduits">
-                <a class="dropdown-item" href="/admin/article/show"   >Gestion des articles</a>
-                <a class="dropdown-item" href="/admin/type-article/show"    > Gestion des types d'articles </a>
-                <a class="dropdown-item" href="/admin/dataviz/etat1"   > votre partie : Dataviz (exemple les types de articles) </a>
-                <a class="dropdown-item" href="/admin/dataviz/etat2"   > sujet 3  : Dataviz supplémentaire : Map </a>
+          <!-- Articles Dropdown -->
+          <div class="relative group">
+            <button class="flex items-center text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              Articles
+            </button>
+            <div class="absolute z-10 hidden group-hover:block w-72 bg-dark-accent rounded-lg shadow-lg py-2 mt-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out">
+              <a href="/admin/article/show" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Gestion des articles
+              </a>
+              <a href="/admin/type-article/show" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                Gestion des types d'articles
+              </a>
+              <a href="/admin/dataviz/etat1" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Dataviz - Types d'articles
+              </a>
+              <a href="/admin/dataviz/etat2" class="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                Dataviz - Map
+              </a>
             </div>
-        </li>
-    </ul>
-</div>
+          </div>
+        </div>
+      </div>
 
- <div class="d-flex">
-        <!-- Authentication Links -->
-        {% if session['role']  %}
-            <span class="navbar-text">
-                Bonjour {{ session['login'] }}
-                {% if session['role']=='ROLE_admin' %} (role :  Admin)
-                {% elif session['role']=='ROLE_client' %} (role : PB Client) {% endif %}
-
+      <!-- User Section -->
+      <div class="flex items-center space-x-4">
+        {% if session['role'] %}
+          <div class="flex items-center text-gray-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>
+              {{ session['login'] }}
+              {% if session['role']=='ROLE_admin' %}
+                <span class="text-red-500 ml-1">(Admin)</span>
+              {% elif session['role']=='ROLE_client' %}
+                <span class="text-red-500 ml-1">(PB Client)</span>
+              {% endif %}
             </span>
-           <a class="btn btn-outline-success" type="button" href="/logout"  >
-                Se déconnecter (Logout)
-            </a>
+          </div>
+          <a href="/logout" class="flex items-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Se déconnecter
+          </a>
         {% else %}
-            <a class="btn btn-outline-success" type="button" href="/login">
-                PB espace admin
-            </a>
+          <a href="/login" class="flex items-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
+            PB espace admin
+          </a>
         {% endif %}
-
-</div>
-</div> <!--container fluid -->
-</nav>
-</div>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-    {% for categorie, message in messages %}
-    <div role="alert" class="alert {{ categorie }}">
-           Information : <strong>{{ message }}</strong>
+      </div>
     </div>
-    {% endfor %}
-{% endif %}
+  </div>
+</nav>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="space-y-2 mt-4">
+      {% for categorie, message in messages %}
+        <div class="p-4 rounded-lg flex items-center {% if categorie == 'alert-success' %}bg-green-100 text-green-700{% elif categorie == 'alert-danger' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <strong>Information :</strong> {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 {% endwith %}
+</div>
 
 

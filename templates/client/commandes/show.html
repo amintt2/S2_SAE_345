@@ -1,98 +1,138 @@
 {% extends "client/layout_client.html" %}
 {% block body %}
-    <div class="container-fluid">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow-sm ring-1 ring-gray-700">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-4 items-end">
+                    <div>
+                        <label for="from_date" class="block text-sm font-medium text-gray-200 mb-2">DATE DE DÉBUT</label>
+                        <input type="date" id="from_date" name="from_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                    </div>
+                    <div>
+                        <label for="to_date" class="block text-sm font-medium text-gray-200 mb-2">DATE DE FIN</label>
+                        <input type="date" id="to_date" name="to_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                    </div>
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-200 mb-2">STATUT</label>
+                        <select id="status" name="status" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                            <option value="">Sélectionner...</option>
+                            <option value="submitted">En attente</option>
+                            <option value="invoiced">Facturée</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">EFFACER</button>
+                        <button type="button" class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">RECHERCHER</button>
+                    </div>
+                </div>
+            </div>
+
             {% if articles_commande %}
-            <h3>Recapitulatifs de la commande selectionnée</h3>
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr><th>Nom</th><th>Quantite</th><th>Prix</th><th>Prix total</th></tr>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Recapitulatifs de la commande selectionnée</h3>
+                <a href="/client/commande/show" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
+                    Retour
+                </a>
+            </div>
+            <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+                <thead>
+                    <tr>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
+                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Quantite</th>
+                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix</th>
+                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix total</th>
+                    </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-700">
                         {% for ligne in articles_commande %}
-                            <tr>
-                                <td>{{ ligne.nom }}
+                            <tr class="hover:bg-gray-700">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
+                                    {% if ligne.image %}
+                                        <img class="h-12 w-12 rounded-full object-cover" 
+                                             src="{{ url_for('static', filename='images/' + ligne.image) }}" 
+                                             alt="Image de {{ ligne.nom }}">
+                                    {% else %}
+                                        <img class="h-12 w-12 rounded-full object-cover"
+                                             src="{{ url_for('static', filename='images/no_photo.jpeg') }}" 
+                                             alt="Pas d'image">
+                                    {% endif %}
+                                </td>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ ligne.nom }}
                                 {% if ligne.nb_declinaisons is defined and ligne.nb_declinaisons > 1 %}
-                                    <span style="color:rgba(255,197,197,0.6);"> ( {{ ligne.nb_declinaisons }} declinaisons )</span>
-                                    <span style="color:#6dcea2">
+                                    <span class="text-gray-400"> ( {{ ligne.nb_declinaisons }} declinaisons )</span>
                                     {% if ligne.couleur_id != 1 %}
-                                        {{ ligne.libelle_couleur }} 
+                                        <span class="text-emerald-400"> {{ ligne.libelle_couleur }} </span>
                                     {% endif %}
-                                    </span>
-                                    <span  style="color:#d941c2">
                                     {% if ligne.taille_id != 1 %}
-                                        {{ ligne.libelle_taille }} 
+                                        <span class="text-pink-400"> {{ ligne.libelle_taille }} </span>
                                     {% endif %}
-                                    </span>
                                 {% endif %}
                                 </td>
-                                <td>{{ ligne.quantite }}</td>
-                                <td>{{ ligne.prix }} €</td>
-                                <td>{{ ligne.prix_ligne }} €  </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.quantite }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix }} €</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix_ligne }} €</td>
                             </tr>
                         {% endfor %}
-
                 </tbody>
             </table>
+                <div class="mt-8 bg-amber-50 p-6 rounded-lg shadow-sm ring-1 ring-amber-200">
+                <strong class="text-amber-900">adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
                 <br>
-                <div style="color: brown">
-                <strong>adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
-                <br>
-                <strong>adresse facturation : </strong>
+                <strong class="text-amber-900">adresse facturation : </strong>
                 {% if commande_adresses.adresse_identique == 'adresse_identique' %}
                     adresse identique
                 {% else %}
                     {{ commande_adresses.nom_facturation }} {{ commande_adresses.rue_facturation }} {{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}
                 {% endif %}
                 </div>
-            <hr>
-        {% endif %}
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <p class="text-primary m-0 font-weight-bold">Toutes mes commandes</p>
+            <hr class="my-8 border-gray-200">
+            {% endif %}
+        <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+            <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
+                <h3 class="text-lg font-medium leading-6 text-gray-200">Toutes mes commandes</h3>
             </div>
-            <div class="card-body">
-                <div class="table-responsive table mt-2" id="dataTable" role="grid" aria-describedby="dataTable_info">
-                    <table class="table my-0" id="dataTable">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
                         <thead>
                         <tr>
-                            <th>Date de commande</th>
-                            <th>Nombre d'articles</th>
-                            <th>Coût total</th>
-                            <th>Etat de la commande</th>
-                            <th style="text-align: center;">Options</th>
+                            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Date de commande</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Nombre d'articles</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Coût total</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Etat de la commande</th>
+                            <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Options</th>
                         </tr>
                         </thead>
-                        <tbody>
-        
-                            
-                        {% for commande in commandes %}
-                            <tr id="" {% if commande.etat_id == 1 %} style="background: #FFD600; font-weight: bold;" {% endif %}>
-                                <td>{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
-                                <td> {{ commande.nbr_articles }} </td>
-                                <td>
+                        <tbody class="divide-y divide-gray-700">
+                            {% for commande in commandes %}
+                            <tr class="{% if commande.etat_id == 1 %}bg-amber-900/50{% else %}bg-gray-800{% endif %} hover:bg-gray-700">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.nbr_articles }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
                                     {{ "{:,.2f} €".format(commande.prix_total) }}
                                 </td>
-                                <td style="text-align: center;">
-                                    {% if commande.etat_id == 1 %} <div style="background-color: #ba8b00; padding: 5px;">
-                                     {{ commande.libelle }}
-                                    </div>
-                                    {% else %} <div style="background-color: #34ce57; padding: 5px;">
-                                        {{ commande.libelle }} </div>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
+                                    {% if commande.etat_id == 1 %}
+                                    <span class="inline-flex items-center rounded-full bg-amber-900/50 px-2.5 py-0.5 text-sm font-medium text-amber-200">
+                                        {{ commande.libelle }}
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-green-900/50 px-2.5 py-0.5 text-sm font-medium text-green-200">
+                                        {{ commande.libelle }}
+                                    </span>
                                     {% endif %}
                                 </td>
-                                <td style="text-align: center;">
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
                                     <a href="/client/commande/show?id_commande={{ commande.id_commande }}">
-                                        <button class="btn btn-primary" > Details </button>
+                                        <button class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Details</button>
                                     </a>
                                 </td>
                             </tr>
-                        {% endfor %}
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
-            </div> <!-- end card-body-->
-
+            </div>
         </div>
     </div>
-
 {% endblock %}
