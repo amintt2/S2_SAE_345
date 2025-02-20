@@ -34,7 +34,7 @@ def client_article_show():                                 # remplace client_ind
         '''
     if 'filter_types' in session and session['filter_types']:
         placeholders = ','.join(['%s'] * len(session['filter_types']))
-        sql += f' WHERE type_skin.id_type_skin IN ({placeholders})'
+        sql += f' AND type_skin.id_type_skin IN ({placeholders})'
         list_param.extend(session['filter_types'])
 
     sql += ' GROUP BY nom_skin ORDER BY id_article'
