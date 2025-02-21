@@ -39,14 +39,14 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <form action="{{ url_for('client_panier.client_panier_update') }}" method="post" class="inline">
                                 <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                                <input type="number" name="quantite" value="{{ article.quantite }}" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue">
+                                <input type="number" name="quantite" value="{{ article.quantite }}" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" onchange="this.form.submit()">
                             </form>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <form action="{{ url_for('client_panier.client_panier_delete') }}" method="post" class="inline">
+                            <form action="{{ url_for('client_panier.client_panier_delete_line') }}" method="post" class="inline">
                                 <input type="hidden" name="id_article" value="{{ article.id_article }}">
                                 <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
-                                    Supprimer
+                                    Supprimer la ligne
                                 </button>
                             </form>
                         </td>
@@ -61,14 +61,19 @@
                 </tfoot>
             </table>
         </div>
-        {% if prix_total > 0 %}
-        <div class="mt-6 text-right">
+        <div class="mt-6 space-x-4 text-right">
+            <form action="{{ url_for('client_panier.client_panier_vider') }}" method="post" class="inline">
+                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
+                    Vider le panier
+                </button>
+            </form>
+            {% if prix_total > 0 %}
             <a href="{{ url_for('client_commande.client_commande_add') }}" 
                class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">
                 Valider la commande
             </a>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
     {% endif %}
 
