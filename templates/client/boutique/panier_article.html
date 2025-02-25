@@ -80,8 +80,8 @@
     <!-- Filter Section -->
     <div class="bg-dark-secondary rounded-lg p-4 mb-3 shadow-lg">
         <div class="flex flex-col space-y-4">
-            <h1 class="text-2xl font-bold text-white">Filtre</h1>
-            <form action="{{ url_for('client_panier.client_panier_filtre') }}" method="post" class="flex flex-col space-y-2">
+            <h2 class="text-2xl font-bold text-white mt-2">Filtre</h2>
+            <form action="{{ url_for('client_article.client_article_filtre') }}" method="post" class="flex flex-col space-y-2">
                 <div class="flex flex-col space-y-2">
                     <label for="filter_word" class="text-sm text-gray-300">Nom :</label>
                     <input type="text" name="filter_word" id="filter_word" placeholder="Nom du skin" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" value="{{ session.filter_word }}">
@@ -109,9 +109,7 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-end space-x-2">
-                    <form action="{{ url_for('client_panier.client_panier_filtre_delete') }}" method="post" class="inline">
-                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">Supprimer le filtre</button>
-                    </form>
+                    <button type="submit" formaction="{{ url_for('client_article.client_article_filtre_delete') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">Supprimer le filtre</button>
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">Filtrer</button>
                 </div>
             </form>
@@ -119,94 +117,102 @@
     </div>
 
     <!-- Items Grid -->
-    <div class="bg-dark-secondary rounded-lg p-4 mb-3 shadow-lg flex flex-col space-y-4">
+    <div class="bg-dark-secondary rounded-lg p-4 mb-3 shadow-lg flex flex-col space-y-4 mt-10">
         <h1 class="text-2xl font-bold text-white">Marketplace de Skins</h1>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {% for article in articles %}
-        <div class="bg-dark-secondary rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div class="relative">
-                <img src="{{ url_for('static', filename='images/' + article.image) }}" 
-                     class="w-full h-48 object-cover" 
-                     alt="{{ article.nom }}">
-                <div class="absolute top-2 right-2 flex flex-col space-y-2">
-                    <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-gray-300 px-2 py-1 rounded text-sm font-medium justify self-end">
-                        {{ article.libelle_type_article }}
-                    </span>
-                    {% if article.libelle_special != 'Normal' %}
-                    <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-yellow-400 px-2 py-1 rounded text-sm font-medium">
-                        {{ article.libelle_special }}
-                    </span>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="p-4">
-                <h3 class="text-lg font-semibold text-white">{{ article.nom }}</h3>
-                {% if article.libelle_type_skin not in ['Sticker'] %}
-                <div class="mt-1 mb-3">
-                    <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
-                        {{ article.libelle_usure }}
-                    </span>
-                    <!--
-                        {% for declinaison in article.declinaisons %}
-                        <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
-                            {{ declinaison }}
+        {% if len(article) == 0 %}
+            {% for article in articles %}
+            <div class="bg-dark-secondary rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div class="relative">
+                    <img src="{{ url_for('static', filename='images/' + article.image) }}" 
+                        class="w-full h-48 object-cover" 
+                        alt="{{ article.nom }}">
+                    <div class="absolute top-2 right-2 flex flex-col space-y-2">
+                        <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-gray-300 px-2 py-1 rounded text-sm font-medium justify self-end">
+                            {{ article.libelle_type_article }}
                         </span>
-                        {% endfor %}
-                    -->
-                </div>
-                {% endif %}
-                <div class="flex justify-between items-center mb-4">
-                    <div class="text-accent-blue font-bold text-xl">
-                        <span style="color: #3498db">
-                            {{ article.prix }}€
-
-                            <!-- Livrable 3
-                            {% if article.prix_min == article.prix_max %}
-                            {{ article.prix_max }}€
-                            {% else %}
-                            {{ article.prix_min }}€ - {{ article.prix_max }}€
-                            {% endif %}
-
-                            -->
-
+                        {% if article.libelle_special != 'Normal' %}
+                        <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-yellow-400 px-2 py-1 rounded text-sm font-medium">
+                            {{ article.libelle_special }}
                         </span>
-                    </div>
-
-                    <div class="flex items-center">
-                        {% if article.stock > 0 %}
-                        <span class="text-gray-400 text-sm">Stock: {{ article.stock }}</span>
-                        {% else %}
-                        <span class="text-red-500 text-sm">Rupture de stock</span>
                         {% endif %}
-                        
-                        <!-- Livrable 3 
-                        <span class="text-gray-400 text-sm">Stock: { article.stock_max }</span>
-                        { if article.stock_max > 0 and article.stock_min == article.stock_max }
-                        { elif article.stock_max > 0 }
-                        <span class="text-gray-400 text-sm">Stock: { article.stock_min } à { article.stock_max }</span>
-                        { else }
-                        <span class="text-red-500 text-sm">Rupture de stock</span>
-                        { endif }
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white">{{ article.nom }}</h3>
+                    {% if article.libelle_type_skin not in ['Sticker'] %}
+                    <div class="mt-1 mb-3">
+                        <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
+                            {{ article.libelle_usure }}
+                        </span>
+                        <!--
+                            {% for declinaison in article.declinaisons %}
+                            <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
+                                {{ declinaison }}
+                            </span>
+                            {% endfor %}
                         -->
                     </div>
+                    {% endif %}
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-accent-blue font-bold text-xl">
+                            <span style="color: #3498db">
+                                {{ article.prix }}€
+
+                                <!-- Livrable 3
+                                {% if article.prix_min == article.prix_max %}
+                                {{ article.prix_max }}€
+                                {% else %}
+                                {{ article.prix_min }}€ - {{ article.prix_max }}€
+                                {% endif %}
+
+                                -->
+
+                            </span>
+                        </div>
+
+                        <div class="flex items-center">
+                            {% if article.stock > 0 %}
+                            <span class="text-gray-400 text-sm">Stock: {{ article.stock }}</span>
+                            {% else %}
+                            <span class="text-red-500 text-sm">Rupture de stock</span>
+                            {% endif %}
+                            
+                            <!-- Livrable 3 
+                            <span class="text-gray-400 text-sm">Stock: { article.stock_max }</span>
+                            { if article.stock_max > 0 and article.stock_min == article.stock_max }
+                            { elif article.stock_max > 0 }
+                            <span class="text-gray-400 text-sm">Stock: { article.stock_min } à { article.stock_max }</span>
+                            { else }
+                            <span class="text-red-500 text-sm">Rupture de stock</span>
+                            { endif }
+                            -->
+                        </div>
+                    </div>
+                    <form action="{{ url_for('client_panier.client_panier_add') }}" method="post">
+                        <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                        <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
+                                {% if article.stock <= 0 %}disabled{% endif %}
+                                {% if article.stock <= 0 %}class="w-full bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
+                            {% if article.stock > 0 %}
+                                Ajouter au panier
+                            {% else %}
+                                Indisponible
+                            {% endif %}
+                        </button>
+                    </form>
                 </div>
-                <form action="{{ url_for('client_panier.client_panier_add') }}" method="post">
-                    <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                    <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
-                            {% if article.stock <= 0 %}disabled{% endif %}
-                            {% if article.stock <= 0 %}class="w-full bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
-                        {% if article.stock > 0 %}
-                            Ajouter au panier
-                        {% else %}
-                            Indisponible
-                        {% endif %}
-                    </button>
-                </form>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
+        {% else %}
+            <div class="bg-dark-secondary rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white">Aucun article trouvé</h3>
+                </div>
+            </div>
+        {% endif %}
   </div>
 </div>
 {% endblock %}
