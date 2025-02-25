@@ -270,6 +270,21 @@ def client_panier_filtre():
     filter_prix_max = request.form.get('filter_prix_max', None)
     filter_types = request.form.getlist('filter_types')
 
+    if filter_word:
+        session['filter_word'] = filter_word
+    elif 'filter_word' in session:
+        session.pop('filter_word')
+
+    if filter_prix_min:
+        session['filter_prix_min'] = filter_prix_min
+    elif 'filter_prix_min' in session:
+        session.pop('filter_prix_min')
+
+    if filter_prix_max:
+        session['filter_prix_max'] = filter_prix_max
+    elif 'filter_prix_max' in session:
+        session.pop('filter_prix_max')
+
     if filter_types:
         session['filter_types'] = filter_types
     elif 'filter_types' in session:
@@ -279,7 +294,14 @@ def client_panier_filtre():
 
 
 @client_panier.route('/client/panier/filtre/suppr', methods=['POST'])
-def client_panier_filtre_suppr():
-    # suppression  des variables en session
-    print("suppr filtre")
+def client_panier_filtre_delete():
+    # suppression des variables en session
+    if 'filter_word' in session:
+        session.pop('filter_word')
+    if 'filter_prix_min' in session:
+        session.pop('filter_prix_min')
+    if 'filter_prix_max' in session:
+        session.pop('filter_prix_max')
+    if 'filter_types' in session:
+        session.pop('filter_types')
     return redirect('/client/article/show')

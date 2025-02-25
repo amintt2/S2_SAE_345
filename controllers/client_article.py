@@ -61,12 +61,25 @@ def client_article_show():                                 # remplace client_ind
         INNER JOIN usure ON skin.usure_id = usure.id_usure
         INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
         INNER JOIN special ON skin.special_id = special.id_special
+        WHERE 1=1
         '''
+    
     if 'filter_types' in session and session['filter_types']:
         placeholders = ','.join(['%s'] * len(session['filter_types']))
-        sql += f' WHERE type_skin.id_type_skin IN ({placeholders})'
+        sql += f' AND type_skin.id_type_skin IN ({placeholders})'
         list_param.extend(session['filter_types'])
 
+    if 'filter_word' in session and session['filter_word']:
+        sql += ' AND nom_skin LIKE %s'
+
+        list_param.append(f"%{session['filter_word']}%")
+    if 'filter_prix_min' in session and session['filter_prix_min']:
+        sql += ' AND prix_skin >= %s'
+        list_param.append(session['filter_prix_min'])
+
+    if 'filter_prix_max' in session and session['filter_prix_max']:
+        sql += ' AND prix_skin <= %s'
+        list_param.append(session['filter_prix_max'])
     
     mycursor.execute(sql, tuple(list_param) if list_param else None)
     articles = mycursor.fetchall()

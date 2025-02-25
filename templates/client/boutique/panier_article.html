@@ -79,35 +79,50 @@
 
     <!-- Filter Section -->
     <div class="bg-dark-secondary rounded-lg p-4 mb-3 shadow-lg">
-        <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold text-white">Marketplace de Skins</h1>
-            <div class="flex space-x-4">
-                <form action="{{ url_for('client_panier.client_panier_filtre') }}" method="post" class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-6">
+        <div class="flex flex-col space-y-4">
+            <h1 class="text-2xl font-bold text-white">Filtre</h1>
+            <form action="{{ url_for('client_panier.client_panier_filtre') }}" method="post" class="flex flex-col space-y-2">
+                <div class="flex flex-col space-y-2">
+                    <label for="filter_word" class="text-sm text-gray-300">Nom :</label>
+                    <input type="text" name="filter_word" id="filter_word" placeholder="Nom du skin" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" value="{{ session.filter_word }}">
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <label for="filter_prix_min" class="text-sm text-gray-300">Prix :</label>
+                    <div class="flex space-x-2">
+                        <input type="number" name="filter_prix_min" placeholder="Prix min" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" value="{{ session.filter_prix_min }}">
+                        <input type="number" name="filter_prix_max" placeholder="Prix max" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" value="{{ session.filter_prix_max }}">
+                    </div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <label class="text-sm text-gray-300">Type :</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
                         {% for type in items_filtre %}
                         <label class="inline-flex items-center">
                             <input type="checkbox" 
                                    name="filter_types" 
                                    value="{{ type.id_type_article }}"
-                                   onchange="this.form.submit()"
-                                   class="form-checkbox h-4 w-4 text-accent-blue bg-dark-primary border-gray-600 rounded focus:ring-accent-blue focus:ring-opacity-25"
+                                   class="h-4 w-4 text-accent-blue bg-dark-primary border-gray-600 rounded focus:ring-accent-blue focus:ring-opacity-25"
                                    {% if session.filter_types and type.id_type_article|string in session.filter_types %}checked{% endif %}>
                             <span class="ml-2 text-sm text-gray-300">{{ type.libelle }}</span>
                         </label>
                         {% endfor %}
                     </div>
-                    <button type="button" class="bg-dark-accent hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-md text-sm font-medium flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                        </svg>
-                        Plus de filtres
-                    </button>
-                </form>
-            </div>
+                </div>
+                <div class="flex items-center justify-start space-x-2">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">Filtrer</button>
+                    <form action="{{ url_for('client_panier.client_panier_filtre_delete') }}" method="post" class="inline">
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">Supprimer le filtre</button>
+                    </form>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- Items Grid -->
+    <div class="bg-dark-secondary rounded-lg p-4 mb-3 shadow-lg flex flex-col space-y-4">
+        <h1 class="text-2xl font-bold text-white">Marketplace de Skins</h1>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {% for article in articles %}
         <div class="bg-dark-secondary rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -153,6 +168,7 @@
                             {% else %}
                             {{ article.prix_min }}€ - {{ article.prix_max }}€
                             {% endif %}
+
                             -->
 
                         </span>
