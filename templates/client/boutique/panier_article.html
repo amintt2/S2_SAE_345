@@ -108,11 +108,11 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="flex items-center justify-start space-x-2">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">Filtrer</button>
+                <div class="flex items-center justify-end space-x-2">
                     <form action="{{ url_for('client_panier.client_panier_filtre_delete') }}" method="post" class="inline">
                         <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">Supprimer le filtre</button>
                     </form>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">Filtrer</button>
                 </div>
             </form>
         </div>
