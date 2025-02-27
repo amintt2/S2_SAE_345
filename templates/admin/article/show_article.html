@@ -16,7 +16,7 @@ articles (tableau de dictionnaires)
 {% block body %}
 <h3 class="text-center mb-4 mt-3" style="color: #bc1a1a; font-size: 2.5rem; text-transform: uppercase; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Gestion des articles et du stock</h3>
 <div class="text-end">
-    <a class="btn btn-success p-2" style="background-color: #14e025; border-radius: 8px;" href="/admin/article/add">
+    <a class="btn btn-success p-2" style="background-color: #14e025a3; border-radius: 8px;" href="/admin/article/add">
         <i class="fas fa-plus"></i> Ajouter un article
     </a>
 </div>
@@ -90,9 +90,21 @@ articles (tableau de dictionnaires)
                         {% endif %}
                   </td>
                   <td>
-                      <a  class="btn btn-outline-danger" href="/admin/article/delete?id_article={{ ligne.id_article }}" onclick="return confirm('Are you sure?')" >supprimer</a>
-                      <a  class="btn btn-outline-warning" href="/admin/article/edit?id_article={{ ligne.id_article }}">editer</a>
-                      <a  class="btn btn-outline-warning" href="/admin/article/commentaires?id_article={{ ligne.id_article }}">commentaires</a>
+                      <div class="flex flex-col space-y-2">
+                          <a class="border-2 border-red-500 text-red-500 px-4 py-2 rounded hover:bg-red-500 hover:text-white transition-colors text-center" 
+                             href="/admin/article/delete?id_article={{ ligne.id_article }}" 
+                             onclick="return confirm('Are you sure?')">
+                             supprimer
+                          </a>
+                          <a class="border-2 border-yellow-500 text-yellow-500 px-4 py-2 rounded hover:bg-yellow-500 hover:text-white transition-colors text-center" 
+                             href="/admin/article/edit?id_article={{ ligne.id_article }}">
+                             editer
+                          </a>
+                          <a class="border-2 border-blue-500 text-blue-500 px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors text-center" 
+                             href="/admin/article/commentaires?id_article={{ ligne.id_article }}">
+                             commentaires
+                          </a>
+                      </div>
                   </td>
            </tr>
         {% endfor %}
