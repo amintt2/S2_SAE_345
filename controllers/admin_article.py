@@ -17,7 +17,28 @@ admin_article = Blueprint('admin_article', __name__,
 @admin_article.route('/admin/article/show')
 def show_article():
     mycursor = get_db().cursor()
-    sql = '''  requête admin_article_1
+    sql = '''
+    SELECT 
+        s.id_skin as id_article,
+        s.nom_skin as nom,
+        s.prix_skin as prix,
+        s.stock,
+        s.image,
+        s.description,
+        ts.id_type_skin as type_article_id,
+        ts.libelle_type_skin as libelle,
+        MIN(s2.stock) as min_stock,
+        COUNT(DISTINCT c.id_commande) as nb_commandes,
+        COUNT(DISTINCT lp.utilisateur_id) as nb_paniers
+    FROM skin s
+    LEFT JOIN type_skin ts ON s.type_skin_id = ts.id_type_skin
+    LEFT JOIN skin s2 ON s.type_skin_id = s2.type_skin_id
+    LEFT JOIN ligne_commande lc ON s.id_skin = lc.skin_id
+    LEFT JOIN commande c ON lc.commande_id = c.id_commande
+    LEFT JOIN ligne_panier lp ON s.id_skin = lp.skin_id
+    GROUP BY s.id_skin, s.nom_skin, s.prix_skin, s.stock, s.image, 
+             s.description, ts.id_type_skin, ts.libelle_type_skin
+    ORDER BY s.nom_skin
     '''
     mycursor.execute(sql)
     articles = mycursor.fetchall()
@@ -27,12 +48,32 @@ def show_article():
 @admin_article.route('/admin/article/add', methods=['GET'])
 def add_article():
     mycursor = get_db().cursor()
+    sql = '''
+    SELECT id_type_skin as id_type_article, libelle_type_skin as libelle 
+    FROM type_skin
+    ORDER BY libelle_type_skin
+    '''
+    mycursor.execute(sql)
+    types_article = mycursor.fetchall()
+    
+    sql = '''
+    SELECT id_usure, libelle_usure 
+    FROM usure
+    '''
+    mycursor.execute(sql)
+    usures = mycursor.fetchall()
+    
+    sql = '''
+    SELECT id_special, libelle_special 
+    FROM special
+    '''
+    mycursor.execute(sql)
+    specials = mycursor.fetchall()
 
-    return render_template('admin/article/add_article.html'
-                           #,types_article=type_article,
-                           #,couleurs=colors
-                           #,tailles=tailles
-                            )
+    return render_template('admin/article/add_article.html',
+                         types_article=types_article,
+                         usures=usures,
+                         specials=specials)
 
 
 @admin_article.route('/admin/article/add', methods=['POST'])
@@ -42,6 +83,9 @@ def valid_add_article():
     nom = request.form.get('nom', '')
     type_article_id = request.form.get('type_article_id', '')
     prix = request.form.get('prix', '')
+    stock = request.form.get('stock', 0)
+    usure_id = request.form.get('usure_id', '')
+    special_id = request.form.get('special_id', '')
     description = request.form.get('description', '')
     image = request.files.get('image', '')
 
@@ -52,10 +96,11 @@ def valid_add_article():
         print("erreur")
         filename=None
 
-    sql = '''  requête admin_article_2 '''
-
-    tuple_add = (nom, filename, prix, type_article_id, description)
-    print(tuple_add)
+    sql = '''
+    INSERT INTO skin(nom_skin, image, prix_skin, type_skin_id, usure_id, special_id, stock, description)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    '''
+    tuple_add = (nom, filename, prix, type_article_id, usure_id, special_id, stock, description)
     mycursor.execute(sql, tuple_add)
     get_db().commit()
 
@@ -185,3 +230,25 @@ def admin_avis_delete():
     userId = request.form.get('idUser', None)
 
     return admin_avis(article_id)
+
+
+@admin_article.route('/admin/article/stock/edit/<int:id>', methods=['POST'])
+def update_stock():
+    mycursor = get_db().cursor()
+    id_article = request.form.get('id_article')
+    new_stock = request.form.get('stock', type=int)
+    
+    if new_stock < 0:
+        flash('Le stock ne peut pas être négatif', 'alert-danger')
+        return redirect('/admin/article/show')
+        
+    sql = '''
+    UPDATE skin 
+    SET stock = %s 
+    WHERE id_skin = %s
+    '''
+    mycursor.execute(sql, (new_stock, id_article))
+    get_db().commit()
+    
+    flash('Stock mis à jour avec succès', 'alert-success')
+    return redirect('/admin/article/show')

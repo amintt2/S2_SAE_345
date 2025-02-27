@@ -38,7 +38,7 @@ def close_connection(exception):
 def show_accueil():
     if 'role' in session:
         if session['role'] == 'ROLE_admin':
-            return redirect('/admin/commande/index')
+            return redirect('/admin/article/show')
         else:
             return redirect('/client/article/show')
     return render_template('auth/layout.html')
