@@ -5,40 +5,86 @@
 {% endblock %}
 
 {% block body %}
-    <h2>Ajouter un article</h2>
-    <div class="row mt-5">
-        <img class="card-img-top rounded mx-4 d-block"  style="width:200px; height:200px; border: 1px solid black; padding: 5px;" id="img_output" src="{{ url_for('static', filename = 'images/')}}no_photo.jpeg" alt="">
-        <div class="w-25">
-            <form class="w-190" method="post" action="/admin/article/add" enctype="multipart/form-data">
-                <label for="nom">Nom :
-                    <input name="nom" type="text" value=""  class="form-control" required>
-                </label>
-                <label for="prix">Prix (€) :
-                    <input name="prix" type="number" min="0.0" step="0.01" max="2147483647" value=""  class="form-control" required>
-                </label>
-                <label for="stock">Stock :
-                    <input name="stock" type="number" min="0" value="0" class="form-control" required>
-                </label>
-                <label for="image"> Image :
-                    <input name="image" type="file" onchange="loadFile(event)"   class="form-control">
-                </label>
+{# Route: GET /admin/article/add #}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold">Ajouter un article</h2>
+    </div>
+    
+    <div class="rounded-lg shadow p-6 max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Prévisualisation de l'image -->
+            <div class="md:col-span-1">
+                <div class="p-4 rounded-lg border">
+                    <img class="w-full h-48 object-contain rounded" 
+                         src="{{ url_for('static', filename='images/no_photo.jpeg') }}" 
+                         alt="Aperçu de l'image">
+                </div>
+            </div>
 
-                <label for="type_article_id">Type de l'article :
-                    <select name="type_article_id" required class="form-select">
-                        <option value="">Sélectionner un type d'article</option>
-                        {% for type in types_article %}
-                             <option value="{{ type.id_type_article }}"> {{ type.libelle }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label for="description">description :
-                    <input name="description" type="text" class="form-control" >
-                </label>
-                <label for="submit">
-                    <input name="submit" type="submit" value="Ajouter" class="btn btn-primary mt-2">
-                </label>
-            </form>
-        <a href="/admin/article/show"><button class="btn btn-secondary mt-2">annuler</button></a>
+            <!-- Formulaire -->
+            <div class="md:col-span-2">
+                {# Route: POST /admin/article/add #}
+                <form method="post" action="/admin/article/add" enctype="multipart/form-data" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Colonne gauche -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block mb-2">Nom de l'article</label>
+                                <input name="nom" type="text" required
+                                       class="w-full rounded px-3 py-2 border bg-transparent text-inherit focus:ring-1">
+                            </div>
+
+                            <div>
+                                <label class="block mb-2">Prix (€)</label>
+                                <input name="prix" type="number" min="0.0" step="0.01" required
+                                       class="w-full rounded px-3 py-2 border bg-transparent text-inherit focus:ring-1">
+                            </div>
+
+                            <div>
+                                <label class="block mb-2">Stock initial</label>
+                                <input name="stock" type="number" min="0" value="0" required
+                                       class="w-full rounded px-3 py-2 border bg-transparent text-inherit focus:ring-1">
+                            </div>
+                        </div>
+
+                        <!-- Colonne droite -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block mb-2">Type de l'article</label>
+                                <select name="type_article_id" required
+                                        class="w-full rounded px-3 py-2 border bg-transparent text-inherit focus:ring-1">
+                                    <option value="">Sélectionner un type</option>
+                                    {% for type in types_article %}
+                                        <option value="{{ type.id_type_article }}">{{ type.libelle }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block mb-2">Description</label>
+                                <textarea name="description" rows="3"
+                                          class="w-full rounded px-3 py-2 border bg-transparent text-inherit focus:ring-1"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block mb-2">Image</label>
+                                <input name="image" type="file"
+                                       class="w-full rounded px-3 py-2 border bg-transparent text-inherit focus:ring-1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div class="flex justify-end space-x-4 mt-8 border-t pt-6">
+                        <button type="submit" 
+                                class="px-6 py-2 rounded bg-green-500 hover:bg-green-600 text-white font-bold shadow-md">
+                            Ajouter l'article
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+</div>
 {% endblock %}
