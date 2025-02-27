@@ -14,25 +14,36 @@ articles (tableau de dictionnaires)
 {% endblock %}
 
 {% block body %}
-<h3>article</h3>
-<a  class="btn btn-outline-success" href="/admin/article/add">ajouter un article</a>
+<h3 class="text-center mb-4 mt-3" style="color: #bc1a1a; font-size: 2.5rem; text-transform: uppercase; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Gestion des articles et du stock</h3>
+<div class="text-end">
+    <a class="btn btn-success p-2" style="background-color: #14e025; border-radius: 8px;" href="/admin/article/add">
+        <i class="fas fa-plus"></i> Ajouter un article
+    </a>
+</div>
 <br><br>
 {#{{ articles }}#}
-<table class="table">
+<table class="table table-bordered">
     <thead class="thead-dark">
-        <tr>
-            <th>nom</th><th>id</th><th>type article (id)</th><th>prix</th><th style="color: green">stock</th>
-            <th>nouveaux avis</th><th>nb déclinaisons</th><th>image</th><th>opération</th>
+        <tr style="border-bottom: 2px solid #dee2e6;">
+            <th>Nom</th>
+            <th>ID</th>
+            <th>Type Article (ID)</th>
+            <th>Prix</th>
+            <th style="color: #28a745">Stock</th>
+            <th>Nouveaux Avis</th>
+            <th>Nb Déclinaisons</th>
+            <th>Image</th>
+            <th>Opération</th>
         </tr>
     </thead>
     <tbody>
     {% if articles | length >= 1 %}
         {% for ligne in articles %}
-           <tr>
+           <tr style="border-bottom: 1px solid #dee2e6;">
                   <td>{{ ligne.nom }}</td>
                   <td>{{ ligne.id_article }}</td>
                   <td><span style="color: red">{{ ligne.libelle }}</span> ({{ ligne.type_article_id }})</td>
-                  <td>{#{ ligne.prix }#}  {{  "{:,.2f} €".format(ligne.prix) }}</td>
+                  <td>{{  "{:,.2f} €".format(ligne.prix) }}</td>
                   <td>
                   {% if ligne.stock is defined %}
                      {% if ligne.stock != None  %}
@@ -86,8 +97,8 @@ articles (tableau de dictionnaires)
            </tr>
         {% endfor %}
     {% else %}
-            <tr>
-                  <td>
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                  <td colspan="9">
                       pas d'article
                   </td>
            </tr>
