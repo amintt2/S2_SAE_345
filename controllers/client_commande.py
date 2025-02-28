@@ -35,31 +35,97 @@ def client_commande_valide():
 @client_commande.route('/client/commande/add', methods=['POST'])
 def client_commande_add():
     mycursor = get_db().cursor()
-
-    # choix de(s) (l')adresse(s)
-
     id_client = session['id_user']
-    sql = ''' selection du contenu du panier de l'utilisateur '''
-    items_ligne_panier = []
-    # if items_ligne_panier is None or len(items_ligne_panier) < 1:
-    #     flash(u'Pas d\'articles dans le ligne_panier', 'alert-warning')
-    #     return redirect('/client/article/show')
-                                           # https://pynative.com/python-mysql-transaction-management-using-commit-rollback/
-    #a = datetime.strptime('my date', "%b %d %Y %H:%M")
+    
+    # Récupération des articles du panier
+    sql = ''' 
+        SELECT ligne_panier.*,
+               skin.prix_skin,
+               skin.stock
+        FROM ligne_panier
+        JOIN skin ON ligne_panier.skin_id = skin.id_skin
+        WHERE ligne_panier.utilisateur_id = %s
+    '''
+    mycursor.execute(sql, (id_client,))
+    items_ligne_panier = mycursor.fetchall()
+    
+    if not items_ligne_panier:
+        flash(u'Pas d\'articles dans le panier', 'alert-warning')
+        return redirect('/client/article/show')
 
-    sql = ''' creation de la commande '''
-
-    sql = '''SELECT last_insert_id() as last_insert_id'''
-    # numéro de la dernière commande
+    # Vérification des stocks
     for item in items_ligne_panier:
-        sql = ''' suppression d'une ligne de panier '''
-        sql = "  ajout d'une ligne de commande'"
+        if item['quantite'] > item['stock']:
+            flash(u'Stock insuffisant pour l\'article ' + str(item['skin_id']), 'alert-warning')
+            return redirect('/client/article/show')
 
-    get_db().commit()
-    flash(u'Commande ajoutée','alert-success')
+    try:
+        # Création de la commande
+        sql = '''
+            INSERT INTO commande(
+                date_achat,
+                utilisateur_id,
+                etat_id
+            ) VALUES (
+                NOW(),
+                %s,
+                1
+            )
+        '''
+        mycursor.execute(sql, (id_client,))
+        
+        # Récupération de l'id de la commande créée
+        sql = '''SELECT LAST_INSERT_ID() as last_insert_id'''
+        mycursor.execute(sql)
+        id_commande = mycursor.fetchone()['last_insert_id']
+
+        # Traitement des lignes du panier
+        for item in items_ligne_panier:
+            # Ajout ligne de commande
+            sql = '''
+                INSERT INTO ligne_commande(
+                    commande_id,
+                    skin_id,
+                    prix,
+                    quantite
+                ) VALUES (
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                )
+            '''
+            mycursor.execute(sql, (
+                id_commande,
+                item['skin_id'],
+                item['prix_skin'],
+                item['quantite']
+            ))
+
+            # Mise à jour du stock
+            sql = '''
+                UPDATE skin 
+                SET stock = stock - %s 
+                WHERE id_skin = %s
+            '''
+            mycursor.execute(sql, (item['quantite'], item['skin_id']))
+
+            # Suppression ligne panier
+            sql = '''
+                DELETE FROM ligne_panier 
+                WHERE id_ligne_panier = %s
+            '''
+            mycursor.execute(sql, (item['id_ligne_panier'],))
+
+        get_db().commit()
+        flash(u'Commande validée avec succès', 'alert-success')
+        
+    except Exception as e:
+        get_db().rollback()
+        flash(u'Erreur lors de la validation de la commande', 'alert-danger')
+        print(e)
+        
     return redirect('/client/article/show')
-
-
 
 
 @client_commande.route('/client/commande/show', methods=['get','post'])
