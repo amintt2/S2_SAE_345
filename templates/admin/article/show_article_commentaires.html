@@ -1,79 +1,71 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>commentaire d'un article</title>
+    <title>Gestion des commentaires</title>
 {% endblock %}
 
 {% block body %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold mb-6">Les commentaires (dates croissantes)</h2>
 
-   <div class="row">
-   <div class="col-5 bg-light p-3">
-        <h3>Les commentaires (dates décroissantes)</h3>
-       <h3>article  <span style="color: green">{{ article.nom }}</span></h3>
-       {% if nb_commentaires.nb_commentaires_total is defined %}  <strong> {{ nb_commentaires.nb_commentaires_total }}</strong> commentaire(s)
-           dont {% if nb_commentaires.nb_commentaires_valider is defined %}<strong>
-                    {{ nb_commentaires.nb_commentaires_valider }}</strong> commentaire(s) validé(s)
+    <!-- Article Info -->
+    <div class="bg-gray-800 rounded-lg p-6 mb-8">
+        <h3 class="text-xl font-semibold mb-4">Article</h3>
+        {% if article %}
+            <div class="flex items-center space-x-4">
+                {% if article.image %}
+                    <img src="{{ url_for('static', filename='images/' + article.image) }}" 
+                         alt="{{ article.nom }}"
+                         class="w-24 h-24 object-contain rounded-lg">
                 {% endif %}
-        {% else %} Pas de commentaire
-       {% endif %}
-       <br>Note : {% if article.nb_notes is defined and article.nb_notes >= 0 %} <strong>{{ article.moyenne_notes }}</strong> ( {{ article.nb_notes }} note(s))
-       {% else %} Pas de note
-       {% endif %}
-   </div>
-   </div>
-
-   <div class="row">
-
-        <table class="table" style="border: solid #8959A8 1px ">
-        {% if commentaires %}
-            <thead class="thead-dark">
-            <tr>
-                <th>nom(pseudo)</th>
-                <th>Commentaires</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-
-                {% for commentaire in commentaires %}
-                    {% if commentaire.valider == 1 and session['id_user']==commentaire.utilisateur_id %}
-                    <tr class="bg-success bg-opacity-25">
-                    {% elif commentaire.valider == 1 %}
-                    <tr class="bg-warning bg-opacity-25">
-                    {% else %}
-                    <tr>
-                    {% endif %}
-                        <td>{{ commentaire.nom }}({{ commentaire.id_utilisateur }})</td>
-                        <td> {% if commentaire.utilisateur_id == session['id_user'] %}
-                            <span style="color: red">(réponse de l'administrateur du site (webmaster) :</span>
-                            {% endif %}
-                            {{ commentaire.commentaire }}
-                        </td>
-                        <td>
-                                  <form  action="/admin/article/commentaires/delete"  style="display: inline-block;"  method="post" >
-                                      <input type="hidden" name="id_article" value="{{ commentaire.id_article }}">
-                                      <input type="hidden" name="id_utilisateur" value="{{ commentaire.id_utilisateur }}">
-                                      <input type="hidden" name="date_publication" value="{{ commentaire.date_publication }}">
-                                      <button class="btn btn-primary" > supprimer </button>
-                                  </form>
-                            {% if commentaire.utilisateur_id != session['id_user'] %}
-                                  <form  action="/admin/article/commentaires/repondre"  style="display: inline-block;"  method="GET" >
-                                      <input type="hidden" name="id_article" value="{{ commentaire.id_article }}">
-                                      <input type="hidden" name="id_utilisateur" value="{{ commentaire.id_utilisateur }}">
-                                      <input type="hidden" name="date_publication" value="{{ commentaire.date_publication }}">
-                                      <button class="btn btn-primary" > répondre </button>
-                                  </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            {% else %}
-                <tr class="table-warning"><td>Pas de commentaire</td><td></td></tr>
-            {% endif %}
-            </tbody>
-        </table>
-       <a class="btn btn-primary m-4 col-2" href="/admin/article/commentaires/valider?id_article={{ article.id_article }}">valider les commenaires</a>
-       <a class="btn btn-outline-primary btn-lg" href="/admin/article/show">Retour vers la page d'accueil</a>
+                <div>
+                    <h4 class="text-lg font-medium">{{ article.nom }}</h4>
+                    <p class="text-gray-400">{{ article.description }}</p>
+                </div>
+            </div>
+        {% else %}
+            <p>Article non trouvé</p>
+        {% endif %}
     </div>
 
+    <!-- Comments Section -->
+    <div class="bg-gray-800 rounded-lg p-6">
+        {% if commentaires and commentaires|length > 0 %}
+            <div class="space-y-4">
+                {% for commentaire in commentaires %}
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-medium">{{ commentaire.nom_utilisateur }}</p>
+                                <p class="text-sm text-gray-400">{{ commentaire.date_publication }}</p>
+                            </div>
+                            {% if commentaire.note %}
+                                <div class="bg-blue-500 text-white px-2 py-1 rounded">
+                                    Note: {{ commentaire.note }}/5
+                                </div>
+                            {% endif %}
+                        </div>
+                        <p class="mt-2">{{ commentaire.commentaire }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-gray-400">Pas de commentaire</p>
+        {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-between mt-8">
+        <a href="/admin/article/show" 
+           class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+            Retour à la page d'accueil
+        </a>
+        {% if nb_commentaires and nb_commentaires.nb_new > 0 %}
+            <a href="/admin/article/commentaires/valider?id_article={{ article.id_article }}"
+               class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                Valider les commentaires
+            </a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
