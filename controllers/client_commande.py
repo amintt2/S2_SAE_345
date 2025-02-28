@@ -39,9 +39,9 @@ def client_commande_add():
     
     # Récupération des articles du panier
     sql = ''' 
-        SELECT ligne_panier.*,
-               skin.prix_skin,
-               skin.stock
+        SELECT  ligne_panier.skin_id,
+                ligne_panier.quantite,
+                skin.prix_skin * ligne_panier.quantite as prix
         FROM ligne_panier
         JOIN skin ON ligne_panier.skin_id = skin.id_skin
         WHERE ligne_panier.utilisateur_id = %s
@@ -53,78 +53,58 @@ def client_commande_add():
         flash(u'Pas d\'articles dans le panier', 'alert-warning')
         return redirect('/client/article/show')
 
-    # Vérification des stocks
-    for item in items_ligne_panier:
-        if item['quantite'] > item['stock']:
-            flash(u'Stock insuffisant pour l\'article ' + str(item['skin_id']), 'alert-warning')
-            return redirect('/client/article/show')
+    # Création de la commande
+    sql = '''
+        INSERT INTO commande(
+            date_achat,
+            etat_id,
+            utilisateur_id
+        ) VALUES (
+            NOW(),
+            1,
+            %s
+        )
+    '''
+    mycursor.execute(sql, (id_client,))
+    
+    # Récupération de l'id de la commande créée
+    sql = '''SELECT LAST_INSERT_ID() as last_insert_id'''
+    mycursor.execute(sql)
+    id_commande = mycursor.fetchone()['last_insert_id']
 
-    try:
-        # Création de la commande
+    # Traitement des lignes du panier
+    for item in items_ligne_panier:
+        # Ajout ligne de commande
         sql = '''
-            INSERT INTO commande(
-                date_achat,
-                utilisateur_id,
-                etat_id
+            INSERT INTO ligne_commande(
+                skin_id,
+                commande_id,
+                prix,
+                quantite
             ) VALUES (
-                NOW(),
                 %s,
-                1
+                %s,
+                %s,
+                %s
             )
         '''
-        mycursor.execute(sql, (id_client,))
-        
-        # Récupération de l'id de la commande créée
-        sql = '''SELECT LAST_INSERT_ID() as last_insert_id'''
-        mycursor.execute(sql)
-        id_commande = mycursor.fetchone()['last_insert_id']
+        mycursor.execute(sql, (
+            item['skin_id'],
+            id_commande,
+            item['prix'],
+            item['quantite']
+        ))
 
-        # Traitement des lignes du panier
-        for item in items_ligne_panier:
-            # Ajout ligne de commande
-            sql = '''
-                INSERT INTO ligne_commande(
-                    commande_id,
-                    skin_id,
-                    prix,
-                    quantite
-                ) VALUES (
-                    %s,
-                    %s,
-                    %s,
-                    %s
-                )
-            '''
-            mycursor.execute(sql, (
-                id_commande,
-                item['skin_id'],
-                item['prix_skin'],
-                item['quantite']
-            ))
+        # Suppression ligne panier
+        sql = '''
+            DELETE FROM ligne_panier 
+            WHERE skin_id = %s AND utilisateur_id = %s
+        '''
+        mycursor.execute(sql, (item['skin_id'], id_client))
 
-            # Mise à jour du stock
-            sql = '''
-                UPDATE skin 
-                SET stock = stock - %s 
-                WHERE id_skin = %s
-            '''
-            mycursor.execute(sql, (item['quantite'], item['skin_id']))
-
-            # Suppression ligne panier
-            sql = '''
-                DELETE FROM ligne_panier 
-                WHERE id_ligne_panier = %s
-            '''
-            mycursor.execute(sql, (item['id_ligne_panier'],))
-
-        get_db().commit()
-        flash(u'Commande validée avec succès', 'alert-success')
-        
-    except Exception as e:
-        get_db().rollback()
-        flash(u'Erreur lors de la validation de la commande', 'alert-danger')
-        print(e)
-        
+    get_db().commit()
+    flash(u'Commande validée avec succès', 'alert-success')
+    
     return redirect('/client/article/show')
 
 
