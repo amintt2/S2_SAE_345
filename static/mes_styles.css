@@ -2,3 +2,14 @@ h1 { color: green;}
 
 br , h2 { color: blue; }
 
+.flashes {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius);
+}
+  
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
