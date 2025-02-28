@@ -49,38 +49,22 @@ def client_panier_add():
     id_declinaison_article=request.form.get('id_declinaison_article',None)
     
 # ajout dans le panier d'une déclinaison d'un article (si 1 declinaison : immédiat sinon => vu pour faire un choix
-    if id_declinaison_article is None:
-        sql = '''
-            SELECT id_skin AS id_declinaison_article
-            FROM skin
-            WHERE nom_skin = (
-                SELECT nom_skin
-                FROM skin
-                WHERE id_skin = %s
-            );
-        '''
-        mycursor.execute(sql, (id_article))
-        declinaisons = mycursor.fetchall()
-        print("Decli: ", declinaisons)
+    # sql = '''    '''
+    # mycursor.execute(sql, (id_article))
+    # declinaisons = mycursor.fetchall()
+    # if len(declinaisons) == 1:
+    #     id_declinaison_article = declinaisons[0]['id_declinaison_article']
+    # elif len(declinaisons) == 0:
+    #     abort("pb nb de declinaison")
+    # else:
+    #     sql = '''   '''
+    #     mycursor.execute(sql, (id_article))
+    #     article = mycursor.fetchone()
+    #     return render_template('client/boutique/declinaison_article.html'
+    #                                , declinaisons=declinaisons
+    #                                , quantite=quantite
+    #                                , article=article)
 
-        if len(declinaisons) == 1:
-            id_declinaison_article = declinaisons[0]['id_declinaison_article']
-        elif len(declinaisons) == 0:
-            abort("pb nb de declinaison")
-        else:
-            sql = '''
-                SELECT  nom_skin AS nom,
-                        prix_skin AS prix,
-                        image
-                FROM skin
-                WHERE id_skin = %s;
-            '''
-            mycursor.execute(sql, (id_article))
-            article = mycursor.fetchone()
-            return render_template('client/boutique/declinaison_article.html'
-                                    , declinaisons=declinaisons
-                                    , quantite=quantite
-                                    , article=article)
 
 # mise à jour des quantités
     quantite = update_stock(quantite, id_article)
@@ -107,7 +91,7 @@ def client_panier_add():
             INSERT INTO ligne_panier (utilisateur_id, skin_id, quantite, date_ajout)
             VALUES (%s, %s, %s, NOW());
         '''
-        mycursor.execute(sql, (id_client, id_declinaison_article, quantite))
+        mycursor.execute(sql, (id_client, id_article, quantite))
     get_db().commit()
 
 
