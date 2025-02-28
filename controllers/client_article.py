@@ -71,15 +71,37 @@ def client_article_show():                                 # remplace client_ind
 
     if 'filter_word' in session and session['filter_word']:
         sql += ' AND nom_skin LIKE %s'
-
         list_param.append(f"%{session['filter_word']}%")
-    if 'filter_prix_min' in session and session['filter_prix_min']:
-        sql += ' AND prix_skin >= %s'
-        list_param.append(session['filter_prix_min'])
 
-    if 'filter_prix_max' in session and session['filter_prix_max']:
-        sql += ' AND prix_skin <= %s'
-        list_param.append(session['filter_prix_max'])
+    if 'filter_prix_min' in session and session['filter_prix_min'] and 'filter_prix_max' in session and session['filter_prix_max']:
+        if not session['filter_prix_min'].isdigit() or not session['filter_prix_max'].isdigit():
+            message = u'Les valeurs du prix doivent être numériques'
+            flash(message, 'alert-warning')
+        else:
+            min_val = int(session['filter_prix_min'])
+            max_val = int(session['filter_prix_max'])
+            if min_val > max_val:
+                message = u'Le prix minimum doit être inférieur au prix maximum'
+                flash(message, 'alert-warning')
+            else:
+                sql += ' AND prix_skin BETWEEN %s AND %s'
+                list_param.extend([min_val, max_val])
+
+    elif 'filter_prix_min' in session and session['filter_prix_min']:
+        if not session['filter_prix_min'].isdigit():
+            message = u'Les valeurs du prix doivent être numériques'
+            flash(message, 'alert-warning')
+        else:
+            sql += ' AND prix_skin >= %s'
+            list_param.append(int(session['filter_prix_min']))
+
+    elif 'filter_prix_max' in session and session['filter_prix_max']:
+        if not session['filter_prix_max'].isdigit():
+            message = u'Les valeurs du prix doivent être numériques'
+            flash(message, 'alert-warning')
+        else:
+            sql += ' AND prix_skin <= %s'
+            list_param.append(int(session['filter_prix_max']))
     
     mycursor.execute(sql, tuple(list_param) if list_param else None)
     articles = mycursor.fetchall()
@@ -158,21 +180,50 @@ def client_article_filtre():
     filter_prix_max = request.form.get('filter_prix_max', None)
     filter_types = request.form.getlist('filter_types')
 
+    # Gestion du filtre mot
     if filter_word:
         session['filter_word'] = filter_word
     elif 'filter_word' in session:
         session.pop('filter_word')
 
-    if filter_prix_min:
-        session['filter_prix_min'] = filter_prix_min
-    elif 'filter_prix_min' in session:
-        session.pop('filter_prix_min')
+    # Gestion des filtres prix
+    prix_valid = True
 
-    if filter_prix_max:
-        session['filter_prix_max'] = filter_prix_max
-    elif 'filter_prix_max' in session:
-        session.pop('filter_prix_max')
+    # Validation des prix
+    if filter_prix_min or filter_prix_max:
+        if filter_prix_min and not filter_prix_min.isdigit():
+            flash(u'Les valeurs du prix doivent être numériques', 'alert-warning')
+            prix_valid = False
+        if filter_prix_max and not filter_prix_max.isdigit():
+            flash(u'Les valeurs du prix doivent être numériques', 'alert-warning')
+            prix_valid = False
+        
+        if prix_valid and filter_prix_min and filter_prix_max:
+            min_val = int(filter_prix_min)
+            max_val = int(filter_prix_max)
+            if min_val > max_val:
+                flash(u'Le prix minimum doit être inférieur au prix maximum', 'alert-warning')
+                prix_valid = False
 
+    # Sauvegarde des prix si valides
+    if prix_valid:
+        if filter_prix_min:
+            session['filter_prix_min'] = filter_prix_min
+        elif 'filter_prix_min' in session:
+            session.pop('filter_prix_min')
+            
+        if filter_prix_max:
+            session['filter_prix_max'] = filter_prix_max
+        elif 'filter_prix_max' in session:
+            session.pop('filter_prix_max')
+    else:
+        # Si prix invalides, on supprime les filtres de prix
+        if 'filter_prix_min' in session:
+            session.pop('filter_prix_min')
+        if 'filter_prix_max' in session:
+            session.pop('filter_prix_max')
+
+    # Gestion du filtre types
     if filter_types:
         session['filter_types'] = filter_types
     elif 'filter_types' in session:
