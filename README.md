@@ -66,24 +66,25 @@ filtre texte obligatoire.
 
 
 
-Ramarque prof après livrable 2 :
+# Remarques du professeur après livrable 2
 
-# Bonne chose :
-- Premier partie (Client) tout bon (Page accueil)
+## ✅ Points positifs
+- **Partie Client** : Interface d'accueil très satisfaisante
 
+## 🔧 Améliorations requises
 
+### Côté Client
+- **Gestion des quantités** : Ajouter des boutons **+** et **-** pour incrémenter/décrémenter les quantités sur la page d'accueil
+- **Affichage panier** : 
+  - Ajouter le **sous-total** dans la page panier
+  - Afficher "**Panier vide**" au lieu de 0
+  - **Supprimer automatiquement** les produits quand quantité = 0
+- **Stocks** : Afficher clairement un message de **rupture de stock**
 
+### Côté Admin
+- **Affichage commandes** :
+  - **Réorganiser** le tableau pour avoir les commandes en cours en premier ( order by )
+  - Simplifier les états : uniquement "**Validé**" (pas de "Livré" ou autres)
 
-# Chose a améliorer :
-- (Client) Ajouter des bouton ( style + et - ) pour incrementer et decrementer les quantités sur la page d'Acceuil.
-- (Client) Ajouter le sous total dans la page de panier.
-- (Client) Message pour afficher rupture de stock.
-- (Client) Dire que la cantier est vider au lieux d'afficher 0
-- (Client) Retier directement produis si = 0
-- (Admin) Changer la position pour avoir les en cours en premier dans le tableau
-- (Admin) Que des Valider pas de liver ou autre
-
-
-
-# Chose a refaire :
-- Pas de url for suivre les consigne et refaire les url pour utiliser les bonne route.
+## ⚠️ Points à refaire
+- **Routing** : Ne pas utiliser `url_for()`, suivre les conventions de routing et refaire les URLs selon les bonnes pratiques
