@@ -61,3 +61,29 @@ Remetre le filtre inisial du prof
 il veux moins de truc a cocher.
 Garde en memoir le filtre et ne retire rien meme si il est modifier
 filtre texte obligatoire. 
+
+
+
+
+
+Ramarque prof après livrable 2 :
+
+# Bonne chose :
+- Premier partie (Client) tout bon (Page accueil)
+
+
+
+
+# Chose a améliorer :
+- (Client) Ajouter des bouton ( style + et - ) pour incrementer et decrementer les quantités sur la page d'Acceuil.
+- (Client) Ajouter le sous total dans la page de panier.
+- (Client) Message pour afficher rupture de stock.
+- (Client) Dire que la cantier est vider au lieux d'afficher 0
+- (Client) Retier directement produis si = 0
+- (Admin) Changer la position pour avoir les en cours en premier dans le tableau
+- (Admin) Que des Valider pas de liver ou autre
+
+
+
+# Chose a refaire :
+- Pas de url for suivre les consigne et refaire les url pour utiliser les bonne route.
