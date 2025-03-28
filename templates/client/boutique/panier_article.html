@@ -177,18 +177,23 @@
                             {% endif %}
                         </div>
                     </div>
-                    <form action="{{ url_for('client_panier.client_panier_add') }}" method="post">
-                        <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                        <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
-                                {% if article.stock_min <= 0 %}disabled{% endif %}
-                                {% if article.stock_min <= 0 %}class="w-full bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
-                            {% if article.stock_min > 0 %}
-                                Ajouter au panier
-                            {% else %}
-                                Indisponible
-                            {% endif %}
-                        </button>
-                    </form>
+                    <div class="flex gap-2">
+                        <form action="{{ url_for('client_panier.client_panier_add') }}" method="post" class="flex-grow">
+                            <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                            <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
+                                    {% if article.stock_min <= 0 %}disabled{% endif %}
+                                    {% if article.stock_min <= 0 %}class="w-full bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
+                                {% if article.stock_min > 0 %}
+                                    Ajouter au panier
+                                {% else %}
+                                    Indisponible
+                                {% endif %}
+                            </button>
+                        </form>
+                        <a href="/client/envie/add?id_article={{ article.id_article }}" class="inline-flex items-center justify-center bg-dark-accent hover:bg-dark-accent/80 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
+                            <span>💛</span>
+                        </a>
+                    </div>
                 </div>
             </div>
             {% endfor %}

@@ -61,3 +61,30 @@ Remetre le filtre inisial du prof
 il veux moins de truc a cocher.
 Garde en memoir le filtre et ne retire rien meme si il est modifier
 filtre texte obligatoire. 
+
+
+
+
+
+# Remarques du professeur après livrable 2
+
+## ✅ Points positifs
+- **Partie Client** : Interface d'accueil très satisfaisante
+
+## 🔧 Améliorations requises
+
+### Côté Client
+- **Gestion des quantités** : Ajouter des boutons **+** et **-** pour incrémenter/décrémenter les quantités sur la page d'accueil
+- **Affichage panier** : 
+  - Ajouter le **sous-total** dans la page panier
+  - Afficher "**Panier vide**" au lieu de 0
+  - **Supprimer automatiquement** les produits quand quantité = 0
+- **Stocks** : Afficher clairement un message de **rupture de stock**
+
+### Côté Admin
+- **Affichage commandes** :
+  - **Réorganiser** le tableau pour avoir les commandes en cours en premier ( order by )
+  - Simplifier les états : uniquement "**Validé**" (pas de "Livré" ou autres)
+
+## ⚠️ Points à refaire
+- **Routing** : Ne pas utiliser `url_for()`, suivre les conventions de routing et refaire les URLs selon les bonnes pratiques
