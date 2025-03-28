@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS historique;
+DROP TABLE IF EXISTS liste_envie;
 DROP TABLE IF EXISTS ligne_panier;
 DROP TABLE IF EXISTS ligne_commande;
 DROP TABLE IF EXISTS commande;
@@ -57,6 +59,24 @@ CREATE TABLE skin(
    FOREIGN KEY(special_id) REFERENCES special(id_special),
    FOREIGN KEY(usure_id) REFERENCES usure(id_usure),
    FOREIGN KEY(type_skin_id) REFERENCES type_skin(id_type_skin)
+) DEFAULT CHARSET utf8mb4;
+
+CREATE TABLE historique(
+   id_skin INT,
+   id_utilisateur INT,
+   date_consultation DATETIME,
+   PRIMARY KEY(date_consultation),
+   FOREIGN KEY(id_skin) REFERENCES skin(id_skin),
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
+) DEFAULT CHARSET utf8mb4;
+
+CREATE TABLE liste_envie(
+   id_skin INT,
+   id_utilisateur INT, 
+   date_update DATETIME,
+   PRIMARY KEY(date_update),
+   FOREIGN KEY(id_skin) REFERENCES skin(id_skin),
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 ) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE commande(
