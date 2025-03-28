@@ -16,7 +16,7 @@ def update_stock(quantite, id_article):
         FROM skin
         WHERE id_skin = %s
     '''
-    mycursor.execute(sql, (id_article))
+    mycursor.execute(sql, (id_article,)) 
     quantite_article = mycursor.fetchone()['stock']
     if quantite > quantite_article:
         print("Quantité trop élevé")
