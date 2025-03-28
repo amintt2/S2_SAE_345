@@ -66,13 +66,13 @@
             </table>
         </div>
         <div class="mt-6 space-x-4 text-right">
-            <form action="{{ url_for('client_panier.client_panier_vider') }}" method="post" class="inline">
+            <form action="/client/panier/vider" method="post" class="inline">
                 <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
                     Vider le panier
                 </button>
             </form>
             {% if prix_total > 0 %}
-            <form action="{{ url_for('client_commande.client_commande_add') }}" method="post" class="inline">
+            <form action="/client/commande/add" method="post" class="inline">
                 <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">
                     Valider la commande
                 </button>
@@ -86,7 +86,7 @@
     <div class="bg-dark-secondary rounded-lg p-4 mb-3 shadow-lg">
         <div class="flex flex-col space-y-4">
             <h2 class="text-2xl font-bold text-white mt-2">Filtre</h2>
-            <form action="{{ url_for('client_article.client_article_filtre') }}" method="post" class="flex flex-col space-y-2">
+            <form action="/client/article/filtre" method="post" class="flex flex-col space-y-2">
                 <div class="flex flex-col space-y-2">
                     <label for="filter_word" class="text-sm text-gray-300">Nom :</label>
                     <input type="text" name="filter_word" id="filter_word" placeholder="Nom du skin" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" value="{{ session.filter_word }}">
@@ -115,7 +115,7 @@
                 </div>
                 <div class="flex items-center justify-start space-x-2 flex-row-reverse">
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">Filtrer</button>
-                    <button type="submit" formaction="{{ url_for('client_article.client_article_filtre_delete') }}" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">Supprimer le filtre</button>
+                    <button type="submit" formaction="/client/article/filtre/delete" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">Supprimer le filtre</button>
                 </div>
             </form>
         </div>
@@ -131,8 +131,8 @@
             {% for article in articles %}
             <div class="bg-dark-secondary rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div class="relative">
-                    <img src="{{ url_for('static', filename='images/' + article.image) }}" 
-                        class="w-full h-48 object-cover" 
+                    <img src="/static/images/{{ article.image }}" 
+                        class="w-full h-60 object-contain" 
                         alt="{{ article.nom }}">
                     <div class="absolute top-2 right-2 flex flex-col space-y-2">
                         <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-gray-300 px-2 py-1 rounded text-sm font-medium justify self-end">
@@ -178,7 +178,7 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <form action="{{ url_for('client_panier.client_panier_add') }}" method="post" class="flex-grow">
+                        <form action="/client/panier/add" method="post" class="flex-grow">
                             <input type="hidden" name="id_article" value="{{ article.id_article }}">
                             <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
                                     {% if article.stock_min <= 0 %}disabled{% endif %}

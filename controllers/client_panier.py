@@ -56,7 +56,7 @@ def client_panier_add():
     if result['nb_declinaisons'] > 1:
         # Si plusieurs déclinaisons, afficher la page de choix de déclinaison
         sql = '''
-            SELECT s.id_skin, s.nom_skin, s.prix_skin, s.stock,
+            SELECT s.id_skin, s.nom_skin, s.prix_skin, s.stock, s.image,
                    u.libelle_usure, u.id_usure
             FROM skin s
             INNER JOIN usure u ON s.usure_id = u.id_usure
@@ -65,9 +65,20 @@ def client_panier_add():
         '''
         mycursor.execute(sql, (id_article,))
         declinaisons = mycursor.fetchall()
-        return render_template('client/boutique/declinaison_article.html', 
+        
+        # Avoir l'image de l'article
+        sql = '''
+            SELECT image, nom_skin as nom
+            FROM skin 
+            WHERE id_skin = %s
+        '''
+        mycursor.execute(sql, (id_article,))
+        article = mycursor.fetchone()
+        
+        return render_template('client/boutique/declinaison_article.html',
                              declinaisons=declinaisons,
-                             nom_article=declinaisons[0]['nom_skin'])
+                             nom_article=declinaisons[0]['nom_skin'],
+                             article=article)
 
     # Si un seul article, ajouter directement au panier
     print("Form data:")
@@ -165,13 +176,17 @@ def client_panier_add_declinaison():
     ligne_panier = mycursor.fetchone()
 
     if ligne_panier:
+        # Met à jour la quantité si déjà dans le panier
         sql = '''
             UPDATE ligne_panier 
             SET quantite = quantite + 1 
             WHERE utilisateur_id = %s AND skin_id = %s
         '''
         mycursor.execute(sql, (id_client, id_article))
+        # Met à jour le stock
+        update_stock(1, id_article)
     else:
+        # Ajouter une nouvelle ligne au panier
         sql = '''
             INSERT INTO ligne_panier(utilisateur_id, skin_id, quantite) 
             VALUES (%s, %s, 1)
