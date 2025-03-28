@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 from flask import Blueprint
-from flask import request, render_template, redirect, abort, flash, session, url_for
+from flask import request, render_template, redirect, abort, flash, session
  
 from connexion_db import get_db
 
@@ -35,6 +35,41 @@ def update_stock(quantite, id_article):
 @client_panier.route('/client/panier/add', methods=['POST'])
 def client_panier_add():
     mycursor = get_db().cursor()
+    id_client = session['id_user']
+    id_article = request.form.get('id_article', None)
+
+    if not id_article:
+        flash(u'Article non trouvé', 'alert-warning')
+        return redirect('/client/article/show')
+
+    # Vérifier si l'article a plusieurs déclinaisons
+    sql = '''
+        SELECT COUNT(DISTINCT usure.id_usure) as nb_declinaisons
+        FROM skin 
+        INNER JOIN usure ON skin.usure_id = usure.id_usure
+        WHERE nom_skin = (SELECT nom_skin FROM skin WHERE id_skin = %s)
+        AND stock > 0
+    '''
+    mycursor.execute(sql, (id_article,))
+    result = mycursor.fetchone()
+    
+    if result['nb_declinaisons'] > 1:
+        # Si plusieurs déclinaisons, afficher la page de choix de déclinaison
+        sql = '''
+            SELECT s.id_skin, s.nom_skin, s.prix_skin, s.stock,
+                   u.libelle_usure, u.id_usure
+            FROM skin s
+            INNER JOIN usure u ON s.usure_id = u.id_usure
+            WHERE s.nom_skin = (SELECT nom_skin FROM skin WHERE id_skin = %s)
+            AND s.stock > 0
+        '''
+        mycursor.execute(sql, (id_article,))
+        declinaisons = mycursor.fetchall()
+        return render_template('client/boutique/declinaison_article.html', 
+                             declinaisons=declinaisons,
+                             nom_article=declinaisons[0]['nom_skin'])
+
+    # Si un seul article, ajouter directement au panier
     print("Form data:")
     print("id_client:", session['id_user'])
     print("id_article:", request.form.get('id_article'))
@@ -42,59 +77,110 @@ def client_panier_add():
     print("id_declinaison_article:", request.form.get('id_declinaison_article', None))
     
     id_client = session['id_user']
-    id_article = request.form.get('id_article')
-    quantite = int(request.form.get('quantite', 1))
+    id_article = request.form.get('id_article', None)
 
-    # ---------
-    id_declinaison_article=request.form.get('id_declinaison_article',None)
-    
-# ajout dans le panier d'une déclinaison d'un article (si 1 declinaison : immédiat sinon => vu pour faire un choix
-    sql = '''    '''
-    mycursor.execute(sql, (id_article))
-    declinaisons = mycursor.fetchall()
-    if len(declinaisons) == 1:
-        id_declinaison_article = declinaisons[0]['id_declinaison_article']
-    elif len(declinaisons) == 0:
-        abort("pb nb de declinaison")
-    else:
-        sql = '''   '''
-        mycursor.execute(sql, (id_article))
-        article = mycursor.fetchone()
-        return render_template('client/boutique/declinaison_article.html'
-                                   , declinaisons=declinaisons
-                                   , quantite=quantite
-                                   , article=article)
+    if not id_article:
+        flash(u'Article non trouvé', 'alert-warning')
+        return redirect('/client/article/show')
 
-
-# mise à jour des quantités
-    quantite = update_stock(quantite, id_article)
-
-# ajout dans le panier d'un article
-
+    # Vérifie si l'article est en stock / existe
     sql = '''
-        SELECT *  FROM ligne_panier 
-        WHERE skin_id = %s AND utilisateur_id = %s
+        SELECT id_skin, stock 
+        FROM skin 
+        WHERE id_skin = %s
     '''
-    mycursor.execute(sql, (id_article, id_client))
-    article_panier = mycursor.fetchone()
-    print("article_panier: ", article_panier)
+    mycursor.execute(sql, (id_article,))
+    article = mycursor.fetchone()
+    
+    if not article:
+        flash(u'Article non trouvé', 'alert-warning')
+        return redirect('/client/article/show')
+    
+    if article['stock'] <= 0:
+        flash(u'Article en rupture de stock', 'alert-warning')
+        return redirect('/client/article/show')
 
-    if article_panier is not None:
+    # Vérifie si l'article est déjà dans le panier
+    sql = '''
+        SELECT quantite 
+        FROM ligne_panier 
+        WHERE utilisateur_id = %s AND skin_id = %s
+    '''
+    mycursor.execute(sql, (id_client, id_article))
+    ligne_panier = mycursor.fetchone()
+
+    if ligne_panier:
+        # Met à jour la quantité si déjà dans le panier
         sql = '''
-            UPDATE ligne_panier
-            SET quantite = quantite + %s
-            WHERE skin_id = %s AND utilisateur_id = %s;
+            UPDATE ligne_panier 
+            SET quantite = quantite + 1 
+            WHERE utilisateur_id = %s AND skin_id = %s
         '''
-        mycursor.execute(sql, (quantite, id_article, id_client))
+        mycursor.execute(sql, (id_client, id_article))
+        
+    else:
+        # Ajouter une nouvelle ligne au panier
+        sql = '''
+            INSERT INTO ligne_panier(utilisateur_id, skin_id, quantite) 
+            VALUES (%s, %s, 1)
+        '''
+        mycursor.execute(sql, (id_client, id_article))
+        update_stock(1, id_article)
+
+    get_db().commit()
+    flash(u'Article ajouté au panier', 'alert-success')
+    return redirect('/client/article/show')
+
+
+@client_panier.route('/client/panier/add_declinaison', methods=['POST'])
+def client_panier_add_declinaison():
+    id_article = request.form.get('id_article')
+    if not id_article:
+        flash(u'Article non trouvé', 'alert-warning')
+        return redirect('/client/article/show')
+        
+    id_client = session['id_user']
+    mycursor = get_db().cursor()
+
+    # Vérifier le stock
+    sql = '''
+        SELECT stock 
+        FROM skin 
+        WHERE id_skin = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+    article = mycursor.fetchone()
+    
+    if not article or article['stock'] <= 0:
+        flash(u'Article non disponible', 'alert-warning')
+        return redirect('/client/article/show')
+
+    # Ajouter au panier
+    sql = '''
+        SELECT quantite 
+        FROM ligne_panier 
+        WHERE utilisateur_id = %s AND skin_id = %s
+    '''
+    mycursor.execute(sql, (id_client, id_article))
+    ligne_panier = mycursor.fetchone()
+
+    if ligne_panier:
+        sql = '''
+            UPDATE ligne_panier 
+            SET quantite = quantite + 1 
+            WHERE utilisateur_id = %s AND skin_id = %s
+        '''
+        mycursor.execute(sql, (id_client, id_article))
     else:
         sql = '''
-            INSERT INTO ligne_panier (utilisateur_id, skin_id, quantite, date_ajout)
-            VALUES (%s, %s, %s, NOW());
+            INSERT INTO ligne_panier(utilisateur_id, skin_id, quantite) 
+            VALUES (%s, %s, 1)
         '''
-        mycursor.execute(sql, (id_client, id_article, quantite))
+        mycursor.execute(sql, (id_client, id_article))
+        update_stock(1, id_article)
+
     get_db().commit()
-
-
+    flash(u'Article ajouté au panier', 'alert-success')
     return redirect('/client/article/show')
 
 
@@ -289,3 +375,4 @@ def client_panier_filtre_delete():
     if 'filter_types' in session:
         session.pop('filter_types')
     return redirect('/client/article/show')
+
