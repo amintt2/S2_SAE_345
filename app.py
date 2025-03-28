@@ -33,7 +33,6 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-
 @app.route('/')
 def show_accueil():
     if 'role' in session:
@@ -86,4 +85,5 @@ app.register_blueprint(admin_commentaire)
 
 if __name__ == '__main__':
     app.run()
+
 

@@ -149,59 +149,40 @@
                     <h3 class="text-lg font-semibold text-white">{{ article.nom }}</h3>
                     {% if article.libelle_type_skin not in ['Sticker'] %}
                     <div class="mt-1 mb-3">
-                        <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
-                            {{ article.libelle_usure }}
-                        </span>
-                        <!--
                             {% for declinaison in article.declinaisons %}
                             <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
                                 {{ declinaison }}
                             </span>
                             {% endfor %}
-                        -->
                     </div>
                     {% endif %}
                     <div class="flex justify-between items-center mb-4">
                         <div class="text-accent-blue font-bold text-xl">
-                            <span style="color: #3498db">
-                                {{ article.prix }}€
-
-                                <!-- Livrable 3
+                            <span style="color: #3498db">$
                                 {% if article.prix_min == article.prix_max %}
-                                {{ article.prix_max }}€
+                                    {{ article.prix_max }}€
                                 {% else %}
-                                {{ article.prix_min }}€ - {{ article.prix_max }}€
+                                    {{ article.prix_min }}€ - {{ article.prix_max }}€
                                 {% endif %}
-
-                                -->
-
                             </span>
                         </div>
 
                         <div class="flex items-center">
-                            {% if article.stock > 0 %}
-                            <span class="text-gray-400 text-sm">Stock: {{ article.stock }}</span>
+                            {% if article.stock_max > 0 and article.stock_min == article.stock_max %}
+                                <span class="text-gray-400 text-sm">Stock: {{ article.stock_max }}</span>
+                            {% elif article.stock_max > 0 %}
+                                <span class="text-gray-400 text-sm">Stock: {{ article.stock_min }} à {{ article.stock_max }}</span>
                             {% else %}
-                            <span class="text-red-500 text-sm">Rupture de stock</span>
+                                <span class="text-red-500 text-sm">Rupture de stock</span>
                             {% endif %}
-                            
-                            <!-- Livrable 3 
-                            <span class="text-gray-400 text-sm">Stock: { article.stock_max }</span>
-                            { if article.stock_max > 0 and article.stock_min == article.stock_max }
-                            { elif article.stock_max > 0 }
-                            <span class="text-gray-400 text-sm">Stock: { article.stock_min } à { article.stock_max }</span>
-                            { else }
-                            <span class="text-red-500 text-sm">Rupture de stock</span>
-                            { endif }
-                            -->
                         </div>
                     </div>
                     <form action="{{ url_for('client_panier.client_panier_add') }}" method="post">
                         <input type="hidden" name="id_article" value="{{ article.id_article }}">
                         <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
-                                {% if article.stock <= 0 %}disabled{% endif %}
-                                {% if article.stock <= 0 %}class="w-full bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
-                            {% if article.stock > 0 %}
+                                {% if article.stock_min <= 0 %}disabled{% endif %}
+                                {% if article.stock_min <= 0 %}class="w-full bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
+                            {% if article.stock_min > 0 %}
                                 Ajouter au panier
                             {% else %}
                                 Indisponible

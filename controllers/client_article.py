@@ -15,54 +15,43 @@ def client_article_show():                                 # remplace client_ind
     id_client = session['id_user']
     list_param = []
 
-########################## Livrable 3 ##########################
-#    sql = '''
-#        SELECT DISTINCT nom_skin AS nom
-#                , MIN(id_skin) AS id_article
-#                , MIN(prix_skin) AS prix_min
-#                , MAX(prix_skin) AS prix_max
-#                , MIN(stock) AS stock_min
-#                , MAX(stock) AS stock_max
-#                , MIN(image) AS image
-#                , MIN(libelle_usure) AS libelle_usure
-#                , MIN(libelle_type_skin) AS libelle_type_article
-#                , MIN(libelle_special) AS libelle_special
-#        FROM skin
-#        INNER JOIN usure ON skin.usure_id = usure.id_usure
-#        INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
-#        INNER JOIN special ON skin.special_id = special.id_special
-#        WHERE stock > 0
-#        '''
-#    if 'filter_types' in session and session['filter_types']:
-#        placeholders = ','.join(['%s'] * len(session['filter_types']))
-#        sql += f' AND type_skin.id_type_skin IN ({placeholders})'
-#        list_param.extend(session['filter_types'])
-#
-#    sql += ' GROUP BY nom_skin ORDER BY id_article'
-#
-#
-#    # pour les déclinaisons
-#    declinaisons = []
-#    for article in articles:
-#        declinaisons = get_declinaison(article['nom'])
-#        article['declinaisons'] = declinaisons
-################################################################
-
     sql = '''
-        SELECT id_skin AS id_article
-                , nom_skin AS nom
-                , prix_skin AS prix
-                , stock 
-                , image
-                , libelle_usure AS libelle_usure
-                , libelle_type_skin AS libelle_type_article
-                , libelle_special AS libelle_special
+        SELECT DISTINCT nom_skin AS nom
+                , MIN(id_skin) AS id_article
+                , MIN(prix_skin) AS prix_min
+                , MAX(prix_skin) AS prix_max
+                , MIN(stock) AS stock_min
+                , MAX(stock) AS stock_max
+                , MIN(image) AS image
+                , MIN(libelle_usure) AS libelle_usure
+                , MIN(libelle_type_skin) AS libelle_type_article
+                , MIN(libelle_special) AS libelle_special
         FROM skin
         INNER JOIN usure ON skin.usure_id = usure.id_usure
         INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
         INNER JOIN special ON skin.special_id = special.id_special
-        WHERE 1=1
+        WHERE stock > 0
         '''
+
+
+######################## Livrable 2 ###########################
+#    sql = '''
+#        SELECT id_skin AS id_article
+#                , nom_skin AS nom
+#                , prix_skin AS prix
+#                , stock 
+#                , image
+#                , libelle_usure AS libelle_usure
+#                , libelle_type_skin AS libelle_type_article
+#                , libelle_special AS libelle_special
+#        FROM skin
+#        INNER JOIN usure ON skin.usure_id = usure.id_usure
+#        INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
+#        INNER JOIN special ON skin.special_id = special.id_special
+#        WHERE 1=1
+#        '''
+################################################################
+
     
     if 'filter_types' in session and session['filter_types']:
         placeholders = ','.join(['%s'] * len(session['filter_types']))
@@ -102,9 +91,18 @@ def client_article_show():                                 # remplace client_ind
         else:
             sql += ' AND prix_skin <= %s'
             list_param.append(int(session['filter_prix_max']))
+            
+    sql += 'GROUP BY nom_skin'
     
     mycursor.execute(sql, tuple(list_param) if list_param else None)
     articles = mycursor.fetchall()
+
+
+    # pour les déclinaisons
+    declinaisons = []
+    for article in articles:
+        declinaisons = get_declinaison(article['nom'])
+        article['declinaisons'] = declinaisons
 
 
     # pour le filtre

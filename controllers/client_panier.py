@@ -49,21 +49,21 @@ def client_panier_add():
     id_declinaison_article=request.form.get('id_declinaison_article',None)
     
 # ajout dans le panier d'une déclinaison d'un article (si 1 declinaison : immédiat sinon => vu pour faire un choix
-    # sql = '''    '''
-    # mycursor.execute(sql, (id_article))
-    # declinaisons = mycursor.fetchall()
-    # if len(declinaisons) == 1:
-    #     id_declinaison_article = declinaisons[0]['id_declinaison_article']
-    # elif len(declinaisons) == 0:
-    #     abort("pb nb de declinaison")
-    # else:
-    #     sql = '''   '''
-    #     mycursor.execute(sql, (id_article))
-    #     article = mycursor.fetchone()
-    #     return render_template('client/boutique/declinaison_article.html'
-    #                                , declinaisons=declinaisons
-    #                                , quantite=quantite
-    #                                , article=article)
+    sql = '''    '''
+    mycursor.execute(sql, (id_article))
+    declinaisons = mycursor.fetchall()
+    if len(declinaisons) == 1:
+        id_declinaison_article = declinaisons[0]['id_declinaison_article']
+    elif len(declinaisons) == 0:
+        abort("pb nb de declinaison")
+    else:
+        sql = '''   '''
+        mycursor.execute(sql, (id_article))
+        article = mycursor.fetchone()
+        return render_template('client/boutique/declinaison_article.html'
+                                   , declinaisons=declinaisons
+                                   , quantite=quantite
+                                   , article=article)
 
 
 # mise à jour des quantités
@@ -183,7 +183,7 @@ def client_panier_delete():
 
     # ---------
     # partie 2 : on supprime une déclinaison de l'article
-    # id_declinaison_article = request.form.get('id_declinaison_article', None)
+    id_declinaison_article = request.form.get('id_declinaison_article', None)
 
 
     _delete_article_from_panier(quantite, id_article)
@@ -231,7 +231,7 @@ def client_panier_delete_line():
     mycursor = get_db().cursor()
     id_client = session['id_user']
     id_article = request.form.get('id_article')
-    #id_declinaison_article = request.form.get('id_declinaison_article')
+    id_declinaison_article = request.form.get('id_declinaison_article')
 
     sql = ''' 
         SELECT quantite 
