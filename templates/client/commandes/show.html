@@ -28,7 +28,7 @@
 
             {% if articles_commande %}
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-900">Recapitulatifs de la commande selectionnée</h3>
+                <h3 class="text-2xl font-bold text-white-900">Recapitulatif de la commande selectionnée</h3>
                 <a href="/client/commande/show" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
                     Retour
                 </a>
@@ -36,11 +36,11 @@
             <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
                 <thead>
                     <tr>
-                        <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
-                        <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
-                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Quantite</th>
-                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix</th>
-                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix total</th>
+                        <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
+                        <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
+                        <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Quantite</th>
+                        <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Prix unitaire</th>
+                        <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Prix total</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
@@ -49,28 +49,20 @@
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
                                     {% if ligne.image %}
                                         <img class="h-12 w-12 rounded-full object-cover" 
-                                             src="{{ url_for('static', filename='images/' + ligne.image) }}" 
+                                             src="/static/images/{{ ligne.image }}" 
                                              alt="Image de {{ ligne.nom }}">
                                     {% else %}
                                         <img class="h-12 w-12 rounded-full object-cover"
-                                             src="{{ url_for('static', filename='images/no_photo.jpeg') }}" 
+                                             src="/static/images/no_photo.jpeg" 
                                              alt="Pas d'image">
                                     {% endif %}
                                 </td>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ ligne.nom }}
-                                {% if ligne.nb_declinaisons is defined and ligne.nb_declinaisons > 1 %}
-                                    <span class="text-gray-400"> ( {{ ligne.nb_declinaisons }} declinaisons )</span>
-                                    {% if ligne.couleur_id != 1 %}
-                                        <span class="text-emerald-400"> {{ ligne.libelle_couleur }} </span>
-                                    {% endif %}
-                                    {% if ligne.taille_id != 1 %}
-                                        <span class="text-pink-400"> {{ ligne.libelle_taille }} </span>
-                                    {% endif %}
-                                {% endif %}
+                                    <span class="text-blue-400 ml-2">( {{ ligne.libelle_usure }} )</span>
                                 </td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.quantite }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix }} €</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix_ligne }} €</td>
+                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ ligne.quantite }}</td>
+                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ ligne.prix }} €</td>
+                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ ligne.prix_ligne }} €</td>
                             </tr>
                         {% endfor %}
                 </tbody>
@@ -96,10 +88,10 @@
                     <table class="min-w-full divide-y divide-gray-700">
                         <thead>
                         <tr>
-                            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Date de commande</th>
-                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Nombre d'articles</th>
-                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Coût total</th>
-                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Etat de la commande</th>
+                            <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Date de commande</th>
+                            <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Nombre d'articles</th>
+                            <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Coût total</th>
+                            <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Etat de la commande</th>
                             <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Options</th>
                         </tr>
                         </thead>
