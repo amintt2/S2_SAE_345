@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block style %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='mes_styles.css') }}" >
+    <link rel="stylesheet" href="/static/mes_styles.css" >
 {% endblock %}
 
 {% block body %}
@@ -41,13 +41,13 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ article.prix }}€</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <form action="{{ url_for('client_panier.client_panier_update') }}" method="post" class="inline">
+                            <form action="/client/panier/update" method="post" class="inline">
                                 <input type="hidden" name="id_article" value="{{ article.id_article }}">
                                 <input type="number" name="quantite" value="{{ article.quantite }}" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" onchange="this.form.submit()">
                             </form>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <form action="{{ url_for('client_panier.client_panier_delete_line') }}" method="post" class="inline">
+                            <form action="/client/panier/delete/line" method="post" class="inline">
                                 <input type="hidden" name="id_article" value="{{ article.id_article }}">
                                 <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
                                     Supprimer la ligne
@@ -113,9 +113,13 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="flex items-center justify-start space-x-2 flex-row-reverse">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">Filtrer</button>
-                    <button type="submit" formaction="/client/article/filtre/delete" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">Supprimer le filtre</button>
+                <div class="flex items-center justify-end space-x-4">
+                    <button type="submit" formaction="/client/article/filtre/delete" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
+                        Supprimer le filtre
+                    </button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">
+                        Filtrer
+                    </button>
                 </div>
             </form>
         </div>
@@ -207,5 +211,6 @@
   </div>
 </div>
 {% endblock %}
+
 
 
