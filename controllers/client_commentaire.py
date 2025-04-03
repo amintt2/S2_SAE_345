@@ -15,6 +15,7 @@ client_commentaire = Blueprint('client_commentaire', __name__,
 def client_article_details():
     mycursor = get_db().cursor()
     id_article =  request.args.get('id_article', None)
+    print(id_article)
     id_client = session['id_user']
 
     ## partie 4
@@ -26,49 +27,69 @@ def client_article_details():
         nom_skin AS nom, 
         prix_skin AS prix,
         description,
-        image
-    FROM skin 
-    WHERE id_skin = %s;
+        image,
+        ROUND(AVG(note), 1) AS moyenne_notes,
+        COUNT(note) AS nb_notes
+    FROM skin
+    LEFT JOIN note ON note.skin_id = skin.id_skin
+    WHERE id_skin = %s
+    GROUP BY id_skin, nom_skin, prix_skin, description, image;
     '''
     # -- Description, moyenne_notes, nb_notes
-    mycursor.execute(sql, id_article)
+    mycursor.execute(sql, (id_article,))
     article = mycursor.fetchone()
+    print(article)
     #article=[]
     commandes_articles=[]
     nb_commentaires=[]
     if article is None:
         abort(404, "pb id article")
-    # sql = '''
-    #
-    # '''
-    # mycursor.execute(sql, ( id_article))
-    # commentaires = mycursor.fetchall()
     sql = '''
-    SELECT COUNT(declinaison_id) AS nb_commandes_article
-    FROM ligne_commande
-    JOIN commande ON commande.id_commande = ligne_commande.commande_id
-    WHERE commande.utilisateur_id=%s and ligne_commande.declinaison_id=%s;
+        SELECT commentaire, date_publication, utilisateur_id, nom, skin_id AS id_article, valide
+        FROM commentaire
+        JOIN utilisateur ON utilisateur.id_utilisateur = commentaire.utilisateur_id
+        WHERE skin_id = %s
+        ORDER BY valide DESC, date_publication DESC;
+    '''
+    mycursor.execute(sql, ( id_article))
+    commentaires = mycursor.fetchall()
+    sql = '''
+        SELECT COUNT(declinaison_id) AS nb_commandes_article
+        FROM ligne_commande
+        JOIN commande ON commande.id_commande = ligne_commande.commande_id
+        WHERE commande.utilisateur_id=%s and ligne_commande.declinaison_id=%s;
     '''
     mycursor.execute(sql, (id_client, id_article))
     commandes_articles = mycursor.fetchone()
     print(f"id_client: {id_client} - id_article: {id_article}")
     print(commandes_articles)
-    # sql = '''
-    # '''
-    # mycursor.execute(sql, (id_client, id_article))
-    # note = mycursor.fetchone()
-    # print('note',note)
-    # if note:
-    #     note=note['note']
-    # sql = '''
-    # '''
-    # mycursor.execute(sql, (id_client, id_article))
-    # nb_commentaires = mycursor.fetchone()
+    sql = ''' 
+        SELECT note 
+        FROM note
+        WHERE utilisateur_id=%s and skin_id=%s;
+    '''
+    mycursor.execute(sql, (id_client, id_article))
+    note = mycursor.fetchone()
+    print('note',note)
+    if note:
+        note=note['note']
+    sql = '''
+        SELECT  COUNT(*) AS nb_commentaires_total
+                , COUNT(IF(valide = 1, 1, NULL)) AS nb_commentaires_total_valide
+                , COUNT(IF(utilisateur_id = %s, 1, NULL)) AS nb_commentaires_utilisateur
+                , COUNT(IF(utilisateur_id = %s AND valide = 1, 1, NULL)) AS nb_commentaires_utilisateur_valide
+
+        FROM commentaire
+        WHERE skin_id = %s
+        GROUP BY skin_id;
+    '''
+    mycursor.execute(sql, (id_client, id_client, id_article))
+    nb_commentaires = mycursor.fetchone()
     return render_template('client/article_info/article_details.html'
                            , article=article
-                           # , commentaires=commentaires
+                           , commentaires=commentaires
                            , commandes_articles=commandes_articles
-                           # , note=note
+                           , note=note
                             , nb_commentaires=nb_commentaires
                            )
 
@@ -85,9 +106,37 @@ def client_comment_add():
         flash(u'Commentaire avec plus de 2 caractères','alert-warning')              # 
         return redirect('/client/article/details?id_article='+id_article)
 
-    tuple_insert = (commentaire, id_client, id_article)
+    tuple_insert = (id_client, id_article, commentaire)
     print(tuple_insert)
-    sql = '''  '''
+
+    sql='''
+    SELECT commande.utilisateur_id, declinaison.skin_id
+    FROM ligne_commande
+    JOIN commande ON commande.id_commande = ligne_commande.commande_id
+    JOIN declinaison ON declinaison.id_declinaison = ligne_commande.declinaison_id
+    WHERE commande.utilisateur_id=%s AND declinaison.skin_id=%s
+    '''
+    mycursor.execute(sql, (id_client, id_article))
+    commande = mycursor.fetchone()
+    if not commande:
+        flash(u'Vous ne pouvez pas commenter cet article sans l\'avoir acheté', 'alert-info')
+        return redirect('/client/article/details?id_article='+id_article)
+    
+    sql = '''
+    SELECT COUNT(*) AS nb_commentaires
+    FROM commentaire
+    WHERE skin_id = %s AND utilisateur_id = %s
+    '''
+    mycursor.execute(sql, (id_article, id_client))
+    nb_commentaires = mycursor.fetchone()
+    if nb_commentaires['nb_commentaires'] >= 3:
+        flash(u'Vous avez deja commenté cet article 3 fois', 'alert-info')
+        return redirect('/client/article/details?id_article='+id_article)
+    
+    sql = '''  
+        INSERT INTO commentaire(utilisateur_id, skin_id, commentaire, date_publication, valide)
+        VALUES (%s, %s, %s, NOW(), 0);
+    '''
     mycursor.execute(sql, tuple_insert)
     get_db().commit()
     return redirect('/client/article/details?id_article='+id_article)
@@ -97,10 +146,19 @@ def client_comment_add():
 def client_comment_detete():
     mycursor = get_db().cursor()
     id_client = session['id_user']
+    id_author = request.form.get('utilisateur_id', None)
     id_article = request.form.get('id_article', None)
     date_publication = request.form.get('date_publication', None)
-    sql = '''   '''
+    if (id_author == id_client):
+        flash(u'Vous ne pouvez pas supprimer un commentaire qui ne vous appartien pas', 'alert-info')
+        return redirect('/client/article/details?id_article='+id_article)
+
+    sql = '''
+    DELETE FROM commentaire
+    WHERE utilisateur_id = %s AND skin_id = %s AND date_publication = %s;
+    '''
     tuple_delete=(id_client,id_article,date_publication)
+    print(tuple_delete)
     mycursor.execute(sql, tuple_delete)
     get_db().commit()
     return redirect('/client/article/details?id_article='+id_article)
@@ -113,9 +171,39 @@ def client_note_add():
     id_article = request.form.get('id_article', None)
     tuple_insert = (note, id_client, id_article)
     print(tuple_insert)
-    sql = '''   '''
+
+    sql='''
+        SELECT commande.utilisateur_id, declinaison.skin_id
+        FROM ligne_commande
+        JOIN commande ON commande.id_commande = ligne_commande.commande_id
+        JOIN declinaison ON declinaison.id_declinaison = ligne_commande.declinaison_id
+        WHERE commande.utilisateur_id=%s AND declinaison.skin_id=%s
+    '''
+    mycursor.execute(sql, (id_client, id_article))
+    commande = mycursor.fetchone()
+    if not commande:
+        flash(u'Vous ne pouvez pas noter un skin que vous n\'avez jamais acheté', 'alert-info')
+        return redirect('/client/article/details?id_article='+id_article)
+    
+
+    sql = '''
+        SELECT *
+        FROM note
+        WHERE skin_id = %s AND utilisateur_id = %s
+    '''
+    mycursor.execute(sql, (id_article, id_client))
+    nb_notes = mycursor.fetchone()
+    if nb_notes is not None:
+        flash(u'Vous avez deja noté cet article', 'alert-info')
+        return redirect('/client/article/details?id_article='+id_article)
+    
+    sql = '''
+        INSERT INTO note (note, utilisateur_id, skin_id)
+        VALUES (%s, %s, %s)
+        '''
     mycursor.execute(sql, tuple_insert)
     get_db().commit()
+    
     return redirect('/client/article/details?id_article='+id_article)
 
 @client_commentaire.route('/client/note/edit', methods=['POST'])
@@ -126,7 +214,24 @@ def client_note_edit():
     id_article = request.form.get('id_article', None)
     tuple_update = (note, id_client, id_article)
     print(tuple_update)
-    sql = '''  '''
+
+    sql = '''
+    SELECT *
+    FROM note
+    WHERE skin_id = %s AND utilisateur_id = %s
+    '''
+    mycursor.execute(sql, (id_article, id_client))
+    nb_notes = mycursor.fetchone()
+    if nb_notes is None:
+        flash(u'Vous n\'avez pas encore noté cet article', 'alert-info')
+        return redirect('/client/article/details?id_article='+id_article)
+    
+    
+    sql = '''
+        UPDATE note
+        SET note = %s
+        WHERE utilisateur_id = %s AND skin_id = %s
+    '''
     mycursor.execute(sql, tuple_update)
     get_db().commit()
     return redirect('/client/article/details?id_article='+id_article)
@@ -138,7 +243,21 @@ def client_note_delete():
     id_article = request.form.get('id_article', None)
     tuple_delete = (id_client, id_article)
     print(tuple_delete)
-    sql = '''  '''
+    sql = '''
+    SELECT *
+    FROM note
+    WHERE skin_id = %s AND utilisateur_id = %s
+    '''
+    mycursor.execute(sql, (id_article, id_client))
+    nb_notes = mycursor.fetchone()
+    if nb_notes is None:
+        flash(u'Vous ne pouvez pas supprimer une note que vous n\'avez jamais noté', 'alert-info')
+        return redirect('/client/article/details?id_article='+id_article)
+    
+    sql = ''' 
+        DELETE FROM note
+        WHERE utilisateur_id = %s AND skin_id = %s;
+    '''
     mycursor.execute(sql, tuple_delete)
     get_db().commit()
-    return redirect('/client/article/details?id_article='+id_article)
+    return redirect(u'/client/article/details?id_article='+id_article)

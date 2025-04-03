@@ -131,7 +131,7 @@ CREATE TABLE commentaire (
    skin_id INT NOT NULL,
    date_publication DATETIME,
    commentaire TEXT,
-   validee TINYINT(1),
+   valide TINYINT(1),
    PRIMARY KEY(utilisateur_id, skin_id, date_publication),
    CONSTRAINT fk_commentaire_utilisateur
       FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
