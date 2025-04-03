@@ -11,15 +11,15 @@ fixtures_load = Blueprint('fixtures_load', __name__,
 @fixtures_load.route('/base/init')
 def fct_fixtures_load():
      mycursor = get_db().cursor()
+     mycursor.execute("DROP TABLE IF EXISTS ligne_panier")
+     mycursor.execute("DROP TABLE IF EXISTS ligne_commande")
      mycursor.execute("DROP TABLE IF EXISTS declinaison")
      mycursor.execute("DROP TABLE IF EXISTS commentaire")
      mycursor.execute("DROP TABLE IF EXISTS note")
-     mycursor.execute("DROP TABLE IF EXISTS ligne_panier")
-     mycursor.execute("DROP TABLE IF EXISTS ligne_commande")
+     mycursor.execute("DROP TABLE IF EXISTS historique")
+     mycursor.execute("DROP TABLE IF EXISTS liste_envie")
      mycursor.execute("DROP TABLE IF EXISTS commande")
      mycursor.execute("DROP TABLE IF EXISTS adresse")
-     mycursor.execute("DROP TABLE IF EXISTS liste_envie")
-     mycursor.execute("DROP TABLE IF EXISTS historique")
      mycursor.execute("DROP TABLE IF EXISTS skin")
      mycursor.execute("DROP TABLE IF EXISTS etat")
      mycursor.execute("DROP TABLE IF EXISTS special")
@@ -94,34 +94,6 @@ def fct_fixtures_load():
      mycursor.execute(sql)
 
      sql='''
-     CREATE TABLE historique(
-          skin_id INT NOT NULL,
-          utilisateur_id INT NOT NULL,
-          date_consultation DATETIME,
-          PRIMARY KEY(skin_id, utilisateur_id, date_consultation),
-          CONSTRAINT fk_historique_skin
-               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
-          CONSTRAINT fk_historique_utilisateur
-               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
-     ) DEFAULT CHARSET utf8mb4;
-     '''
-     mycursor.execute(sql)
-
-     sql='''
-     CREATE TABLE liste_envie(
-          skin_id INT NOT NULL,
-          utilisateur_id INT NOT NULL, 
-          date_update DATETIME,
-          PRIMARY KEY(skin_id, utilisateur_id, date_update),
-          CONSTRAINT fk_liste_envie_skin
-               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
-          CONSTRAINT fk_liste_envie_utilisateur
-               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
-     ) DEFAULT CHARSET utf8mb4;
-     '''
-     mycursor.execute(sql)
-
-     sql='''
      CREATE TABLE adresse (
           id_adresse INT AUTO_INCREMENT,
           nom VARCHAR(255),
@@ -154,6 +126,64 @@ def fct_fixtures_load():
                FOREIGN KEY(adresse_livraison_id) REFERENCES adresse(id_adresse),
           CONSTRAINT fk_commande_adresse_facturation
                FOREIGN KEY(adresse_facturation_id) REFERENCES adresse(id_adresse)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE liste_envie(
+          skin_id INT NOT NULL,
+          utilisateur_id INT NOT NULL, 
+          date_update DATETIME,
+          PRIMARY KEY(skin_id, utilisateur_id, date_update),
+          CONSTRAINT fk_liste_envie_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          CONSTRAINT fk_liste_envie_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE historique(
+          skin_id INT NOT NULL,
+          utilisateur_id INT NOT NULL,
+          date_consultation DATETIME,
+          PRIMARY KEY(skin_id, utilisateur_id, date_consultation),
+          CONSTRAINT fk_historique_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          CONSTRAINT fk_historique_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE note (
+          utilisateur_id INT NOT NULL,
+          skin_id INT NOT NULL,
+          note INT,
+          PRIMARY KEY(utilisateur_id, skin_id),
+          CONSTRAINT fk_note_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+          CONSTRAINT fk_note_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE commentaire (
+          utilisateur_id INT NOT NULL,
+          skin_id INT NOT NULL,
+          date_publication DATETIME,
+          commentaire TEXT,
+          valide TINYINT(1),
+          PRIMARY KEY(utilisateur_id, skin_id, date_publication),
+          CONSTRAINT fk_commentaire_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+          CONSTRAINT fk_commentaire_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin)
      ) DEFAULT CHARSET utf8mb4;
      '''
      mycursor.execute(sql)
@@ -204,36 +234,6 @@ def fct_fixtures_load():
                FOREIGN KEY(declinaison_id) REFERENCES declinaison(id_declinaison),
           CONSTRAINT fk_ligne_panier_utilisateur
                FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
-     ) DEFAULT CHARSET utf8mb4;
-     '''
-     mycursor.execute(sql)
-
-     sql='''
-     CREATE TABLE note (
-          utilisateur_id INT NOT NULL,
-          skin_id INT NOT NULL,
-          note INT,
-          PRIMARY KEY(utilisateur_id, skin_id),
-          CONSTRAINT fk_note_utilisateur
-               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
-          CONSTRAINT fk_note_skin
-               FOREIGN KEY(skin_id) REFERENCES skin(id_skin)
-     ) DEFAULT CHARSET utf8mb4;
-     '''
-     mycursor.execute(sql)
-
-     sql='''
-     CREATE TABLE commentaire (
-          utilisateur_id INT NOT NULL,
-          skin_id INT NOT NULL,
-          date_publication DATETIME,
-          commentaire TEXT,
-          validee TINYINT(1),
-          PRIMARY KEY(utilisateur_id, skin_id, date_publication),
-          CONSTRAINT fk_commentaire_utilisateur
-               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
-          CONSTRAINT fk_commentaire_skin
-               FOREIGN KEY(skin_id) REFERENCES skin(id_skin)
      ) DEFAULT CHARSET utf8mb4;
      '''
      mycursor.execute(sql)
