@@ -1,33 +1,42 @@
 {% extends "client/layout_client.html" %}
 {% block body %}
 
-    <div class="container  container-md">
-      <form method="post" action="/client/coordonnee/edit" >
-        <fieldset>
-            <legend> Modifier ses informations personnelles</legend>
-        <input id="id_user" type="hidden" value="{{ utilisateur.id_utilisateur }}" >
-
-        <div class="mb-3">
-            <label class="form-label" for="login">login utilisateur : </label>
-            <input class="form-control" id="login" type="text" required name="login" {% if utilisateur.login != "None" %}value="{{ utilisateur.login }}" {% endif %} >
-        </div>
-        <div class="mb-3">
-                <label class="form-label" for="nom">nom : </label>
-                <input class="form-control" id="nom" type="text" required name="nom" {% if utilisateur.nom != "None" %}value="{{ utilisateur.nom }}" {% endif %} >
-        </div>
-        <div class="mb-3">
-            <label class="form-label" for="email">email : </label>
-            <input class="form-control" id="email" type="email" required name="email" {% if utilisateur.email != "None" %}value="{{ utilisateur.email }}" {% endif %} >
-        </div>
-
-            <div class="col-12">
-                <button class="btn btn-primary" type="submit">Valider</button>
-                <a href="/client/coordonnee/show" class="btn btn-primary">Retour</a>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg p-6">
+        <h3 class="text-lg font-medium leading-6 text-gray-200 mb-6">Modifier ses informations personnelles</h3>
+        <form method="post" action="/client/coordonnee/edit">
+            <input id="id_user" name="id_user" type="hidden" value="{{ utilisateur.id_utilisateur }}">
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="login" class="block text-sm font-medium text-gray-200 mb-2">Login utilisateur</label>
+                    <input type="text" name="login" id="login" required {% if utilisateur.login != "None" %}value="{{ utilisateur.login }}"{% endif %} 
+                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                </div>
+                
+                <div>
+                    <label for="nom" class="block text-sm font-medium text-gray-200 mb-2">Nom</label>
+                    <input type="text" name="nom" id="nom" required {% if utilisateur.nom != "None" %}value="{{ utilisateur.nom }}"{% endif %} 
+                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-200 mb-2">Email</label>
+                    <input type="email" name="email" id="email" required {% if utilisateur.email != "None" %}value="{{ utilisateur.email }}"{% endif %} 
+                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                </div>
+                
+                <div class="mt-6">
+                    <button type="submit" class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                        Valider
+                    </button>
+                    <a href="/client/coordonnee/show" class="ml-2 rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
+                        Retour
+                    </a>
+                </div>
             </div>
-
-        </fieldset>
-      </form>
-
+        </form>
+    </div>
 </div>
 
 {% endblock %}

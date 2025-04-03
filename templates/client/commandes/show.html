@@ -38,45 +38,45 @@
                     <tr>
                         <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
                         <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
-                        <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Quantite</th>
+                        <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Quantité</th>
                         <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Prix unitaire</th>
                         <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Prix total</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
-                        {% for ligne in articles_commande %}
+                        {% for article in articles_commande %}
                             <tr class="hover:bg-gray-700">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
-                                    {% if ligne.image %}
+                                    {% if article.image_article %}
                                         <img class="h-12 w-12 rounded-full object-cover" 
-                                             src="/static/images/{{ ligne.image }}" 
-                                             alt="Image de {{ ligne.nom }}">
+                                             src="/static/images/{{ article.image_article }}" 
+                                             alt="Image de {{ article.nom_article }}">
                                     {% else %}
                                         <img class="h-12 w-12 rounded-full object-cover"
                                              src="/static/images/no_photo.jpeg" 
                                              alt="Pas d'image">
                                     {% endif %}
                                 </td>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ ligne.nom }}
-                                    <span class="text-blue-400 ml-2">( {{ ligne.libelle_usure }} )</span>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ article.nom_article }}
+                                    <span class="text-blue-400 ml-2">( {{ article.libelle_usure }} )</span>
                                     <div class="text-sm text-gray-400">
-                                        <span class="text-indigo-400">{{ ligne.libelle_type_skin }}</span>
-                                        {% if ligne.libelle_special != "Aucun" %}
-                                            <span class="text-amber-400 ml-2">{{ ligne.libelle_special }}</span>
+                                        <span class="text-indigo-400">{{ article.libelle_type_skin }}</span>
+                                        {% if article.libelle_special != "Aucun" %}
+                                            <span class="text-amber-400 ml-2">{{ article.libelle_special }}</span>
                                         {% endif %}
                                     </div>
                                 </td>
-                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ ligne.quantite }}</td>
-                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ ligne.prix }} €</td>
-                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ ligne.prix_ligne }} €</td>
+                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ article.quantite_article }}</td>
+                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ article.prix_unitaire }} €</td>
+                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ article.prix_total_ligne }} €</td>
                             </tr>
                         {% endfor %}
                 </tbody>
             </table>
                 <div class="mt-8 bg-amber-50 p-6 rounded-lg shadow-sm ring-1 ring-amber-200">
-                <strong class="text-amber-900">adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
+                <strong class="text-amber-900">Adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
                 <br>
-                <strong class="text-amber-900">adresse facturation : </strong>
+                <strong class="text-amber-900">Adresse facturation : </strong>
                 {% if commande_adresses.adresse_identique == 'adresse_identique' %}
                     adresse identique
                 {% else %}
@@ -103,25 +103,25 @@
                         </thead>
                         <tbody class="divide-y divide-gray-700">
                             {% for commande in commandes %}
-                            <tr class="{% if commande.etat_id == 1 %}bg-amber-900/50{% else %}bg-gray-800{% endif %} hover:bg-gray-700">
+                            <tr class="{% if commande.identifiant_etat == 1 %}bg-amber-900/50{% else %}bg-gray-800{% endif %} hover:bg-gray-700">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.nbr_articles }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.nombre_articles }}</td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
-                                    {{ "{:,.2f} €".format(commande.prix_total) }}
+                                    {{ "{:,.2f} €".format(commande.prix_total_commande) }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
-                                    {% if commande.etat_id == 1 %}
+                                    {% if commande.identifiant_etat == 1 %}
                                     <span class="inline-flex items-center rounded-full bg-amber-900/50 px-2.5 py-0.5 text-sm font-medium text-amber-200">
-                                        {{ commande.libelle }}
+                                        {{ commande.libelle_etat }}
                                     </span>
                                     {% else %}
                                     <span class="inline-flex items-center rounded-full bg-green-900/50 px-2.5 py-0.5 text-sm font-medium text-green-200">
-                                        {{ commande.libelle }}
+                                        {{ commande.libelle_etat }}
                                     </span>
                                     {% endif %}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
-                                    <a href="/client/commande/show?id_commande={{ commande.id_commande }}">
+                                    <a href="/client/commande/show?id_commande={{ commande.identifiant_commande }}">
                                         <button class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Details</button>
                                     </a>
                                 </td>

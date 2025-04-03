@@ -1,85 +1,112 @@
 {% extends "client/layout_client.html" %}
 {% block body %}
-<div class="m-auto" style="width: 700px">
-    <div style="text-align: center"><h2>Mes informations :</h2></div>
-    <div class="border m-auto p-3">
-        <table class="table">
-            <tr>
-                <td>Votre login :</td>
-                <td>{{ utilisateur.login }}</td>
-            </tr>
-            <tr>
-                <td>Votre nom : </td>
-                <td>{{ utilisateur.nom }}</td>
-            </tr>
-            <tr>
-                <td>Email : </td>
-                <td>{{ utilisateur.email }}</td>
-            </tr>
-        </table>
-        <div>
-            <a href="/client/coordonnee/edit"  class="btn btn-primary m-2" >Modifier son profil</a>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Informations personnelles -->
+    <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg mb-8">
+        <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
+            <h3 class="text-lg font-medium leading-6 text-gray-200">Mes informations</h3>
+        </div>
+        <div class="px-4 py-5 sm:p-6">
+            <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                <div>
+                    <dt class="text-sm font-medium text-gray-400">Login</dt>
+                    <dd class="mt-1 text-sm text-gray-200">{{ utilisateur.login }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-400">Nom</dt>
+                    <dd class="mt-1 text-sm text-gray-200">{{ utilisateur.nom }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-400">Email</dt>
+                    <dd class="mt-1 text-sm text-gray-200">{{ utilisateur.email }}</dd>
+                </div>
+            </dl>
+            <div class="mt-6">
+                <a href="/client/coordonnee/edit" class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                    Modifier son profil
+                </a>
+            </div>
         </div>
     </div>
-    <br>
 
-    <div style="text-align: center"><h2 >Mes adresses :</h2></div>
-    <div class="border m-auto p-3">
-        <table class="table border">
-            <thead class="thead-dark">
-                <tr>
-                    <th>nom</th>
-                    <th>Rue</th>
-                     <th>Code Postal</th>
-                     <th>Ville</th>
-                    <th>nbr. utilisation commande</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for adresse in adresses %}
-                    <tr
-                            {% if adresse.valide is defined and adresse.valide==0 %} style="color: darkorange"{% endif %}
-                            {% if adresse.favori is defined and adresse.favori==1 %} style="color: blue; font-weight: bolder;"{% endif %}
-                    >
-
-                        <td>{{ adresse.nom }}
-                            {% if adresse.favori is defined and adresse.favori==1 %}💛{% endif %}
-                        </td>
-                        <td>{{ adresse.rue }}</td>
-                        <td>{{ adresse.code_postal }}</td>
-                        <td>{{ adresse.ville }}</td>
-                        <td> {% if adresse.nbr_commandes is defined %}{{ adresse.nbr_commandes }} {% endif %} </td>
-                        <td>
-                            {% if adresse.valide is defined and adresse.valide==0 %}
-                                <span style="color: darkorange">*</span>
-                            {% else %}
-                                <a class="btn btn-primary" href="/client/coordonnee/edit_adresse?id_adresse={{ adresse.id_adresse }}"> Modifier </a>
-                            <form action="/client/coordonnee/delete_adresse" style="display: inline-block;"  method="post">
-                                <input type="hidden"  name="id_adresse" value="{{ adresse.id_adresse }}">
-                                <button class="btn btn-primary" > Supprimer </button>
-                            </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <div>
-            {% if nb_adresses is defined %}
-                {% if nb_adresses <4 %}
-                        <span style="color: darkorange">* adresse non valide</span><br><span style="color: blue; font-weight: bolder;">* favori 💛</span>
-                  <a href="/client/coordonnee/add_adresse" class="btn btn-primary m-2">Ajouter une adresse</a>
+    <!-- Adresses -->
+    <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+        <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
+            <h3 class="text-lg font-medium leading-6 text-gray-200">Mes adresses</h3>
+        </div>
+        <div class="px-4 py-5 sm:p-6">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Rue</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Code Postal</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Ville</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Nbr. utilisation commande</th>
+                            <th class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                <span class="sr-only">Actions</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        {% for adresse in adresses %}
+                        <tr class="hover:bg-gray-700">
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6 text-gray-200">
+                                {{ adresse.nom }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ adresse.rue }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ adresse.code_postal }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ adresse.ville }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
+                                {% if 'nbr_commandes' in adresse %}{{ adresse.nbr_commandes }}{% endif %}
+                            </td>
+                            <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <a href="/client/coordonnee/edit_adresse?id_adresse={{ adresse.id_adresse }}" 
+                                   class="rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                                    Modifier
+                                </a>
+                                <form action="/client/coordonnee/delete_adresse" method="post" class="inline-block ml-2">
+                                    <input type="hidden" name="id_adresse" value="{{ adresse.id_adresse }}">
+                                    <button type="submit" 
+                                            class="rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-6">
+                {% if nb_adresses is defined %}
+                    {% if nb_adresses < 4 %}
+                        <a href="/client/coordonnee/add_adresse" 
+                           class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                            Ajouter une adresse
+                        </a>
+                    {% endif %}
+                    
+                    <p class="mt-4 text-sm text-green-400">
+                        (<strong>{{ nb_adresses }}</strong> / 4 adresses ; <strong>{{ nb_adresses_tot }}</strong> adresses pour l'utilisateur)
+                    </p>
+                {% else %}
+                    <a href="/client/coordonnee/add_adresse" 
+                       class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                        Ajouter une adresse
+                    </a>
                 {% endif %}
-                 <span style="color:green;">( <strong>{{ nb_adresses }}</strong> / 4 adresses valides ; <strong>{{ nb_adresses_tot }}</strong> adresses pour l'utilisateur)</span>
-            {% else %}
-                <a href="/client/coordonnee/add_adresse" class="btn btn-primary m-2">Ajouter une adresse</a>
-            {% endif %}
+            </div>
+            
+            <div class="mt-6 border-t border-gray-700 pt-6">
+                <a href="/client/article/show" 
+                   class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
+                    Retour aux articles
+                </a>
+            </div>
         </div>
     </div>
-        <div>
-            <a href="/client/article/show" class="btn btn-primary m-2">Retour aux articles </a>
-        </div>
-
 </div>
-
 {% endblock %}

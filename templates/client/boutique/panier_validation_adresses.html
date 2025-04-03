@@ -11,8 +11,8 @@
             {% if adresses | length > 0 %}
                 <br>
                     <h4>Choisisser l'adresse de livraison</h4>
-                    <select  name="id_adresse_livraison" name="adresse_livraison" required  class="form-select">
-                        <option value="">Sélectionner l'adresse de facturation</option>
+                    <select name="adresse_livraison_id" required class="form-select">
+                        <option value="">Sélectionner l'adresse de livraison</option>
                         {% for adresse  in adresses %}
 
                              <option value="{{ adresse.id_adresse }}"
@@ -34,9 +34,9 @@
                     <h4>Choisisser l'adresse de facturation</h4>
                     adresse de facturation identique <input type="checkbox" name="adresse_identique" value="adresse_identique" id="adresse_identique" onclick="identique()">
                 <br>
-                    <select  id="id_adresse_facturation" name="id_adresse_facturation" required class="form-select">
-                        <option value="">Sélectionner l'adresse de livraison</option>
-                        {% for adresse  in adresses %}
+                    <select id="adresse_facturation_id" name="adresse_facturation_id" required class="form-select">
+                        <option value="">Sélectionner l'adresse de facturation</option>
+                        {% for adresse in adresses %}
                              <option value="{{ adresse.id_adresse }}"
                              {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}
                                  selected
@@ -60,13 +60,13 @@
     function identique(){
 	if(document.getElementById('adresse_identique').checked == true)
         {
-        document.getElementById("id_adresse_facturation").style.display = 'none';
-        document.getElementById("id_adresse_facturation").required = false;
+        document.getElementById("adresse_facturation_id").style.display = 'none';
+        document.getElementById("adresse_facturation_id").required = false;
         }
         else
         {
-        document.getElementById("id_adresse_facturation").style.display = 'block';
-        document.getElementById("id_adresse_facturation").required = true;
+        document.getElementById("adresse_facturation_id").style.display = 'block';
+        document.getElementById("adresse_facturation_id").required = true;
         }
     };
     </script>
