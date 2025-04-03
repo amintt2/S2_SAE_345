@@ -11,14 +11,20 @@ fixtures_load = Blueprint('fixtures_load', __name__,
 @fixtures_load.route('/base/init')
 def fct_fixtures_load():
      mycursor = get_db().cursor()
+     mycursor.execute("DROP TABLE IF EXISTS declinaison")
+     mycursor.execute("DROP TABLE IF EXISTS commentaire")
+     mycursor.execute("DROP TABLE IF EXISTS note")
      mycursor.execute("DROP TABLE IF EXISTS ligne_panier")
      mycursor.execute("DROP TABLE IF EXISTS ligne_commande")
      mycursor.execute("DROP TABLE IF EXISTS commande")
+     mycursor.execute("DROP TABLE IF EXISTS adresse")
+     mycursor.execute("DROP TABLE IF EXISTS liste_envie")
+     mycursor.execute("DROP TABLE IF EXISTS historique")
      mycursor.execute("DROP TABLE IF EXISTS skin")
-     mycursor.execute("DROP TABLE IF EXISTS type_skin")
-     mycursor.execute("DROP TABLE IF EXISTS usure")
-     mycursor.execute("DROP TABLE IF EXISTS special")
      mycursor.execute("DROP TABLE IF EXISTS etat")
+     mycursor.execute("DROP TABLE IF EXISTS special")
+     mycursor.execute("DROP TABLE IF EXISTS usure")
+     mycursor.execute("DROP TABLE IF EXISTS type_skin")
      mycursor.execute("DROP TABLE IF EXISTS utilisateur")
 
      sql='''
@@ -76,16 +82,56 @@ def fct_fixtures_load():
           id_skin INT AUTO_INCREMENT,
           nom_skin VARCHAR(50),
           prix_skin DECIMAL(10,2),
-          stock INT,
-          special_id INT NOT NULL,
-          usure_id INT NOT NULL,
           type_skin_id INT NOT NULL,
           image VARCHAR(255),
           description TEXT,
           PRIMARY KEY(id_skin),
-          FOREIGN KEY(special_id) REFERENCES special(id_special),
-          FOREIGN KEY(usure_id) REFERENCES usure(id_usure),
-          FOREIGN KEY(type_skin_id) REFERENCES type_skin(id_type_skin)
+          CONSTRAINT fk_skin_type
+               FOREIGN KEY(type_skin_id) REFERENCES type_skin(id_type_skin)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE historique(
+          skin_id INT NOT NULL,
+          utilisateur_id INT NOT NULL,
+          date_consultation DATETIME,
+          PRIMARY KEY(skin_id, utilisateur_id, date_consultation),
+          CONSTRAINT fk_historique_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          CONSTRAINT fk_historique_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE liste_envie(
+          skin_id INT NOT NULL,
+          utilisateur_id INT NOT NULL, 
+          date_update DATETIME,
+          PRIMARY KEY(skin_id, utilisateur_id, date_update),
+          CONSTRAINT fk_liste_envie_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          CONSTRAINT fk_liste_envie_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE adresse (
+          id_adresse INT AUTO_INCREMENT,
+          nom VARCHAR(255),
+          rue VARCHAR(255),
+          code_postal VARCHAR(255),
+          ville VARCHAR(255),
+          date_utilisation DATETIME,
+          utilisateur_id INT NOT NULL,
+          PRIMARY KEY(id_adresse),
+          CONSTRAINT fk_adresse_utilisateur
+               FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur)
      ) DEFAULT CHARSET utf8mb4;
      '''
      mycursor.execute(sql)
@@ -96,38 +142,101 @@ def fct_fixtures_load():
           date_achat DATE,
           etat_id INT NOT NULL,
           utilisateur_id INT NOT NULL,
+          adresse_livraison_id INT,
+          adresse_facturation_id INT,
           PRIMARY KEY(id_commande),
-          FOREIGN KEY(etat_id) REFERENCES etat(id_etat),
-          FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+          CONSTRAINT fk_commande_etat
+               FOREIGN KEY(etat_id) REFERENCES etat(id_etat),
+          CONSTRAINT fk_commande_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+          CONSTRAINT fk_commande_adresse_livraison
+               FOREIGN KEY(adresse_livraison_id) REFERENCES adresse(id_adresse),
+          CONSTRAINT fk_commande_adresse_facturation
+               FOREIGN KEY(adresse_facturation_id) REFERENCES adresse(id_adresse)
      ) DEFAULT CHARSET utf8mb4;
      '''
      mycursor.execute(sql)
      
      sql='''
      CREATE TABLE ligne_commande(
-          skin_id INT,
-          commande_id INT,
+          skin_id INT NOT NULL,
+          commande_id INT NOT NULL,
           prix DECIMAL(10,2),
           quantite INT,
           PRIMARY KEY(skin_id, commande_id),
-          FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
-          FOREIGN KEY(commande_id) REFERENCES commande(id_commande)
+          CONSTRAINT fk_ligne_commande_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          CONSTRAINT fk_ligne_commande_commande
+               FOREIGN KEY(commande_id) REFERENCES commande(id_commande)
      ) DEFAULT CHARSET utf8mb4;
      '''
      mycursor.execute(sql)
      
      sql='''
      CREATE TABLE ligne_panier(
-          skin_id INT,
-          utilisateur_id INT,
+          skin_id INT NOT NULL,
+          utilisateur_id INT NOT NULL,
           quantite INT,
           date_ajout DATETIME,
           PRIMARY KEY(skin_id, utilisateur_id),
-          FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
-          FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+          CONSTRAINT fk_ligne_panier_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          CONSTRAINT fk_ligne_panier_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
      ) DEFAULT CHARSET utf8mb4;
      '''
      mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE note (
+          utilisateur_id INT NOT NULL,
+          skin_id INT NOT NULL,
+          note INT,
+          PRIMARY KEY(utilisateur_id, skin_id),
+          CONSTRAINT fk_note_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+          CONSTRAINT fk_note_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE commentaire (
+          utilisateur_id INT NOT NULL,
+          skin_id INT NOT NULL,
+          date_publication DATETIME,
+          commentaire TEXT,
+          validee TINYINT(1),
+          PRIMARY KEY(utilisateur_id, skin_id, date_publication),
+          CONSTRAINT fk_commentaire_utilisateur
+               FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+          CONSTRAINT fk_commentaire_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE declinaison (
+          id_declinaison INT AUTO_INCREMENT,
+          stock INT,
+          prix_declinaison DECIMAL(10,2),
+          image VARCHAR(255),
+          special_id INT NOT NULL,
+          usure_id INT NOT NULL,
+          skin_id INT,
+          PRIMARY KEY(id_declinaison),
+          CONSTRAINT fk_declinaison_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          CONSTRAINT fk_declinaison_special
+               FOREIGN KEY(special_id) REFERENCES special(id_special),
+          CONSTRAINT fk_declinaison_usure
+               FOREIGN KEY(usure_id) REFERENCES usure(id_usure)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
+
      
      sql='''
      INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) VALUES
@@ -184,50 +293,92 @@ def fct_fixtures_load():
      mycursor.execute(sql)
      
      sql='''
-     INSERT INTO skin (nom_skin, prix_skin, stock, special_id, usure_id, type_skin_id, image) VALUES
-     ('Karambit | Gamma Doppler', 1005.34, 5, 2, 1, 4, 'karambit_gamma_doppler.png'),
-     ('AWP | Dragon Lore', 11244.54, 2, 1, 1, 3, 'awp_dragon_lore.png'),
-     ('Sport Gloves | Amphibious', 897.35, 8, 2, 2, 5, 'gloves_amphibious.png'),
-     ('Skeleton Knife | Crimson Web', 490.76, 3, 2, 2, 4, 'skeleton_crimson.png'),
-     ('AK-47 | Gold Arabesque', 4023.26, 1, 2, 1, 1, 'ak_gold_arabesque.png'),
-     ('Butterfly Knife | Marble Fade', 2083.06, 4, 2, 1, 4, 'butterfly_marble.png'),
-     ('Driver Gloves | Snow Leopard', 83.90, 7, 1, 5, 5, 'gloves_snow_leopard.png'),
-     ('M4A1-S | Knight', 2959.66, 2, 1, 1, 6, 'm4a1s_knight.png'),
-     ('M9 Bayonet | Doppler', 1262.63, 6, 2, 1, 4, 'm9_doppler.png'),
-     ('AWP | Lightning Strike', 74.32, 9, 2, 1, 3, 'awp_lightning_st.png'),
-     ('AK-47 | Inheritance', 180.50, 3, 1, 1, 1, 'FN_AK_INHERITANCE.png'),
-     ('AWP | Gungnir', 11200.00, 1, 1, 1, 3, 'FN_GUNGNIR.png'),
-     ('Sticker | iBUYPOWER (Holo) | Katowice 2014', 75000.00, 1, 1, 1, 2, 'IBUYPOWER-HOLO.png'),
-     ('Sticker | Titan (Holo) | Katowice 2014', 55000.00, 1, 1, 1, 2, 'TITAN-HOLO.png'),
-     ('Karambit | Crimson Web', 433.53, 5, 1, 2, 4, 'karambit_crimson_web.png'),
-     ('AWP | Wildfire', 47.93, 8, 1, 3, 3, 'awp_wildfire.png'),
-     ('Flip Knife | Bright Water', 206.29, 4, 1, 1, 4, 'flip_bright_water.png'),
-     ('Bowie Knife | Autotronic', 147.36, 6, 1, 3, 4, 'bowie_autotronic.png'),
-     ('Huntsman Knife | Gamma Doppler', 378.27, 2, 1, 1, 4, 'huntsman_gamma_doppler.png'),
-     ('Navaja Knife | Rust Coat', 93.19, 7, 1, 5, 4, 'navaja_rust.png'),
-     ('Specialist Gloves | Fade', 343.02, 5, 1, 3, 5, 'specialist_fade.png'),
-     ('Bowie Knife | Black Laminate', 113.87, 3, 1, 2, 4, 'bowie_black_laminate.png'),
-     ('Skeleton Knife | Fade', 1346.34, 4, 1, 1, 4, 'skeleton_fade.png'),
-     ('Flip Knife | Doppler', 453.49, 6, 1, 1, 4, 'flip_doppler.png'),
-     ('M4A1-S | Mud-Spec', 0.15, 10, 1, 3, 6, 'm4a1s_mudspec.png'),
-     ('Natus Vincere Glitter', 0.15, 8, 1, 1, 2, 'sticker_navi_glitter.png'),
-     ('AWP | Dragon Lore', 9244.54, 3, 1, 2, 3, 'awp_dragon_lore.png'),
-     ('AWP | Dragon Lore', 8244.54, 5, 1, 3, 3, 'awp_dragon_lore.png'),
-     ('AWP | Dragon Lore', 7244.54, 0, 1, 4, 3, 'awp_dragon_lore.png'),
-     ('Karambit | Gamma Doppler', 905.34, 2, 2, 2, 4, 'karambit_gamma_doppler.png'),
-     ('Karambit | Gamma Doppler', 805.34, 4, 2, 3, 4, 'karambit_gamma_doppler.png'),
-     ('AK-47 | Gold Arabesque', 3523.26, 1, 2, 2, 1, 'ak_gold_arabesque.png'),
-     ('AK-47 | Gold Arabesque', 3023.26, 7, 2, 3, 1, 'ak_gold_arabesque.png'),
-     ('M4A1-S | Knight', 2459.66, 6, 1, 2, 6, 'm4a1s_knight.png'),
-     ('M4A1-S | Knight', 1959.66, 9, 1, 3, 6, 'm4a1s_knight.png');
+     INSERT INTO skin (nom_skin, prix_skin, type_skin_id, image, description) VALUES
+     ('Karambit | Gamma Doppler', 1005.34, 4, 'karambit_gamma_doppler.png', 'A knife with a curved blade resembling a claw with a mesmerizing gamma doppler finish.'),
+     ('AWP | Dragon Lore', 11244.54, 3, 'awp_dragon_lore.png', 'The legendary AWP skin with golden dragon motifs.'),
+     ('Sport Gloves | Amphibious', 897.35, 5, 'gloves_amphibious.png', 'Sport gloves with a blue and green amphibious design.'),
+     ('Skeleton Knife | Crimson Web', 490.76, 4, 'skeleton_crimson.png', 'A skeleton knife with a crimson web pattern.'),
+     ('AK-47 | Gold Arabesque', 4023.26, 1, 'ak_gold_arabesque.png', 'AK-47 with intricate gold arabesque design.'),
+     ('Butterfly Knife | Marble Fade', 2083.06, 4, 'butterfly_marble.png', 'A butterfly knife with a colorful marble fade pattern.'),
+     ('Driver Gloves | Snow Leopard', 83.90, 5, 'gloves_snow_leopard.png', 'Driver gloves with a snow leopard pattern.'),
+     ('M4A1-S | Knight', 2959.66, 6, 'm4a1s_knight.png', 'An elegant gold-themed M4A1-S skin.'),
+     ('M9 Bayonet | Doppler', 1262.63, 4, 'm9_doppler.png', 'An M9 Bayonet with an iridescent doppler finish.'),
+     ('AWP | Lightning Strike', 74.32, 3, 'awp_lightning_st.png', 'An AWP skin featuring a lightning strike pattern.'),
+     ('AK-47 | Inheritance', 180.50, 1, 'FN_AK_INHERITANCE.png', 'An AK-47 with intricate inheritance design.'),
+     ('AWP | Gungnir', 11200.00, 3, 'FN_GUNGNIR.png', 'A Nordic-themed AWP with blue and gold details.'),
+     ('Sticker | iBUYPOWER (Holo) | Katowice 2014', 75000.00, 2, 'IBUYPOWER-HOLO.png', 'An extremely rare holographic sticker from Katowice 2014.'),
+     ('Sticker | Titan (Holo) | Katowice 2014', 55000.00, 2, 'TITAN-HOLO.png', 'A valuable holographic Titan sticker from Katowice 2014.'),
+     ('Karambit | Crimson Web', 433.53, 4, 'karambit_crimson_web.png', 'A karambit with a crimson web pattern.'),
+     ('AWP | Wildfire', 47.93, 3, 'awp_wildfire.png', 'An AWP skin with fire-themed design.'),
+     ('Flip Knife | Bright Water', 206.29, 4, 'flip_bright_water.png', 'A flip knife with a bright water pattern.'),
+     ('Bowie Knife | Autotronic', 147.36, 4, 'bowie_autotronic.png', 'A bowie knife with an autotronic finish.'),
+     ('Huntsman Knife | Gamma Doppler', 378.27, 4, 'huntsman_gamma_doppler.png', 'A huntsman knife with a gamma doppler finish.'),
+     ('Navaja Knife | Rust Coat', 93.19, 4, 'navaja_rust.png', 'A navaja knife with a rust coat finish.'),
+     ('Specialist Gloves | Fade', 343.02, 5, 'specialist_fade.png', 'Specialist gloves with a fade pattern.'),
+     ('Bowie Knife | Black Laminate', 113.87, 4, 'bowie_black_laminate.png', 'A bowie knife with a black laminate finish.'),
+     ('Skeleton Knife | Fade', 1346.34, 4, 'skeleton_fade.png', 'A skeleton knife with a fade pattern.'),
+     ('Flip Knife | Doppler', 453.49, 4, 'flip_doppler.png', 'A flip knife with a doppler finish.'),
+     ('M4A1-S | Mud-Spec', 0.15, 6, 'm4a1s_mudspec.png', 'A common M4A1-S skin with a mud spec pattern.'),
+     ('Natus Vincere Glitter', 0.15, 2, 'sticker_navi_glitter.png', 'A glitter sticker for Natus Vincere team.');
      '''
      mycursor.execute(sql)
-     
+
      sql='''
-     INSERT INTO ligne_panier (skin_id, utilisateur_id, quantite, date_ajout) VALUES 
-          (1, 2, 1, '2024-03-20 10:30:00'),
-          (2, 2, 4, '2023-06-24'),
-          (2, 3, 3, '2023-06-24');
+     INSERT INTO declinaison (stock, prix_declinaison, image, special_id, usure_id, skin_id) VALUES
+     -- Karambit | Gamma Doppler variations
+     (5, 1005.34, 'karambit_gamma_doppler.png', 2, 1, 1),
+     (2, 905.34, 'karambit_gamma_doppler.png', 2, 2, 1),
+     (4, 805.34, 'karambit_gamma_doppler.png', 2, 3, 1),
+
+     -- AWP | Dragon Lore variations
+     (2, 11244.54, 'awp_dragon_lore.png', 1, 1, 2),
+     (3, 9244.54, 'awp_dragon_lore.png', 1, 2, 2),
+     (5, 8244.54, 'awp_dragon_lore.png', 1, 3, 2),
+     (0, 7244.54, 'awp_dragon_lore.png', 1, 4, 2),
+
+     -- Sport Gloves | Amphibious
+     (8, 897.35, 'gloves_amphibious.png', 2, 2, 3),
+
+     -- Skeleton Knife | Crimson Web
+     (3, 490.76, 'skeleton_crimson.png', 2, 2, 4),
+
+     -- AK-47 | Gold Arabesque variations
+     (1, 4023.26, 'ak_gold_arabesque.png', 2, 1, 5),
+     (1, 3523.26, 'ak_gold_arabesque.png', 2, 2, 5),
+     (7, 3023.26, 'ak_gold_arabesque.png', 2, 3, 5),
+
+     -- Butterfly Knife | Marble Fade
+     (4, 2083.06, 'butterfly_marble.png', 2, 1, 6),
+
+     -- Driver Gloves | Snow Leopard
+     (7, 83.90, 'gloves_snow_leopard.png', 1, 5, 7),
+
+     -- M4A1-S | Knight variations
+     (2, 2959.66, 'm4a1s_knight.png', 1, 1, 8),
+     (6, 2459.66, 'm4a1s_knight.png', 1, 2, 8),
+     (9, 1959.66, 'm4a1s_knight.png', 1, 3, 8),
+
+     -- M9 Bayonet | Doppler
+     (6, 1262.63, 'm9_doppler.png', 2, 1, 9),
+
+     -- Other items - single variations for the rest
+     (9, 74.32, 'awp_lightning_st.png', 2, 1, 10),
+     (3, 180.50, 'FN_AK_INHERITANCE.png', 1, 1, 11),
+     (1, 11200.00, 'FN_GUNGNIR.png', 1, 1, 12),
+     (1, 75000.00, 'IBUYPOWER-HOLO.png', 1, 1, 13),
+     (1, 55000.00, 'TITAN-HOLO.png', 1, 1, 14),
+     (5, 433.53, 'karambit_crimson_web.png', 1, 2, 15),
+     (8, 47.93, 'awp_wildfire.png', 1, 3, 16),
+     (4, 206.29, 'flip_bright_water.png', 1, 1, 17),
+     (6, 147.36, 'bowie_autotronic.png', 1, 3, 18),
+     (2, 378.27, 'huntsman_gamma_doppler.png', 1, 1, 19),
+     (7, 93.19, 'navaja_rust.png', 1, 5, 20),
+     (5, 343.02, 'specialist_fade.png', 1, 3, 21),
+     (3, 113.87, 'bowie_black_laminate.png', 1, 2, 22),
+     (4, 1346.34, 'skeleton_fade.png', 1, 1, 23),
+     (6, 453.49, 'flip_doppler.png', 1, 1, 24),
+     (10, 0.15, 'm4a1s_mudspec.png', 1, 3, 25),
+     (8, 0.15, 'sticker_navi_glitter.png', 1, 1, 26);
      '''
      mycursor.execute(sql)
      
@@ -251,6 +402,14 @@ def fct_fixtures_load():
           (15, 3, 433.53, 2),
           (2, 4, 11244.54, 1),
           (5, 5, 4023.26, 1);
+     '''
+     mycursor.execute(sql)
+
+     sql='''
+     INSERT INTO ligne_panier (skin_id, utilisateur_id, quantite, date_ajout) VALUES 
+          (1, 2, 1, '2024-03-20 10:30:00'),
+          (2, 2, 4, '2023-06-24'),
+          (2, 3, 3, '2023-06-24');
      '''
      mycursor.execute(sql)
      
