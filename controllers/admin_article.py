@@ -21,22 +21,23 @@ def show_article():
     SELECT 
         skin.id_skin as id_article,
         skin.nom_skin as nom,
-        skin.prix_skin as prix,
-        skin.stock,
         skin.image,
         skin.description,
         type_skin.id_type_skin as type_article_id,
         type_skin.libelle_type_skin as libelle,
-        MIN(skin2.stock) as min_stock,
+        MIN(d.prix_declinaison) as prix_min,
+        MAX(d.prix_declinaison) as prix_max,
+        SUM(d.stock) as stock_total,
+        MIN(d.stock) as min_stock,
         COUNT(DISTINCT commande.id_commande) as nb_commandes,
         COUNT(DISTINCT ligne_panier.utilisateur_id) as nb_paniers
     FROM skin
     LEFT JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
-    LEFT JOIN skin skin2 ON skin.type_skin_id = skin2.type_skin_id
-    LEFT JOIN ligne_commande ON skin.id_skin = ligne_commande.skin_id
+    LEFT JOIN declinaison d ON skin.id_skin = d.skin_id
+    LEFT JOIN ligne_commande ON d.id_declinaison = ligne_commande.declinaison_id
     LEFT JOIN commande ON ligne_commande.commande_id = commande.id_commande
-    LEFT JOIN ligne_panier ON skin.id_skin = ligne_panier.skin_id
-    GROUP BY skin.id_skin, skin.nom_skin, skin.prix_skin, skin.stock, skin.image, 
+    LEFT JOIN ligne_panier ON d.id_declinaison = ligne_panier.declinaison_id
+    GROUP BY skin.id_skin, skin.nom_skin, skin.image, 
              skin.description, type_skin.id_type_skin, type_skin.libelle_type_skin
     ORDER BY skin.nom_skin
     '''
@@ -176,14 +177,17 @@ def edit_article():
         skin.id_skin as id_article,
         skin.nom_skin as nom,
         skin.prix_skin as prix,
-        skin.stock,
+        SUM(d.stock) as stock,
         skin.image,
         skin.description,
         skin.type_skin_id as type_article_id,
         type_skin.libelle_type_skin as libelle
     FROM skin
     LEFT JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
+    LEFT JOIN declinaison d ON skin.id_skin = d.skin_id
     WHERE skin.id_skin = %s
+    GROUP BY skin.id_skin, skin.nom_skin, skin.prix_skin, skin.image, 
+             skin.description, skin.type_skin_id, type_skin.libelle_type_skin
     '''
     mycursor.execute(sql, (id_article,))
     article = mycursor.fetchone()
@@ -206,7 +210,6 @@ def valid_edit_article():
     id_article = request.form.get('id_article')
     nom = request.form.get('nom')
     prix = request.form.get('prix')
-    stock = request.form.get('stock', 0)
     description = request.form.get('description')
     type_article_id = request.form.get('type_article_id')
     image = request.files.get('image', None)
@@ -214,20 +217,20 @@ def valid_edit_article():
     if image:
         sql = '''
         UPDATE skin 
-        SET nom_skin = %s, prix_skin = %s, stock = %s, 
+        SET nom_skin = %s, prix_skin = %s, 
             type_skin_id = %s, description = %s, image = %s
         WHERE id_skin = %s
         RETURNING image as old_image
         '''
-        tuple_update = (nom, prix, stock, type_article_id, description, image.filename, id_article)
+        tuple_update = (nom, prix, type_article_id, description, image.filename, id_article)
     else:
         sql = '''
         UPDATE skin 
-        SET nom_skin = %s, prix_skin = %s, stock = %s, 
+        SET nom_skin = %s, prix_skin = %s, 
             type_skin_id = %s, description = %s
         WHERE id_skin = %s
         '''
-        tuple_update = (nom, prix, stock, type_article_id, description, id_article)
+        tuple_update = (nom, prix, type_article_id, description, id_article)
 
     mycursor.execute(sql, tuple_update)
 
@@ -274,9 +277,9 @@ def update_stock():
         return redirect('/admin/article/show')
         
     sql = '''
-    UPDATE skin 
+    UPDATE declinaison 
     SET stock = %s 
-    WHERE id_skin = %s
+    WHERE skin_id = %s
     '''
     mycursor.execute(sql, (new_stock, id_article))
     get_db().commit()
@@ -300,9 +303,9 @@ def update_article_stock():
         return redirect('/admin/article/show')
     
     sql = '''
-    UPDATE skin 
+    UPDATE declinaison 
     SET stock = %s 
-    WHERE id_skin = %s
+    WHERE skin_id = %s
     '''
     mycursor.execute(sql, (new_stock, id_article))
     get_db().commit()

@@ -25,30 +25,31 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
-                    {% for article in articles_panier %}
+                    {% for article_p in articles_panier %}
                     <tr class="hover:bg-dark-accent transition-colors duration-200">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-gray-300">{{ article.designation }}</div>
-                            {% if article.libelle_type_skin not in ['Sticker', 'Capsule'] %}
-                            <div class="text-accent-blue text-xs mt-1">{{ article.libelle_usure }}</div>
-                            {% endif %}
-                            {% if article.libelle_special != 'Normal' %}
-                            <div class="text-yellow-400 text-xs mt-1">{{ article.libelle_special }}</div>
+                            <div class="text-gray-300">{{ article_p.designation }}</div>
+                            {# Display Wear and Special if not default #}
+                            <div class="text-accent-blue text-xs mt-1">{{ article_p.libelle_usure }}</div>
+                            {% if article_p.libelle_special != 'Normal' %}
+                            <div class="text-yellow-400 text-xs mt-1">{{ article_p.libelle_special }}</div>
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-gray-300">
-                            {{ article.libelle_type_skin }}
+                            {{ article_p.libelle_type_skin }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ article.prix }}€</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ "%.2f"|format(article_p.prix_total_ligne|float) }}€</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <form action="/client/panier/update" method="post" class="inline">
-                                <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                                <input type="number" name="quantite" value="{{ article.quantite }}" class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" onchange="this.form.submit()">
+                                {# IMPORTANT: Send declinaison_id now #}
+                                <input type="hidden" name="declinaison_id" value="{{ article_p.id_declinaison }}">
+                                <input type="number" name="quantite" value="{{ article_p.quantite }}" min="1" max="{{ article_p.stock }}" aria-label="Quantité pour {{ article_p.designation }} ({{ article_p.libelle_usure }})" {# Optional: Add max based on stock #} class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue w-20" onchange="this.form.submit()">
                             </form>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <form action="/client/panier/delete/line" method="post" class="inline">
-                                <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                                {# IMPORTANT: Send declinaison_id now #}
+                                <input type="hidden" name="declinaison_id" value="{{ article_p.id_declinaison }}">
                                 <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
                                     Supprimer la ligne
                                 </button>
@@ -60,7 +61,7 @@
                 <tfoot class="bg-dark-accent">
                     <tr>
                         <td colspan="3" class="px-6 py-4 text-right font-bold text-white">Total:</td>
-                        <td colspan="2" class="px-6 py-4 text-accent-blue font-bold">{{ prix_total }}€</td>
+                        <td colspan="2" class="px-6 py-4 text-accent-blue font-bold">{{ "%.2f"|format(prix_total|float) }}€</td>
                     </tr>
                 </tfoot>
             </table>
@@ -151,42 +152,44 @@
                 </div>
                 <div class="p-4">
                     <h3 class="text-lg font-semibold text-white">{{ article.nom }}</h3>
-                    {% if article.libelle_type_skin not in ['Sticker'] %}
-                    <div class="mt-1 mb-3">
-                            {% for declinaison in article.declinaisons %}
-                            <span class="inline-block bg-dark-accent text-accent-blue px-2 py-1 rounded text-xs font-medium">
-                                {{ declinaison }}
-                            </span>
-                            {% endfor %}
-                    </div>
-                    {% endif %}
-                    <div class="flex justify-between items-center mb-4">
+                    <div class="flex justify-between items-center mb-2">
                         <div class="text-accent-blue font-bold text-xl">
-                            <span style="color: #3498db">$
+                            <span style="color: #3498db">
                                 {% if article.prix_min == article.prix_max %}
-                                    {{ article.prix_max }}€
+                                    {{ "%.2f"|format(article.prix_max|float) }}€
                                 {% else %}
-                                    {{ article.prix_min }}€ - {{ article.prix_max }}€
+                                    {{ "%.2f"|format(article.prix_min|float) }}€ - {{ "%.2f"|format(article.prix_max|float) }}€
                                 {% endif %}
                             </span>
                         </div>
-
                     </div>
 
-                    <!-- TODO: Remettre la vérification des stocks -->
-
-
-                    <div class="flex gap-2">
-                        <form action="/client/panier/add" method="post" class="flex-grow">
-                            <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                            <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
-                                    Ajouter au panier
+                    <form action="/client/panier/add" method="post" class="space-y-3">
+                        <input type="hidden" name="id_skin_base" value="{{ article.id_skin }}"> {# Optional: Keep base skin ID if needed #}
+                        <div>
+                            <label for="declinaison_id_{{ article.id_skin }}" class="block text-sm font-medium text-gray-300 mb-1">Choisissez une version :</label>
+                            <select name="declinaison_id" id="declinaison_id_{{ article.id_skin }}" class="w-full bg-gray-700 rounded-md px-3 py-2 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" required>
+                                <option value="" disabled selected>Sélectionnez...</option>
+                                {% for decl in article.declinaisons %}
+                                    <option value="{{ decl.id_declinaison }}">
+                                        {{ decl.libelle_usure }} 
+                                        {% if decl.libelle_special != 'Normal' %} ({{ decl.libelle_special }}) {% endif %}
+                                        - {{ "%.2f"|format(decl.prix_declinaison|float) }}€ 
+                                        (Stock: {{ decl.stock }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button type="submit" class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
+                                Ajouter au panier
                             </button>
-                        </form>
-                        <a href="/client/envie/add?id_article={{ article.id_article }}" class="inline-flex items-center justify-center bg-dark-accent hover:bg-dark-accent/80 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
-                            <span>💛</span>
-                        </a>
-                    </div>
+                            <a href="/client/envie/add?id_article={{ article.id_skin }}" class="inline-flex items-center justify-center bg-dark-accent hover:bg-dark-accent/80 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
+                                <span>💛</span>
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
             {% endfor %}

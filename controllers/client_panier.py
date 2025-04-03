@@ -9,190 +9,111 @@ client_panier = Blueprint('client_panier', __name__,
                         template_folder='templates')
 
 
-def update_stock(quantite, id_article):
-    mycursor = get_db().cursor()    
-    sql = '''
-        SELECT stock 
-        FROM skin
-        WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (id_article,)) 
-    quantite_article = mycursor.fetchone()['stock']
-    if quantite > quantite_article:
-        print("Quantité trop élevé")
-        quantite = quantite_article
+# --- Refactored Helper Functions for Declinaison Stock ---
 
-    sql = '''
-        UPDATE skin
-        SET stock = stock - %s
-        WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (quantite, id_article))
+def _get_declinaison_stock(declinaison_id):
+    """Fetches the current stock for a specific declinaison."""
+    mycursor = get_db().cursor()
+    sql = 'SELECT stock FROM declinaison WHERE id_declinaison = %s'
+    mycursor.execute(sql, (declinaison_id,))
+    result = mycursor.fetchone()
+    return result['stock'] if result else 0
 
-    # renvoie la quantité qui peut être réellement ajouter au panier
-    return quantite
+def _update_declinaison_stock(declinaison_id, quantity_change):
+    """Updates the stock for a specific declinaison. Use negative quantity_change to decrease stock."""
+    mycursor = get_db().cursor()
+    sql = '''
+        UPDATE declinaison
+        SET stock = stock + %s
+        WHERE id_declinaison = %s
+    '''
+    mycursor.execute(sql, (quantity_change, declinaison_id))
+    # Note: We might want to add checks here to prevent stock going below zero
+    # if the database doesn't enforce it.
+
+def _decrease_declinaison_stock(declinaison_id, quantity_to_remove):
+    """Decreases stock for a declinaison, ensuring stock doesn't go below zero. 
+       Returns the actual quantity removed (might be less than requested if stock is low)."""
+    current_stock = _get_declinaison_stock(declinaison_id)
+    actual_quantity_to_remove = min(quantity_to_remove, current_stock)
+    
+    if actual_quantity_to_remove > 0:
+        _update_declinaison_stock(declinaison_id, -actual_quantity_to_remove)
+        
+    return actual_quantity_to_remove
+
+def _restore_declinaison_stock(declinaison_id, quantity_to_add):
+    """Increases stock for a declinaison (e.g., when removing from cart)."""
+    # Simple addition, assumes stock can increase indefinitely for now
+    _update_declinaison_stock(declinaison_id, quantity_to_add)
+
+# --- End Refactored Helpers ---
 
 @client_panier.route('/client/panier/add', methods=['POST'])
 def client_panier_add():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    id_article = request.form.get('id_article', None)
+    declinaison_id = request.form.get('declinaison_id')
 
-    if not id_article:
-        flash(u'Article non trouvé', 'alert-warning')
+    if not declinaison_id:
+        flash('Veuillez sélectionner une version de l\'article.', 'alert-warning')
         return redirect('/client/article/show')
 
-    # Vérifier si l'article a plusieurs déclinaisons
-    sql = '''
-        SELECT COUNT(DISTINCT usure.id_usure) as nb_declinaisons
-        FROM skin 
-        INNER JOIN usure ON skin.usure_id = usure.id_usure
-        WHERE nom_skin = (SELECT nom_skin FROM skin WHERE id_skin = %s)
-        AND stock > 0
-    '''
-    mycursor.execute(sql, (id_article,))
-    result = mycursor.fetchone()
-    
-    if result['nb_declinaisons'] > 1:
-        # Si plusieurs déclinaisons, afficher la page de choix de déclinaison
-        sql = '''
-            SELECT s.id_skin, s.nom_skin, s.prix_skin, s.stock, s.image,
-                   u.libelle_usure, u.id_usure
-            FROM skin s
-            INNER JOIN usure u ON s.usure_id = u.id_usure
-            WHERE s.nom_skin = (SELECT nom_skin FROM skin WHERE id_skin = %s)
-            AND s.stock > 0
-        '''
-        mycursor.execute(sql, (id_article,))
-        declinaisons = mycursor.fetchall()
-        
-        # Avoir l'image de l'article
-        sql = '''
-            SELECT image, nom_skin as nom
-            FROM skin 
-            WHERE id_skin = %s
-        '''
-        mycursor.execute(sql, (id_article,))
-        article = mycursor.fetchone()
-        
-        return render_template('client/boutique/declinaison_article.html',
-                             declinaisons=declinaisons,
-                             nom_article=declinaisons[0]['nom_skin'],
-                             article=article)
-
-    # Si un seul article, ajouter directement au panier
-    print("Form data:")
-    print("id_client:", session['id_user'])
-    print("id_article:", request.form.get('id_article'))
-    print("quantite:", request.form.get('quantite'))
-    print("id_declinaison_article:", request.form.get('id_declinaison_article', None))
-    
-    id_client = session['id_user']
-    id_article = request.form.get('id_article', None)
-
-    if not id_article:
-        flash(u'Article non trouvé', 'alert-warning')
+    try:
+        declinaison_id = int(declinaison_id)
+    except ValueError:
+        flash(u'ID de version invalide.', 'alert-danger')
         return redirect('/client/article/show')
 
-    # Vérifie si l'article est en stock / existe
-    sql = '''
-        SELECT id_skin, stock 
-        FROM skin 
-        WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (id_article,))
-    article = mycursor.fetchone()
-    
-    if not article:
-        flash(u'Article non trouvé', 'alert-warning')
-        return redirect('/client/article/show')
-    
-    if article['stock'] <= 0:
-        flash(u'Article en rupture de stock', 'alert-warning')
+    # Check stock for the selected declinaison
+    sql_check_stock = 'SELECT stock FROM declinaison WHERE id_declinaison = %s'
+    mycursor.execute(sql_check_stock, (declinaison_id,))
+    declinaison_data = mycursor.fetchone()
+
+    if not declinaison_data:
+        flash(u'Version de l\'article non trouvée.', 'alert-danger')
         return redirect('/client/article/show')
 
-    # Vérifie si l'article est déjà dans le panier
-    sql = '''
+    if declinaison_data['stock'] <= 0:
+        flash(u'Cette version de l\'article est en rupture de stock.', 'alert-warning')
+        return redirect('/client/article/show')
+
+    # Check if this specific declinaison is already in the cart
+    sql_check_cart = '''
         SELECT quantite 
         FROM ligne_panier 
-        WHERE utilisateur_id = %s AND skin_id = %s
+        WHERE utilisateur_id = %s AND declinaison_id = %s
     '''
-    mycursor.execute(sql, (id_client, id_article))
+    mycursor.execute(sql_check_cart, (id_client, declinaison_id))
     ligne_panier = mycursor.fetchone()
 
-    if ligne_panier:
-        # Met à jour la quantité si déjà dans le panier
-        sql = '''
-            UPDATE ligne_panier 
-            SET quantite = quantite + 1 
-            WHERE utilisateur_id = %s AND skin_id = %s
-        '''
-        mycursor.execute(sql, (id_client, id_article))
-        
-    else:
-        # Ajouter une nouvelle ligne au panier
-        sql = '''
-            INSERT INTO ligne_panier(utilisateur_id, skin_id, quantite) 
-            VALUES (%s, %s, 1)
-        '''
-        mycursor.execute(sql, (id_client, id_article))
-        update_stock(1, id_article)
-
-    get_db().commit()
-    flash(u'Article ajouté au panier', 'alert-success')
-    return redirect('/client/article/show')
-
-
-@client_panier.route('/client/panier/add_declinaison', methods=['POST'])
-def client_panier_add_declinaison():
-    id_article = request.form.get('id_article')
-    if not id_article:
-        flash(u'Article non trouvé', 'alert-warning')
-        return redirect('/client/article/show')
-        
-    id_client = session['id_user']
-    mycursor = get_db().cursor()
-
-    # Vérifier le stock
-    sql = '''
-        SELECT stock 
-        FROM skin 
-        WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (id_article,))
-    article = mycursor.fetchone()
-    
-    if not article or article['stock'] <= 0:
-        flash(u'Article non disponible', 'alert-warning')
-        return redirect('/client/article/show')
-
-    # Ajouter au panier
-    sql = '''
-        SELECT quantite 
-        FROM ligne_panier 
-        WHERE utilisateur_id = %s AND skin_id = %s
-    '''
-    mycursor.execute(sql, (id_client, id_article))
-    ligne_panier = mycursor.fetchone()
+    quantity_to_add = 1 # Add one item at a time for now
 
     if ligne_panier:
-        # Met à jour la quantité si déjà dans le panier
-        sql = '''
+        # Check if adding one more exceeds stock
+        if ligne_panier['quantite'] + quantity_to_add > declinaison_data['stock']:
+            flash(u'Quantité demandée supérieure au stock disponible.', 'alert-warning')
+            return redirect('/client/article/show')
+        
+        # Update quantity in cart
+        sql_update = '''
             UPDATE ligne_panier 
-            SET quantite = quantite + 1 
-            WHERE utilisateur_id = %s AND skin_id = %s
+            SET quantite = quantite + %s 
+            WHERE utilisateur_id = %s AND declinaison_id = %s
         '''
-        mycursor.execute(sql, (id_client, id_article))
-        # Met à jour le stock
-        update_stock(1, id_article)
+        mycursor.execute(sql_update, (quantity_to_add, id_client, declinaison_id))
     else:
-        # Ajouter une nouvelle ligne au panier
-        sql = '''
-            INSERT INTO ligne_panier(utilisateur_id, skin_id, quantite) 
-            VALUES (%s, %s, 1)
+        # Insert new line into cart
+        sql_insert = '''
+            INSERT INTO ligne_panier(utilisateur_id, declinaison_id, quantite, date_ajout) 
+            VALUES (%s, %s, %s, NOW())
         '''
-        mycursor.execute(sql, (id_client, id_article))
-        update_stock(1, id_article)
+        mycursor.execute(sql_insert, (id_client, declinaison_id, quantity_to_add))
+
+    # Decrease stock
+    actual_removed = _decrease_declinaison_stock(declinaison_id, quantity_to_add)
+    if actual_removed < quantity_to_add:
+         flash(u'Attention: Stock ajusté car insuffisant.', 'alert-warning') # Should not happen due to checks above, but good fallback
 
     get_db().commit()
     flash(u'Article ajouté au panier', 'alert-success')
@@ -202,78 +123,80 @@ def client_panier_add_declinaison():
 @client_panier.route('/client/panier/update', methods=['POST'])
 def client_panier_update():
     id_client = session['id_user']
-    id_article = request.form.get('id_article')
-    quantite = int(request.form.get('quantite', 1))
-    print('Change quantity to', quantite)
+    # Use declinaison_id from form
+    declinaison_id = request.form.get('declinaison_id')
     
+    try:
+        new_quantity = int(request.form.get('quantite', 1))
+        declinaison_id = int(declinaison_id)
+        if new_quantity < 0: # Cannot have negative quantity
+            raise ValueError("Quantity cannot be negative")
+    except (ValueError, TypeError):
+        flash(u'ID de version ou quantité invalide.', 'alert-danger')
+        return redirect('/client/article/show')
+
     mycursor = get_db().cursor()
 
-    sql = '''
-        SELECT quantite
-        FROM ligne_panier
-        WHERE skin_id = %s AND utilisateur_id = %s
+    # Get current quantity in cart
+    sql_get_cart = '''
+        SELECT quantite 
+        FROM ligne_panier 
+        WHERE declinaison_id = %s AND utilisateur_id = %s
     '''
-    mycursor.execute(sql, (id_article, id_client))
-    quantite_panier = mycursor.fetchone()['quantite']
-    quantite = quantite - quantite_panier
-    print('Update quantity with', quantite, 'articles')
+    mycursor.execute(sql_get_cart, (declinaison_id, id_client))
+    cart_item = mycursor.fetchone()
 
-    if quantite > 0:
-        quantite = update_stock(quantite, id_article)
-        print('Will add', quantite, 'articles')
-        sql = '''
-            UPDATE ligne_panier
-            SET quantite = quantite + %s
-            WHERE skin_id = %s AND utilisateur_id = %s
-        '''
-        mycursor.execute(sql, (quantite, id_article, id_client))
-    elif quantite < 0:
-        _delete_article_from_panier(-quantite, id_article)
-
-
-    get_db().commit()
-    return redirect('/client/article/show') 
+    if not cart_item:
+        flash(u'Article non trouvé dans le panier.', 'alert-warning')
+        return redirect('/client/article/show')
     
+    current_quantity_in_cart = cart_item['quantite']
+    quantity_diff = new_quantity - current_quantity_in_cart
 
-def _delete_article_from_panier(quantite, id_article):
-    id_client = session['id_user']
-    
-    mycursor = get_db().cursor()
+    if quantity_diff == 0:
+        return redirect('/client/article/show') # No change needed
 
-    sql = ''' 
-        SELECT quantite
-        FROM ligne_panier
-        WHERE skin_id = %s AND utilisateur_id = %s
-    '''
-    mycursor.execute(sql, (id_article, id_client))
-    article_panier=mycursor.fetchone()
-
-    if article_panier['quantite'] < quantite:
-        quantite = article_panier['quantite']
-
-    sql = '''
-        UPDATE skin
-        SET stock = stock + %s
-        WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (quantite, id_article))
-
-    if not(article_panier is None) and article_panier['quantite'] > quantite:
-        sql = '''
-            UPDATE ligne_panier
-            SET quantite = quantite - %s
-            WHERE skin_id = %s AND utilisateur_id = %s
-        '''
-        mycursor.execute(sql, (quantite, id_article, id_client))
-    else:
-        sql = '''
+    if new_quantity == 0:
+        # If new quantity is 0, effectively delete the line
+        _restore_declinaison_stock(declinaison_id, current_quantity_in_cart)
+        sql_delete = '''
             DELETE FROM ligne_panier 
-            WHERE skin_id = %s AND utilisateur_id = %s
+            WHERE declinaison_id = %s AND utilisateur_id = %s
         '''
-        mycursor.execute(sql, (id_article, id_client))
+        mycursor.execute(sql_delete, (declinaison_id, id_client))
+    elif quantity_diff > 0:
+        # Increase quantity: Check stock and decrease it
+        actual_removed = _decrease_declinaison_stock(declinaison_id, quantity_diff)
+        if actual_removed < quantity_diff:
+            message = f'Stock insuffisant. {actual_removed} article(s) ajouté(s) au lieu de {quantity_diff}.'
+            flash(message, 'alert-warning')
+            # Adjust the quantity to update in the cart based on actual stock removed
+            quantity_to_update = current_quantity_in_cart + actual_removed
+        else:
+            quantity_to_update = new_quantity
 
-    # mise à jour du stock de l'article disponible
+        sql_update = '''
+            UPDATE ligne_panier 
+            SET quantite = %s 
+            WHERE declinaison_id = %s AND utilisateur_id = %s
+        '''
+        mycursor.execute(sql_update, (quantity_to_update, declinaison_id, id_client))
+        
+    elif quantity_diff < 0:
+        # Decrease quantity: Restore stock and update cart
+        quantity_to_restore = abs(quantity_diff)
+        _restore_declinaison_stock(declinaison_id, quantity_to_restore)
+        
+        sql_update = '''
+            UPDATE ligne_panier 
+            SET quantite = %s 
+            WHERE declinaison_id = %s AND utilisateur_id = %s
+        '''
+        mycursor.execute(sql_update, (new_quantity, declinaison_id, id_client))
+
     get_db().commit()
+    return redirect('/client/article/show')
+    
 
 @client_panier.route('/client/panier/delete', methods=['POST'])
 def client_panier_delete():
@@ -292,102 +215,80 @@ def client_panier_delete():
     return redirect('/client/article/show')
 
 
-def _client_panier_delete_line(id_article, quantite):
-    id_client = session['id_user']
+# Refactored helper to delete a line and restore stock
+def _delete_line_and_restore_stock(declinaison_id, utilisateur_id):
     mycursor = get_db().cursor()
-    sql = ''' 
-        DELETE FROM ligne_panier
-        WHERE utilisateur_id = %s AND skin_id = %s 
+    # First, find the quantity in the cart to restore stock
+    sql_get_qty = '''
+        SELECT quantite 
+        FROM ligne_panier 
+        WHERE declinaison_id = %s AND utilisateur_id = %s
     '''
-    mycursor.execute(sql, (id_client, id_article))
+    mycursor.execute(sql_get_qty, (declinaison_id, utilisateur_id))
+    cart_item = mycursor.fetchone()
 
-    sql = ''' 
-        UPDATE skin
-        SET stock = stock + %s
-        WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (quantite, id_article))
+    if cart_item:
+        quantity_to_restore = cart_item['quantite']
+        
+        # Delete the line
+        sql_delete = '''
+            DELETE FROM ligne_panier 
+            WHERE declinaison_id = %s AND utilisateur_id = %s
+        '''
+        mycursor.execute(sql_delete, (declinaison_id, utilisateur_id))
 
-    get_db().commit()
+        # Restore the stock for the specific declinaison
+        _restore_declinaison_stock(declinaison_id, quantity_to_restore)
+        
+        return True # Indicate success
+    return False # Indicate item not found
 
 
 @client_panier.route('/client/panier/vider', methods=['POST'])
 def client_panier_vider():
     mycursor = get_db().cursor()
     client_id = session['id_user']
+    # Fetch declinaison_id and quantity from the cart
     sql = ''' 
-        SELECT skin_id, quantite
+        SELECT declinaison_id, quantite 
         FROM ligne_panier
         WHERE utilisateur_id = %s
     '''
-    mycursor.execute(sql, (client_id))
+    mycursor.execute(sql, (client_id,))
     items_panier = mycursor.fetchall()
-    for item in items_panier:
-        _client_panier_delete_line(item['skin_id'], item['quantite'])
+    
+    if items_panier:
+        for item in items_panier:
+            # Use the helper to delete line and restore stock
+            _delete_line_and_restore_stock(item['declinaison_id'], client_id)
+        get_db().commit() # Commit once after processing all items
+        flash(u'Panier vidé.', 'alert-success')
+    else:
+        flash(u'Le panier est déjà vide.', 'alert-info')
+        
     return redirect('/client/article/show')
 
 
 @client_panier.route('/client/panier/delete/line', methods=['POST'])
 def client_panier_delete_line():
-    mycursor = get_db().cursor()
     id_client = session['id_user']
-    id_article = request.form.get('id_article')
-    id_declinaison_article = request.form.get('id_declinaison_article')
+    # Use declinaison_id from form
+    declinaison_id = request.form.get('declinaison_id')
 
-    sql = ''' 
-        SELECT quantite 
-        FROM ligne_panier
-        WHERE utilisateur_id = %s AND skin_id = %s  
-    '''
-    mycursor.execute(sql, (id_client, id_article))
-    quantite = mycursor.fetchone()["quantite"]
+    try:
+        declinaison_id = int(declinaison_id)
+    except (ValueError, TypeError):
+        flash(u'ID de version invalide.', 'alert-danger')
+        return redirect('/client/article/show')
 
-    _client_panier_delete_line(id_article, quantite)
+    # Use the helper function to delete the line and restore stock
+    deleted = _delete_line_and_restore_stock(declinaison_id, id_client)
 
-    get_db().commit()
-    return redirect('/client/article/show')
+    if deleted:
+        get_db().commit()
+        flash(u'Article supprimé du panier.', 'alert-success')
+    else:
+        flash(u'Article non trouvé dans le panier.', 'alert-warning')
 
-
-@client_panier.route('/client/panier/filtre', methods=['POST'])
-def client_panier_filtre():
-    filter_word = request.form.get('filter_word', None)
-    filter_prix_min = request.form.get('filter_prix_min', None)
-    filter_prix_max = request.form.get('filter_prix_max', None)
-    filter_types = request.form.getlist('filter_types')
-
-    if filter_word:
-        session['filter_word'] = filter_word
-    elif 'filter_word' in session:
-        session.pop('filter_word')
-
-    if filter_prix_min:
-        session['filter_prix_min'] = filter_prix_min
-    elif 'filter_prix_min' in session:
-        session.pop('filter_prix_min')
-
-    if filter_prix_max:
-        session['filter_prix_max'] = filter_prix_max
-    elif 'filter_prix_max' in session:
-        session.pop('filter_prix_max')
-
-    if filter_types:
-        session['filter_types'] = filter_types
-    elif 'filter_types' in session:
-        session.pop('filter_types')
-
-    return redirect('/client/article/show')
-
-
-@client_panier.route('/client/panier/filtre/suppr', methods=['POST'])
-def client_panier_filtre_delete():
-    # suppression des variables en session
-    if 'filter_word' in session:
-        session.pop('filter_word')
-    if 'filter_prix_min' in session:
-        session.pop('filter_prix_min')
-    if 'filter_prix_max' in session:
-        session.pop('filter_prix_max')
-    if 'filter_types' in session:
-        session.pop('filter_types')
     return redirect('/client/article/show')
 

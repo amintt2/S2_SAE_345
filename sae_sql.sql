@@ -116,25 +116,25 @@ CREATE TABLE commande(
 ) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE ligne_commande(
-   skin_id INT NOT NULL,
+   declinaison_id INT NOT NULL,
    commande_id INT NOT NULL,
    prix DECIMAL(10,2),
    quantite INT,
-   PRIMARY KEY(skin_id, commande_id),
+   PRIMARY KEY(declinaison_id, commande_id),
    CONSTRAINT fk_ligne_commande_skin
-      FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+      FOREIGN KEY(declinaison_id) REFERENCES skin(id_skin),
    CONSTRAINT fk_ligne_commande_commande
       FOREIGN KEY(commande_id) REFERENCES commande(id_commande)
 ) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE ligne_panier(
-   skin_id INT NOT NULL,
+   declinaison_id INT NOT NULL,
    utilisateur_id INT NOT NULL,
    quantite INT,
    date_ajout DATETIME,
-   PRIMARY KEY(skin_id, utilisateur_id),
+   PRIMARY KEY(declinaison_id, utilisateur_id),
    CONSTRAINT fk_ligne_panier_skin
-      FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+      FOREIGN KEY(declinaison_id) REFERENCES skin(id_skin),
    CONSTRAINT fk_ligne_panier_utilisateur
       FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
 ) DEFAULT CHARSET utf8mb4;
@@ -305,24 +305,4 @@ INSERT INTO declinaison (stock, prix_declinaison, image, special_id, usure_id, s
 (10, 0.15, 'm4a1s_mudspec.png', 1, 3, 25),
 (8, 0.15, 'sticker_navi_glitter.png', 1, 1, 26);
 
-INSERT INTO commande (date_achat, etat_id, utilisateur_id) VALUES 
-    ('2024-03-19', 2, 2),
-    ('2024-03-15', 4, 2),
-    ('2024-03-18', 3, 3),
-    ('2024-03-20', 1, 3),
-    ('2024-03-10', 5, 2);
 
-INSERT INTO ligne_commande (skin_id, commande_id, prix, quantite) VALUES 
-    (1, 1, 80.00, 1),
-    (3, 1, 897.35, 2),
-    (7, 2, 83.90, 1),
-    (10, 2, 74.32, 3),
-    (4, 3, 490.76, 1),
-    (15, 3, 433.53, 2),
-    (2, 4, 11244.54, 1),
-    (5, 5, 4023.26, 1);
-
-INSERT INTO ligne_panier (skin_id, utilisateur_id, quantite, date_ajout) VALUES
-(1, 2, 1, '2024-03-20 10:30:00'),
-(2, 2, 4, '2023-06-24'),
-(2, 3, 3, '2023-06-24');

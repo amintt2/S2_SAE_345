@@ -73,11 +73,15 @@ articles (tableau de dictionnaires)
                             </div>
                             <div class="flex items-center gap-4 mb-4 md:mb-0">
                                 <div class="text-accent-blue font-bold text-xl">
-                                    {{ "{:,.2f}".format(ligne.prix) }}€
+                                    {% if ligne.prix_min == ligne.prix_max %}
+                                        {{ "{:,.2f}".format(ligne.prix_min) }}€
+                                    {% else %}
+                                        {{ "{:,.2f}".format(ligne.prix_min) }}€ - {{ "{:,.2f}".format(ligne.prix_max) }}€
+                                    {% endif %}
                                 </div>
                                 <div class="flex items-center">
-                                    {% if ligne.stock > 0 %}
-                                    <span class="text-gray-400 text-sm">Stock: {{ ligne.stock }}</span>
+                                    {% if ligne.stock_total > 0 %}
+                                    <span class="text-gray-400 text-sm">Stock total: {{ ligne.stock_total }}</span>
                                     {% else %}
                                     <span class="text-red-500 text-sm">Rupture de stock</span>
                                     {% endif %}
@@ -89,8 +93,8 @@ articles (tableau de dictionnaires)
                                 <input type="hidden" name="id_article" value="{{ ligne.id_skin }}">
                                 <input type="hidden" name="quantite" value="1">
                                 <button class="bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
-                                        {% if ligne.stock <= 0 %}disabled class="bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
-                                    {% if ligne.stock > 0 %}
+                                        {% if ligne.stock_total <= 0 %}disabled class="bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
+                                    {% if ligne.stock_total > 0 %}
                                         Ajouter au panier
                                     {% else %}
                                         Indisponible
@@ -189,11 +193,15 @@ articles (tableau de dictionnaires)
                             </div>
                             <div class="flex items-center gap-4">
                                 <div class="text-accent-blue font-bold text-xl">
-                                    {{ "{:,.2f}".format(article.prix) }}€
+                                    {% if article.prix_min == article.prix_max %}
+                                        {{ "{:,.2f}".format(article.prix_min) }}€
+                                    {% else %}
+                                        {{ "{:,.2f}".format(article.prix_min) }}€ - {{ "{:,.2f}".format(article.prix_max) }}€
+                                    {% endif %}
                                 </div>
                                 <div class="flex items-center">
-                                    {% if article.stock > 0 %}
-                                    <span class="text-gray-400 text-sm">Stock: {{ article.stock }}</span>
+                                    {% if article.stock_total > 0 %}
+                                    <span class="text-gray-400 text-sm">Stock total: {{ article.stock_total }}</span>
                                     {% else %}
                                     <span class="text-red-500 text-sm">Rupture de stock</span>
                                     {% endif %}

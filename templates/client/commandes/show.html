@@ -59,6 +59,12 @@
                                 </td>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ ligne.nom }}
                                     <span class="text-blue-400 ml-2">( {{ ligne.libelle_usure }} )</span>
+                                    <div class="text-sm text-gray-400">
+                                        <span class="text-indigo-400">{{ ligne.libelle_type_skin }}</span>
+                                        {% if ligne.libelle_special != "Aucun" %}
+                                            <span class="text-amber-400 ml-2">{{ ligne.libelle_special }}</span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ ligne.quantite }}</td>
                                 <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ ligne.prix }} €</td>
