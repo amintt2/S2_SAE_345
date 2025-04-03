@@ -1,12 +1,12 @@
+DROP TABLE IF EXISTS ligne_panier;
+DROP TABLE IF EXISTS ligne_commande;
 DROP TABLE IF EXISTS declinaison;
 DROP TABLE IF EXISTS commentaire;
 DROP TABLE IF EXISTS note;
-DROP TABLE IF EXISTS ligne_panier;
-DROP TABLE IF EXISTS ligne_commande;
+DROP TABLE IF EXISTS historique;
+DROP TABLE IF EXISTS liste_envie;
 DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS adresse;
-DROP TABLE IF EXISTS liste_envie;
-DROP TABLE IF EXISTS historique;
 DROP TABLE IF EXISTS skin;
 DROP TABLE IF EXISTS etat;
 DROP TABLE IF EXISTS special;
@@ -62,28 +62,6 @@ CREATE TABLE skin(
       FOREIGN KEY(type_skin_id) REFERENCES type_skin(id_type_skin)
 ) DEFAULT CHARSET utf8mb4;
 
-CREATE TABLE historique(
-   skin_id INT NOT NULL,
-   utilisateur_id INT NOT NULL,
-   date_consultation DATETIME,
-   PRIMARY KEY(skin_id, utilisateur_id, date_consultation),
-   CONSTRAINT fk_historique_skin
-      FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
-   CONSTRAINT fk_historique_utilisateur
-      FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
-) DEFAULT CHARSET utf8mb4;
-
-CREATE TABLE liste_envie(
-   skin_id INT NOT NULL,
-   utilisateur_id INT NOT NULL, 
-   date_update DATETIME,
-   PRIMARY KEY(skin_id, utilisateur_id, date_update),
-   CONSTRAINT fk_liste_envie_skin
-      FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
-   CONSTRAINT fk_liste_envie_utilisateur
-      FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
-) DEFAULT CHARSET utf8mb4;
-
 CREATE TABLE adresse (
    id_adresse INT AUTO_INCREMENT,
    nom VARCHAR(255),
@@ -115,27 +93,25 @@ CREATE TABLE commande(
       FOREIGN KEY(adresse_facturation_id) REFERENCES adresse(id_adresse)
 ) DEFAULT CHARSET utf8mb4;
 
-CREATE TABLE ligne_commande(
-   declinaison_id INT NOT NULL,
-   commande_id INT NOT NULL,
-   prix DECIMAL(10,2),
-   quantite INT,
-   PRIMARY KEY(declinaison_id, commande_id),
-   CONSTRAINT fk_ligne_commande_skin
-      FOREIGN KEY(declinaison_id) REFERENCES skin(id_skin),
-   CONSTRAINT fk_ligne_commande_commande
-      FOREIGN KEY(commande_id) REFERENCES commande(id_commande)
+CREATE TABLE liste_envie(
+   skin_id INT NOT NULL,
+   utilisateur_id INT NOT NULL, 
+   date_update DATETIME,
+   PRIMARY KEY(skin_id, utilisateur_id, date_update),
+   CONSTRAINT fk_liste_envie_skin
+      FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+   CONSTRAINT fk_liste_envie_utilisateur
+      FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
 ) DEFAULT CHARSET utf8mb4;
 
-CREATE TABLE ligne_panier(
-   declinaison_id INT NOT NULL,
+CREATE TABLE historique(
+   skin_id INT NOT NULL,
    utilisateur_id INT NOT NULL,
-   quantite INT,
-   date_ajout DATETIME,
-   PRIMARY KEY(declinaison_id, utilisateur_id),
-   CONSTRAINT fk_ligne_panier_skin
-      FOREIGN KEY(declinaison_id) REFERENCES skin(id_skin),
-   CONSTRAINT fk_ligne_panier_utilisateur
+   date_consultation DATETIME,
+   PRIMARY KEY(skin_id, utilisateur_id, date_consultation),
+   CONSTRAINT fk_historique_skin
+      FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+   CONSTRAINT fk_historique_utilisateur
       FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
 ) DEFAULT CHARSET utf8mb4;
 
@@ -178,6 +154,30 @@ CREATE TABLE declinaison (
       FOREIGN KEY(special_id) REFERENCES special(id_special),
    CONSTRAINT fk_declinaison_usure
       FOREIGN KEY(usure_id) REFERENCES usure(id_usure)
+) DEFAULT CHARSET utf8mb4;
+
+CREATE TABLE ligne_commande(
+   declinaison_id INT NOT NULL,
+   commande_id INT NOT NULL,
+   prix DECIMAL(10,2),
+   quantite INT,
+   PRIMARY KEY(declinaison_id, commande_id),
+   CONSTRAINT fk_ligne_commande_skin
+      FOREIGN KEY(declinaison_id) REFERENCES skin(id_skin),
+   CONSTRAINT fk_ligne_commande_commande
+      FOREIGN KEY(commande_id) REFERENCES commande(id_commande)
+) DEFAULT CHARSET utf8mb4;
+
+CREATE TABLE ligne_panier(
+   declinaison_id INT NOT NULL,
+   utilisateur_id INT NOT NULL,
+   quantite INT,
+   date_ajout DATETIME,
+   PRIMARY KEY(declinaison_id, utilisateur_id),
+   CONSTRAINT fk_ligne_panier_skin
+      FOREIGN KEY(declinaison_id) REFERENCES skin(id_skin),
+   CONSTRAINT fk_ligne_panier_utilisateur
+      FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
 ) DEFAULT CHARSET utf8mb4;
 
 
@@ -306,3 +306,24 @@ INSERT INTO declinaison (stock, prix_declinaison, image, special_id, usure_id, s
 (8, 0.15, 'sticker_navi_glitter.png', 1, 1, 26);
 
 
+INSERT INTO commande (date_achat, etat_id, utilisateur_id) VALUES 
+    ('2024-03-19', 2, 2),
+    ('2024-03-15', 4, 2),
+    ('2024-03-18', 3, 3),
+    ('2024-03-20', 1, 3),
+    ('2024-03-10', 5, 2);
+
+INSERT INTO ligne_commande (declinaison_id, commande_id, prix, quantite) VALUES 
+    (1, 1, 80.00, 1),
+    (3, 1, 897.35, 2),
+    (7, 2, 83.90, 1),
+    (10, 2, 74.32, 3),
+    (4, 3, 490.76, 1),
+    (15, 3, 433.53, 2),
+    (2, 4, 11244.54, 1),
+    (5, 5, 4023.26, 1);
+
+INSERT INTO ligne_panier (declinaison_id, utilisateur_id, quantite, date_ajout) VALUES
+(1, 2, 1, '2024-03-20 10:30:00'),
+(2, 2, 4, '2023-06-24'),
+(2, 3, 3, '2023-06-24');
