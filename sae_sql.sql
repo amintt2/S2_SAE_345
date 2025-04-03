@@ -53,6 +53,7 @@ CREATE TABLE etat(
 CREATE TABLE skin(
    id_skin INT AUTO_INCREMENT,
    nom_skin VARCHAR(50),
+   disponible TINYINT(1),
    prix_skin DECIMAL(10,2),
    type_skin_id INT NOT NULL,
    image VARCHAR(255),
@@ -220,33 +221,33 @@ INSERT INTO etat (libelle_etat) VALUES
 ('Annulée');
 
 
-INSERT INTO skin (nom_skin, prix_skin, type_skin_id, image, description) VALUES
-('Karambit | Gamma Doppler', 1005.34, 4, 'karambit_gamma_doppler.png', 'A knife with a curved blade resembling a claw with a mesmerizing gamma doppler finish.'),
-('AWP | Dragon Lore', 11244.54, 3, 'awp_dragon_lore.png', 'The legendary AWP skin with golden dragon motifs.'),
-('Sport Gloves | Amphibious', 897.35, 5, 'gloves_amphibious.png', 'Sport gloves with a blue and green amphibious design.'),
-('Skeleton Knife | Crimson Web', 490.76, 4, 'skeleton_crimson.png', 'A skeleton knife with a crimson web pattern.'),
-('AK-47 | Gold Arabesque', 4023.26, 1, 'ak_gold_arabesque.png', 'AK-47 with intricate gold arabesque design.'),
-('Butterfly Knife | Marble Fade', 2083.06, 4, 'butterfly_marble.png', 'A butterfly knife with a colorful marble fade pattern.'),
-('Driver Gloves | Snow Leopard', 83.90, 5, 'gloves_snow_leopard.png', 'Driver gloves with a snow leopard pattern.'),
-('M4A1-S | Knight', 2959.66, 6, 'm4a1s_knight.png', 'An elegant gold-themed M4A1-S skin.'),
-('M9 Bayonet | Doppler', 1262.63, 4, 'm9_doppler.png', 'An M9 Bayonet with an iridescent doppler finish.'),
-('AWP | Lightning Strike', 74.32, 3, 'awp_lightning_st.png', 'An AWP skin featuring a lightning strike pattern.'),
-('AK-47 | Inheritance', 180.50, 1, 'FN_AK_INHERITANCE.png', 'An AK-47 with intricate inheritance design.'),
-('AWP | Gungnir', 11200.00, 3, 'FN_GUNGNIR.png', 'A Nordic-themed AWP with blue and gold details.'),
-('Sticker | iBUYPOWER (Holo) | Katowice 2014', 75000.00, 2, 'IBUYPOWER-HOLO.png', 'An extremely rare holographic sticker from Katowice 2014.'),
-('Sticker | Titan (Holo) | Katowice 2014', 55000.00, 2, 'TITAN-HOLO.png', 'A valuable holographic Titan sticker from Katowice 2014.'),
-('Karambit | Crimson Web', 433.53, 4, 'karambit_crimson_web.png', 'A karambit with a crimson web pattern.'),
-('AWP | Wildfire', 47.93, 3, 'awp_wildfire.png', 'An AWP skin with fire-themed design.'),
-('Flip Knife | Bright Water', 206.29, 4, 'flip_bright_water.png', 'A flip knife with a bright water pattern.'),
-('Bowie Knife | Autotronic', 147.36, 4, 'bowie_autotronic.png', 'A bowie knife with an autotronic finish.'),
-('Huntsman Knife | Gamma Doppler', 378.27, 4, 'huntsman_gamma_doppler.png', 'A huntsman knife with a gamma doppler finish.'),
-('Navaja Knife | Rust Coat', 93.19, 4, 'navaja_rust.png', 'A navaja knife with a rust coat finish.'),
-('Specialist Gloves | Fade', 343.02, 5, 'specialist_fade.png', 'Specialist gloves with a fade pattern.'),
-('Bowie Knife | Black Laminate', 113.87, 4, 'bowie_black_laminate.png', 'A bowie knife with a black laminate finish.'),
-('Skeleton Knife | Fade', 1346.34, 4, 'skeleton_fade.png', 'A skeleton knife with a fade pattern.'),
-('Flip Knife | Doppler', 453.49, 4, 'flip_doppler.png', 'A flip knife with a doppler finish.'),
-('M4A1-S | Mud-Spec', 0.15, 6, 'm4a1s_mudspec.png', 'A common M4A1-S skin with a mud spec pattern.'),
-('Natus Vincere Glitter', 0.15, 2, 'sticker_navi_glitter.png', 'A glitter sticker for Natus Vincere team.');
+INSERT INTO skin (nom_skin, disponible, prix_skin, type_skin_id, image, description) VALUES
+('Karambit | Gamma Doppler', 1, 1005.34, 4, 'karambit_gamma_doppler.png', 'A knife with a curved blade resembling a claw with a mesmerizing gamma doppler finish.'),
+('AWP | Dragon Lore', 1, 11244.54, 3, 'awp_dragon_lore.png', 'The legendary AWP skin with golden dragon motifs.'),
+('Sport Gloves | Amphibious', 1, 897.35, 5, 'gloves_amphibious.png', 'Sport gloves with a blue and green amphibious design.'),
+('Skeleton Knife | Crimson Web', 1, 490.76, 4, 'skeleton_crimson.png', 'A skeleton knife with a crimson web pattern.'),
+('AK-47 | Gold Arabesque', 1, 4023.26, 1, 'ak_gold_arabesque.png', 'AK-47 with intricate gold arabesque design.'),
+('Butterfly Knife | Marble Fade', 1, 2083.06, 4, 'butterfly_marble.png', 'A butterfly knife with a colorful marble fade pattern.'),
+('Driver Gloves | Snow Leopard', 1, 83.90, 5, 'gloves_snow_leopard.png', 'Driver gloves with a snow leopard pattern.'),
+('M4A1-S | Knight', 1, 2959.66, 6, 'm4a1s_knight.png', 'An elegant gold-themed M4A1-S skin.'),
+('M9 Bayonet | Doppler', 1, 1262.63, 4, 'm9_doppler.png', 'An M9 Bayonet with an iridescent doppler finish.'),
+('AWP | Lightning Strike', 1, 74.32, 3, 'awp_lightning_st.png', 'An AWP skin featuring a lightning strike pattern.'),
+('AK-47 | Inheritance', 1, 180.50, 1, 'FN_AK_INHERITANCE.png', 'An AK-47 with intricate inheritance design.'),
+('AWP | Gungnir', 1, 11200.00, 3, 'FN_GUNGNIR.png', 'A Nordic-themed AWP with blue and gold details.'),
+('Sticker | iBUYPOWER (Holo) | Katowice 2014', 1, 75000.00, 2, 'IBUYPOWER-HOLO.png', 'An extremely rare holographic sticker from Katowice 2014.'),
+('Sticker | Titan (Holo) | Katowice 2014', 1, 55000.00, 2, 'TITAN-HOLO.png', 'A valuable holographic Titan sticker from Katowice 2014.'),
+('Karambit | Crimson Web', 1, 433.53, 4, 'karambit_crimson_web.png', 'A karambit with a crimson web pattern.'),
+('AWP | Wildfire', 1, 47.93, 3, 'awp_wildfire.png', 'An AWP skin with fire-themed design.'),
+('Flip Knife | Bright Water', 1, 206.29, 4, 'flip_bright_water.png', 'A flip knife with a bright water pattern.'),
+('Bowie Knife | Autotronic', 1, 147.36, 4, 'bowie_autotronic.png', 'A bowie knife with an autotronic finish.'),
+('Huntsman Knife | Gamma Doppler', 1, 378.27, 4, 'huntsman_gamma_doppler.png', 'A huntsman knife with a gamma doppler finish.'),
+('Navaja Knife | Rust Coat', 1, 93.19, 4, 'navaja_rust.png', 'A navaja knife with a rust coat finish.'),
+('Specialist Gloves | Fade', 1, 343.02, 5, 'specialist_fade.png', 'Specialist gloves with a fade pattern.'),
+('Bowie Knife | Black Laminate', 1, 113.87, 4, 'bowie_black_laminate.png', 'A bowie knife with a black laminate finish.'),
+('Skeleton Knife | Fade', 1, 1346.34, 4, 'skeleton_fade.png', 'A skeleton knife with a fade pattern.'),
+('Flip Knife | Doppler', 1, 453.49, 4, 'flip_doppler.png', 'A flip knife with a doppler finish.'),
+('M4A1-S | Mud-Spec', 1, 0.15, 6, 'm4a1s_mudspec.png', 'A common M4A1-S skin with a mud spec pattern.'),
+('Natus Vincere Glitter', 1, 0.15, 2, 'sticker_navi_glitter.png', 'A glitter sticker for Natus Vincere team.');
 
 
 INSERT INTO declinaison (stock, prix_declinaison, image, special_id, usure_id, skin_id) VALUES
