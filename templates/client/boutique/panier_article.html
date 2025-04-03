@@ -136,9 +136,11 @@
             {% for article in articles %}
             <div class="bg-dark-secondary rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <div class="relative">
-                    <img src="{{ url_for('static', filename='images/' + article.image) }}" 
-                        class="w-full h-60 object-contain" 
-                        alt="{{ article.nom }}">
+                    <a href="/client/article/details?id_article={{ article.id_skin }}">
+                        <img src="{{ url_for('static', filename='images/' + article.image) }}" 
+                            class="w-full h-60 object-contain" 
+                            alt="{{ article.nom }}">
+                    </a>
                     <div class="absolute top-2 right-2 flex flex-col space-y-2">
                         <span style="width: max-content" class="bg-dark-primary bg-opacity-90 text-gray-300 px-2 py-1 rounded text-sm font-medium justify self-end">
                             {{ article.libelle_type_article }}

@@ -123,7 +123,7 @@ def client_panier_add():
 @client_panier.route('/client/panier/update', methods=['POST'])
 def client_panier_update():
     id_client = session['id_user']
-    # Use declinaison_id from form
+    # Use declinaison_id from form  
     declinaison_id = request.form.get('declinaison_id')
     
     try:

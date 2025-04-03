@@ -18,7 +18,7 @@ def client_article_details():
     id_client = session['id_user']
 
     ## partie 4
-    # client_historique_add(id_article, id_client)
+    client_historique_add(id_article, id_client)
 
     sql = '''
     SELECT 
@@ -44,7 +44,7 @@ def client_article_details():
     # mycursor.execute(sql, ( id_article))
     # commentaires = mycursor.fetchall()
     sql = '''
-    SELECT COUNT(skin_id) AS nb_commandes_article
+    SELECT COUNT(declinaison_id) AS nb_commandes_article
     FROM ligne_commande
     JOIN commande ON commande.id_commande = ligne_commande.commande_id
     WHERE commande.utilisateur_id=%s and ligne_commande.declinaison_id=%s;

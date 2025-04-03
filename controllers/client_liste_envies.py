@@ -48,33 +48,53 @@ def client_liste_envies_delete():
 def client_liste_envies_commander():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    id_skin = request.form.get('id_article')
-    quantite = request.form.get('quantite', 1)
+    id_skin = request.form.get('id_article') # This is the base skin ID
+    quantite_a_ajouter = 1 
 
-    # Vérifier si l'article est déjà dans le panier
-    sql = '''SELECT quantite FROM ligne_panier 
-             WHERE utilisateur_id = %s AND skin_id = %s'''
-    mycursor.execute(sql, (id_client, id_skin))
+    # 1. Find the first available declination_id for the given skin_id
+    sql_find_decl = '''SELECT id_declinaison 
+                       FROM declinaison 
+                       WHERE skin_id = %s AND stock > 0 
+                       ORDER BY id_declinaison ASC 
+                       LIMIT 1'''
+    mycursor.execute(sql_find_decl, (id_skin,))
+    available_decl = mycursor.fetchone()
+
+    if not available_decl:
+        flash(u'Désolé, cet article (ou ses déclinaisons) est actuellement en rupture de stock.', 'alert-warning')
+        return redirect('/client/envies/show')
+    
+    id_declinaison_a_ajouter = available_decl['id_declinaison']
+
+    # 2. Check if this specific declination is already in the user's cart
+    sql_check_panier = '''SELECT quantite FROM ligne_panier 
+                          WHERE utilisateur_id = %s AND declinaison_id = %s'''
+    mycursor.execute(sql_check_panier, (id_client, id_declinaison_a_ajouter))
     article_in_panier = mycursor.fetchone()
 
     if article_in_panier:
-        sql = '''UPDATE ligne_panier 
-                 SET quantite = quantite + %s, date_ajout = NOW()
-                 WHERE utilisateur_id = %s AND skin_id = %s'''
-        mycursor.execute(sql, (quantite, id_client, id_skin))
+        # 3a. Update quantity if already in cart
+        sql_update_panier = '''UPDATE ligne_panier 
+                             SET quantite = quantite + %s, date_ajout = NOW()
+                             WHERE utilisateur_id = %s AND declinaison_id = %s'''
+        mycursor.execute(sql_update_panier, (quantite_a_ajouter, id_client, id_declinaison_a_ajouter))
     else:
-        sql = '''INSERT INTO ligne_panier (declinaison_id, utilisateur_id, quantite, date_ajout)
-                 VALUES (%s, %s, %s, NOW())'''
-        mycursor.execute(sql, (id_skin, id_client, quantite))
+        # 3b. Insert new line if not in cart
+        sql_insert_panier = '''INSERT INTO ligne_panier (declinaison_id, utilisateur_id, quantite, date_ajout)
+                             VALUES (%s, %s, %s, NOW())'''
+        mycursor.execute(sql_insert_panier, (id_declinaison_a_ajouter, id_client, quantite_a_ajouter))
     
-    sql = '''DELETE FROM liste_envie
-             WHERE utilisateur_id = %s AND skin_id = %s'''
-    mycursor.execute(sql, (id_client, id_skin))
+    # 4. Remove the base skin from the wishlist (assuming this is desired behavior)
+    sql_delete_envie = '''DELETE FROM liste_envie
+                          WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_delete_envie, (id_client, id_skin))
     
     get_db().commit()
-    flash(u'Article ajouté au panier et retiré de la liste d\'envies')
+    flash(u'Article ajouté au panier (première déclinaison disponible) et retiré de la liste d\'envies.', 'alert-success')
     
-    return redirect('/client/article/show')
+    # Redirect to cart page to show the added item might be better UX
+    # return redirect(url_for('client_panier.client_panier_show')) 
+    return redirect('/client/article/show') # Or back to main article list
 
 @client_liste_envies.route('/client/envies/show', methods=['get'])
 def client_liste_envies_show():
@@ -110,16 +130,20 @@ def client_liste_envies_show():
                     t.libelle_type_skin as type_skin,
                     MIN(d.prix_declinaison) as prix_min,
                     MAX(d.prix_declinaison) as prix_max,
-                    SUM(d.stock) as stock_total,
-                    MAX(h.date_consultation) as date_consultation
-             FROM skin s
-             INNER JOIN historique h ON h.skin_id = s.id_skin
-             INNER JOIN type_skin t ON t.id_type_skin = s.type_skin_id
-             INNER JOIN declinaison d ON d.skin_id = s.id_skin
+                    SUM(d.stock) as stock_total, 
+                    -- Ajout des colonnes pour les infos spécifiques de la déclinaison si nécessaire
+                    -- d.id_declinaison, u.libelle_usure as usure, sp.libelle_special as special,
+                    MAX(h.date_consultation) as last_consultation_date
+             FROM historique h
+             JOIN skin s ON h.skin_id = s.id_skin
+             JOIN type_skin t ON s.type_skin_id = t.id_type_skin
+             LEFT JOIN declinaison d ON s.id_skin = d.skin_id -- LEFT JOIN au cas où un skin n'a pas de déclinaison
+             -- LEFT JOIN usure u ON d.usure_id = u.id_usure
+             -- LEFT JOIN special sp ON d.special_id = sp.id_special
              WHERE h.utilisateur_id = %s
              GROUP BY s.id_skin, s.nom_skin, s.image, t.libelle_type_skin
-             ORDER BY MAX(h.date_consultation) DESC
-             LIMIT 3'''
+             ORDER BY last_consultation_date DESC
+             LIMIT 6''' # Limiter à 6 articles distincts maximum
     mycursor.execute(sql, (id_client,))
     articles_historique = mycursor.fetchall()
 
@@ -156,11 +180,44 @@ def client_liste_envies_show():
                            nb_autres_clients=nb_autres_clients,
                            nb_articles_meme_type=nb_articles_meme_type)
 
-def client_historique_add(article_id, client_id):
+def client_historique_add(skin_id, client_id):
     mycursor = get_db().cursor()
-    sql = '''INSERT INTO historique (utilisateur_id, id_skin, date_consultation)
-             VALUES (%s, %s, NOW())'''
-    mycursor.execute(sql, (client_id, article_id))
+    
+    # 1. Supprimer les entrées de plus d'un mois pour cet utilisateur
+    sql_delete_old = '''DELETE FROM historique
+                      WHERE utilisateur_id = %s AND date_consultation < DATE_SUB(NOW(), INTERVAL 1 MONTH)'''
+    mycursor.execute(sql_delete_old, (client_id,))
+
+    # 2. Vérifier si l'article est déjà dans l'historique récent
+    sql_check_exists = '''SELECT COUNT(*) as count FROM historique
+                          WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_check_exists, (client_id, skin_id))
+    exists = mycursor.fetchone()['count'] > 0
+    
+    if exists:
+        # 3a. Si oui, mettre à jour la date de consultation
+        sql_update_date = '''UPDATE historique SET date_consultation = NOW()
+                           WHERE utilisateur_id = %s AND skin_id = %s'''
+        mycursor.execute(sql_update_date, (client_id, skin_id))
+    else:
+        # 3b. Si non, vérifier le nombre d'articles distincts dans l'historique
+        sql_count = '''SELECT COUNT(*) as count FROM historique WHERE utilisateur_id = %s'''
+        mycursor.execute(sql_count, (client_id,))
+        count = mycursor.fetchone()['count']
+        
+        if count >= 6:
+            # 4. Si l'historique est plein (6 articles), supprimer le plus ancien
+            sql_delete = '''DELETE FROM historique 
+                          WHERE utilisateur_id = %s 
+                          ORDER BY date_consultation ASC 
+                          LIMIT 1'''
+            mycursor.execute(sql_delete, (client_id,))
+
+        # 5. Insérer la nouvelle entrée
+        sql_insert_new = '''INSERT INTO historique (utilisateur_id, skin_id, date_consultation)
+                        VALUES (%s, %s, NOW())'''
+        mycursor.execute(sql_insert_new, (client_id, skin_id))
+        
     get_db().commit()
 
 @client_liste_envies.route('/client/envies/up', methods=['get'])
