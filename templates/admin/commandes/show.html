@@ -1,6 +1,7 @@
 {% extends "admin/layout_admin.html" %}
 {% block body %}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!--
             <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow-sm ring-1 ring-gray-700">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-4 items-end">
                     <div>
@@ -26,132 +27,135 @@
                 </div>
             </div>
 
-            {% if articles_commande %}
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-900">Recapitulatifs de la commande selectionnée</h3>
-                <a href="/admin/commande/show" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500">
-                    Retour
-                </a>
-            </div>
+        -->
 
-            <!-- Client Information -->
-            {% if commande_adresses %}
-            <div class="mb-8 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
-                <div class="px-4 py-5 sm:p-6">
-                    <h4 class="text-lg font-medium text-gray-200 mb-4">Informations client</h4>
-                    <div>
-                        <p class="mt-1 text-sm text-gray-200">Login: {{ commande_adresses.login }}</p>
-                        <p class="mt-1 text-sm text-gray-200">Email: {{ commande_adresses.email }}</p>
-                        <p class="mt-1 text-sm text-gray-200">Nom: {{ commande_adresses.nom }}</p>
-                    </div>
+
+        {% if articles_commande %}
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-white-900">Recapitulatifs de la commande selectionnée</h3>
+            <a href="/admin/commande/show" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500">
+                Retour
+            </a>
+        </div>
+
+        <!-- Client Information -->
+        {% if commande_adresses %}
+        <div class="mb-8 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h4 class="text-lg font-medium text-gray-200 mb-4">Informations client</h4>
+                <div>
+                    <p class="mt-1 text-sm text-gray-200">Login: {{ commande_adresses.login }}</p>
+                    <p class="mt-1 text-sm text-gray-200">Email: {{ commande_adresses.email }}</p>
+                    <p class="mt-1 text-sm text-gray-200">Nom: {{ commande_adresses.nom }}</p>
                 </div>
             </div>
-            {% endif %}
+        </div>
+        {% endif %}
 
-            <!-- Order Details Table -->
-            <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
-                <thead>
-                    <tr>
-                        <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
-                        <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
-                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Quantite</th>
-                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix</th>
-                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix total</th>
+        <!-- Order Details Table -->
+        <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+            <thead>
+                <tr>
+                    <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
+                    <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Quantite</th>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix</th>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Prix total</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+                {% for ligne in articles_commande %}
+                    <tr class="hover:bg-gray-700">
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
+                            {% if ligne.image %}
+                                <img class="h-12 w-12 rounded-full object-cover" 
+                                        src="{{ url_for('static', filename='images/' + ligne.image) }}" 
+                                        alt="Image de {{ ligne.nom }}">
+                            {% else %}
+                                <img class="h-12 w-12 rounded-full object-cover"
+                                        src="{{ url_for('static', filename='images/no_photo.jpeg') }}" 
+                                        alt="Pas d'image">
+                            {% endif %}
+                        </td>
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ ligne.nom }}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.quantite }}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix }} €</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix_ligne }} €</td>
                     </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-700">
-                    {% for ligne in articles_commande %}
-                        <tr class="hover:bg-gray-700">
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
-                                {% if ligne.image %}
-                                    <img class="h-12 w-12 rounded-full object-cover" 
-                                         src="{{ url_for('static', filename='images/' + ligne.image) }}" 
-                                         alt="Image de {{ ligne.nom }}">
-                                {% else %}
-                                    <img class="h-12 w-12 rounded-full object-cover"
-                                         src="{{ url_for('static', filename='images/no_photo.jpeg') }}" 
-                                         alt="Pas d'image">
-                                {% endif %}
-                            </td>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ ligne.nom }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.quantite }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix }} €</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ ligne.prix_ligne }} €</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                {% endfor %}
+            </tbody>
+        </table>
 
-            {% if articles_commande[0].etat_id == 1 %}
-            <div class="mt-4">
-                <form action="/admin/commande/valider" method="post">
-                    <input type="hidden" name="id_commande" value="{{ articles_commande[0].id }}">
-                    <button type="submit" class="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
-                        Valider (Expédier)
-                    </button>
-                </form>
+        {% if articles_commande[0].etat_id == 1 %}
+        <div class="mt-4">
+            <form action="/admin/commande/valider" method="post">
+                <input type="hidden" name="id_commande" value="{{ articles_commande[0].id }}">
+                <button type="submit" class="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
+                    Valider (Expédier)
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        <hr class="my-8 border-gray-200">
+        {% endif %}
+
+        <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+            <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
+                <h3 class="text-lg font-medium leading-6 text-gray-200">Toutes les commandes</h3>
             </div>
-            {% endif %}
-
-            <hr class="my-8 border-gray-200">
-            {% endif %}
-
-            <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
-                <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
-                    <h3 class="text-lg font-medium leading-6 text-gray-200">Toutes les commandes</h3>
-                </div>
-                <div class="px-4 py-5 sm:p-6">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-700">
-                            <thead>
-                                <tr>
-                                    <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Login client</th>
-                                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Date de commande</th>
-                                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Nombre d'articles</th>
-                                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Coût total</th>
-                                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Etat de la commande</th>
-                                    <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Options</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-700">
-                                {% for commande in commandes %}
-                                <tr class="{% if commande.etat_id == 1 %}bg-amber-900/50{% else %}bg-gray-800{% endif %} hover:bg-gray-700">
-                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ commande.login }}</td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.nbr_articles }}</td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ "{:,.2f} €".format(commande.prix_total) }}</td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
-                                        {% if commande.etat_id == 1 %}
-                                        <span class="inline-flex items-center rounded-full bg-amber-900/50 px-2.5 py-0.5 text-sm font-medium text-amber-200">
-                                            {{ commande.libelle }}
-                                        </span>
-                                        {% else %}
-                                        <span class="inline-flex items-center rounded-full bg-green-900/50 px-2.5 py-0.5 text-sm font-medium text-green-200">
-                                            {{ commande.libelle }}
-                                        </span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-center space-x-2">
-                                        {% if commande.etat_id == 1 %}
-                                        <form action="/admin/commande/valider" class="inline-block" method="post">
-                                            <input type="hidden" name="id_commande" value="{{ commande.id_commande }}">
-                                            <button type="submit" class="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
-                                                Valider
-                                            </button>
-                                        </form>
-                                        {% endif %}
-                                        <a href="/admin/commande/show?id_commande={{ commande.id_commande }}">
-                                            <button class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400">
-                                                Details
-                                            </button>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="px-4 py-5 sm:p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead>
+                            <tr>
+                                <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Login client</th>
+                                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Date de commande</th>
+                                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Nombre d'articles</th>
+                                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Coût total</th>
+                                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Etat de la commande</th>
+                                <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Options</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            {% for commande in commandes %}
+                            <tr class="{% if commande.etat_id == 1 %}bg-amber-900/50{% else %}bg-gray-800{% endif %} hover:bg-gray-700">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ commande.login }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.nbr_articles }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ "{:,.2f} €".format(commande.prix_total) }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
+                                    {% if commande.etat_id == 1 %}
+                                    <span class="inline-flex items-center rounded-full bg-amber-900/50 px-2.5 py-0.5 text-sm font-medium text-amber-200">
+                                        {{ commande.libelle }}
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-green-900/50 px-2.5 py-0.5 text-sm font-medium text-green-200">
+                                        {{ commande.libelle }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-center space-x-2">
+                                    {% if commande.etat_id == 1 %}
+                                    <form action="/admin/commande/valider" class="inline-block" method="post">
+                                        <input type="hidden" name="id_commande" value="{{ commande.id_commande }}">
+                                        <button type="submit" class="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
+                                            Valider
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    <a href="/admin/commande/show?id_commande={{ commande.id_commande }}">
+                                        <button class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400">
+                                            Details
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
     </div>
 {% endblock %}

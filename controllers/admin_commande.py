@@ -24,7 +24,7 @@ def admin_commande_show():
             commande.date_achat,
             etat.libelle_etat as libelle,
             etat.id_etat as etat_id,
-            COUNT(ligne_commande.commande_id) as nbr_articles,
+            COUNT(ligne_commande.quantite) as nbr_articles,
             SUM(ligne_commande.prix * ligne_commande.quantite) as prix_total,
             utilisateur.login
         FROM commande
