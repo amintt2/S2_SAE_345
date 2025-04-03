@@ -50,16 +50,17 @@ def admin_commande_show():
                 ligne_commande.quantite,
                 ligne_commande.prix,
                 (ligne_commande.prix * ligne_commande.quantite) AS prix_ligne,
-                usure.libelle_usure,
-                type_skin.libelle_type_skin,
-                special.libelle_special,
+                u.libelle_usure,
+                ts.libelle_type_skin,
+                sp.libelle_special,
                 commande.etat_id,
                 commande.id_commande as id
             FROM ligne_commande
-            INNER JOIN skin ON ligne_commande.skin_id = skin.id_skin
-            INNER JOIN usure ON skin.usure_id = usure.id_usure
-            INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
-            INNER JOIN special ON skin.special_id = special.id_special
+            INNER JOIN declinaison d ON ligne_commande.declinaison_id = d.id_declinaison
+            INNER JOIN skin ON d.skin_id = skin.id_skin
+            INNER JOIN usure u ON d.usure_id = u.id_usure
+            INNER JOIN type_skin ts ON skin.type_skin_id = ts.id_type_skin
+            INNER JOIN special sp ON d.special_id = sp.id_special
             INNER JOIN commande ON ligne_commande.commande_id = commande.id_commande
             WHERE ligne_commande.commande_id = %s
         '''

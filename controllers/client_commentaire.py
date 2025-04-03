@@ -47,7 +47,7 @@ def client_article_details():
     SELECT COUNT(skin_id) AS nb_commandes_article
     FROM ligne_commande
     JOIN commande ON commande.id_commande = ligne_commande.commande_id
-    WHERE commande.utilisateur_id=%s and ligne_commande.skin_id=%s;
+    WHERE commande.utilisateur_id=%s and ligne_commande.declinaison_id=%s;
     '''
     mycursor.execute(sql, (id_client, id_article))
     commandes_articles = mycursor.fetchone()

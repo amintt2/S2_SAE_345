@@ -157,16 +157,36 @@ def fct_fixtures_load():
      ) DEFAULT CHARSET utf8mb4;
      '''
      mycursor.execute(sql)
+
+     sql='''
+     CREATE TABLE declinaison (
+          id_declinaison INT AUTO_INCREMENT,
+          stock INT,
+          prix_declinaison DECIMAL(10,2),
+          image VARCHAR(255),
+          special_id INT NOT NULL,
+          usure_id INT NOT NULL,
+          skin_id INT,
+          PRIMARY KEY(id_declinaison),
+          CONSTRAINT fk_declinaison_skin
+               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          CONSTRAINT fk_declinaison_special
+               FOREIGN KEY(special_id) REFERENCES special(id_special),
+          CONSTRAINT fk_declinaison_usure
+               FOREIGN KEY(usure_id) REFERENCES usure(id_usure)
+     ) DEFAULT CHARSET utf8mb4;
+     '''
+     mycursor.execute(sql)
      
      sql='''
      CREATE TABLE ligne_commande(
-          skin_id INT NOT NULL,
+          declinaison_id INT NOT NULL,
           commande_id INT NOT NULL,
           prix DECIMAL(10,2),
           quantite INT,
-          PRIMARY KEY(skin_id, commande_id),
-          CONSTRAINT fk_ligne_commande_skin
-               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          PRIMARY KEY(declinaison_id, commande_id),
+          CONSTRAINT fk_ligne_commande_declinaison
+               FOREIGN KEY(declinaison_id) REFERENCES declinaison(id_declinaison),
           CONSTRAINT fk_ligne_commande_commande
                FOREIGN KEY(commande_id) REFERENCES commande(id_commande)
      ) DEFAULT CHARSET utf8mb4;
@@ -175,13 +195,13 @@ def fct_fixtures_load():
      
      sql='''
      CREATE TABLE ligne_panier(
-          skin_id INT NOT NULL,
+          declinaison_id INT NOT NULL,
           utilisateur_id INT NOT NULL,
           quantite INT,
           date_ajout DATETIME,
-          PRIMARY KEY(skin_id, utilisateur_id),
-          CONSTRAINT fk_ligne_panier_skin
-               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+          PRIMARY KEY(declinaison_id, utilisateur_id),
+          CONSTRAINT fk_ligne_panier_declinaison
+               FOREIGN KEY(declinaison_id) REFERENCES declinaison(id_declinaison),
           CONSTRAINT fk_ligne_panier_utilisateur
                FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur)
      ) DEFAULT CHARSET utf8mb4;
@@ -219,27 +239,6 @@ def fct_fixtures_load():
      mycursor.execute(sql)
 
      sql='''
-     CREATE TABLE declinaison (
-          id_declinaison INT AUTO_INCREMENT,
-          stock INT,
-          prix_declinaison DECIMAL(10,2),
-          image VARCHAR(255),
-          special_id INT NOT NULL,
-          usure_id INT NOT NULL,
-          skin_id INT,
-          PRIMARY KEY(id_declinaison),
-          CONSTRAINT fk_declinaison_skin
-               FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
-          CONSTRAINT fk_declinaison_special
-               FOREIGN KEY(special_id) REFERENCES special(id_special),
-          CONSTRAINT fk_declinaison_usure
-               FOREIGN KEY(usure_id) REFERENCES usure(id_usure)
-     ) DEFAULT CHARSET utf8mb4;
-     '''
-     mycursor.execute(sql)
-
-     
-     sql='''
      INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) VALUES
      (1,'admin','admin@admin.fr',
           'pbkdf2:sha256:1000000$eQDrpqICHZ9eaRTn$446552ca50b5b3c248db2dde6deac950711c03c5d4863fe2bd9cef31d5f11988',
@@ -252,7 +251,6 @@ def fct_fixtures_load():
           'ROLE_client','client2','1');
      '''
      mycursor.execute(sql)
-     
      
      sql='''
      INSERT INTO type_skin (libelle_type_skin) VALUES
@@ -382,7 +380,7 @@ def fct_fixtures_load():
      (8, 0.15, 'sticker_navi_glitter.png', 1, 1, 26);
      '''
      mycursor.execute(sql)
-     
+
      sql='''
      INSERT INTO commande (date_achat, etat_id, utilisateur_id) VALUES 
           ('2024-03-19', 2, 2),
@@ -392,9 +390,9 @@ def fct_fixtures_load():
           ('2024-03-10', 5, 2);
      '''
      mycursor.execute(sql)
-     
+
      sql='''
-     INSERT INTO ligne_commande (skin_id, commande_id, prix, quantite) VALUES 
+     INSERT INTO ligne_commande (declinaison_id, commande_id, prix, quantite) VALUES 
           (1, 1, 80.00, 1),
           (3, 1, 897.35, 2),
           (7, 2, 83.90, 1),
@@ -407,13 +405,12 @@ def fct_fixtures_load():
      mycursor.execute(sql)
 
      sql='''
-     INSERT INTO ligne_panier (skin_id, utilisateur_id, quantite, date_ajout) VALUES 
+     INSERT INTO ligne_panier (declinaison_id, utilisateur_id, quantite, date_ajout) VALUES 
           (1, 2, 1, '2024-03-20 10:30:00'),
           (2, 2, 4, '2023-06-24'),
           (2, 3, 3, '2023-06-24');
      '''
      mycursor.execute(sql)
-     
 
      get_db().commit()
      return redirect('/')

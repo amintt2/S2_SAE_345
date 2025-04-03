@@ -39,12 +39,12 @@ def client_commande_add():
     
     # Récupération des articles du panier
     sql = ''' 
-        SELECT  ligne_panier.skin_id,
-                ligne_panier.quantite,
-                skin.prix_skin * ligne_panier.quantite as prix
-        FROM ligne_panier
-        JOIN skin ON ligne_panier.skin_id = skin.id_skin
-        WHERE ligne_panier.utilisateur_id = %s
+        SELECT  lp.declinaison_id,
+                lp.quantite,
+                d.prix_declinaison * lp.quantite as prix
+        FROM ligne_panier lp
+        JOIN declinaison d ON lp.declinaison_id = d.id_declinaison
+        WHERE lp.utilisateur_id = %s
     '''
     mycursor.execute(sql, (id_client,))
     items_ligne_panier = mycursor.fetchall()
@@ -77,7 +77,7 @@ def client_commande_add():
         # Ajout ligne de commande
         sql = '''
             INSERT INTO ligne_commande(
-                skin_id,
+                declinaison_id,
                 commande_id,
                 prix,
                 quantite
@@ -89,7 +89,7 @@ def client_commande_add():
             )
         '''
         mycursor.execute(sql, (
-            item['skin_id'],
+            item['declinaison_id'],
             id_commande,
             item['prix'],
             item['quantite']
@@ -98,9 +98,9 @@ def client_commande_add():
         # Suppression ligne panier
         sql = '''
             DELETE FROM ligne_panier 
-            WHERE skin_id = %s AND utilisateur_id = %s
+            WHERE declinaison_id = %s AND utilisateur_id = %s
         '''
-        mycursor.execute(sql, (item['skin_id'], id_client))
+        mycursor.execute(sql, (item['declinaison_id'], id_client))
 
     get_db().commit()
     flash(u'Commande validée avec succès', 'alert-success')
@@ -148,10 +148,11 @@ def client_commande_show():
                 type_skin.libelle_type_skin,
                 special.libelle_special
             FROM ligne_commande
-            INNER JOIN skin ON ligne_commande.skin_id = skin.id_skin
-            INNER JOIN usure ON skin.usure_id = usure.id_usure
+            INNER JOIN declinaison d ON ligne_commande.declinaison_id = d.id_declinaison
+            INNER JOIN skin ON d.skin_id = skin.id_skin
+            INNER JOIN usure ON d.usure_id = usure.id_usure
             INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
-            INNER JOIN special ON skin.special_id = special.id_special
+            INNER JOIN special ON d.special_id = special.id_special
             WHERE ligne_commande.commande_id = %s
         '''
         mycursor.execute(sql, (id_commande,))
