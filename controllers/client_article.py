@@ -20,18 +20,14 @@ def client_article_show():                                 # remplace client_ind
                 , MIN(id_skin) AS id_article
                 , MIN(prix_skin) AS prix_min
                 , MAX(prix_skin) AS prix_max
-                , MIN(stock) AS stock_min
-                , MAX(stock) AS stock_max
                 , MIN(image) AS image
-                , MIN(libelle_usure) AS libelle_usure
                 , MIN(libelle_type_skin) AS libelle_type_article
-                , MIN(libelle_special) AS libelle_special
         FROM skin
-        INNER JOIN usure ON skin.usure_id = usure.id_usure
         INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
-        INNER JOIN special ON skin.special_id = special.id_special
-        WHERE stock > 0
+        WHERE 1=1
         '''
+    
+        #TODO: Remettre la vérification du stock et remettre specialid, libelle usure
 
 
 ######################## Livrable 2 ###########################
@@ -122,17 +118,16 @@ def client_article_show():                                 # remplace client_ind
         SELECT skin.nom_skin AS designation,
             skin.id_skin AS id_article,
             type_skin.libelle_type_skin,
-            usure.libelle_usure,
-            special.libelle_special,
             (skin.prix_skin * ligne_panier.quantite) AS prix,
             ligne_panier.quantite
         FROM ligne_panier
         JOIN skin ON ligne_panier.skin_id = skin.id_skin
-        JOIN usure ON skin.usure_id = usure.id_usure
         JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
-        JOIN special ON skin.special_id = special.id_special
         WHERE ligne_panier.utilisateur_id = %s;
     '''
+
+    #TODO: special et usure enlevé
+
     #        , 10 as prix , concat('nomarticle',stylo_id) as nom 
     mycursor.execute(sql, (id_client))
     articles_panier = mycursor.fetchall()
@@ -160,15 +155,14 @@ def get_declinaison(nom):
     mycursor = get_db().cursor()
 
     sql = '''
-        SELECT DISTINCT libelle_usure
+        SELECT DISTINCT nom_skin
         FROM skin
-        INNER JOIN usure ON skin.usure_id = usure.id_usure
-        WHERE nom_skin = %s AND stock > 0
-        '''
+        WHERE nom_skin = %s
+        ''' # Remettre le stock en verification > 0
     mycursor.execute(sql, nom)
     declinaisons = mycursor.fetchall()
 
-    return [declinaison['libelle_usure'] for declinaison in declinaisons]
+    return [declinaison['nom_skin'] for declinaison in declinaisons]
 
 
 @client_article.route('/client/article/filtre', methods=['POST'])

@@ -171,27 +171,16 @@
                             </span>
                         </div>
 
-                        <div class="flex items-center">
-                            {% if article.stock_max > 0 and article.stock_min == article.stock_max %}
-                                <span class="text-gray-400 text-sm">Stock: {{ article.stock_max }}</span>
-                            {% elif article.stock_max > 0 %}
-                                <span class="text-gray-400 text-sm">Stock: {{ article.stock_min }} à {{ article.stock_max }}</span>
-                            {% else %}
-                                <span class="text-red-500 text-sm">Rupture de stock</span>
-                            {% endif %}
-                        </div>
                     </div>
+
+                    <!-- TODO: Remettre la vérification des stocks -->
+
+
                     <div class="flex gap-2">
                         <form action="/client/panier/add" method="post" class="flex-grow">
                             <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                            <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
-                                    {% if article.stock_min <= 0 %}disabled{% endif %}
-                                    {% if article.stock_min <= 0 %}class="w-full bg-gray-600 cursor-not-allowed text-gray-300 font-medium py-2 px-4 rounded"{% endif %}>
-                                {% if article.stock_min > 0 %}
+                            <button class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
                                     Ajouter au panier
-                                {% else %}
-                                    Indisponible
-                                {% endif %}
                             </button>
                         </form>
                         <a href="/client/envie/add?id_article={{ article.id_article }}" class="inline-flex items-center justify-center bg-dark-accent hover:bg-dark-accent/80 text-white font-medium py-2 px-4 rounded transition-colors duration-200">

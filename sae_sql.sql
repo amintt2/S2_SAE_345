@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS declinaison;
 DROP TABLE IF EXISTS commentaire;
 DROP TABLE IF EXISTS note;
