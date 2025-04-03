@@ -1,169 +1,195 @@
 {% extends "client/layout_client.html" %}
-{% block stylesheets%}
+{% block stylesheets %}
     {{ super() }}
      <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/star_rating.css') }}" >
 {% endblock %}
 
 
 {% block body %}
-<div class="container">
-    <div class="text-center card w-auto">
-         <h2 class="card-title">
-             <span style="color: #0b2e13">{{ article.nom }}</span> &nbsp;{{ article.prix }} €
-         </h2>
-        <div class="card-body">
-        {%  if article.image is not none %}
-            <img class="card-img-top rounded mx-auto d-block"  style="width:100px;height:100px"  src="{{ url_for('static', filename = 'images/')}}{{ article.image }}"  alt="image  de {{ article.nom }}" >
-        {% else %} <img class="card-img-top rounded mx-auto d-block"   style="width:100px;height:100px"   src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  alt="image  de {{ article.nom }}" >
-        {% endif %}
-
-
-       {% if commandes_articles.nb_commandes_article is defined and commandes_articles.nb_commandes_article > 0 %}
-                 <br>Vous avez commandé <strong>{{ commandes_articles.nb_commandes_article }} </strong>fois  ce produit
-        {% endif %}
-
+<div class="w-full">
+    <!-- Article Details Card -->
+    <div class="bg-dark-secondary rounded-lg shadow-lg p-6 mb-8">
+        <div class="flex flex-col md:flex-row items-center md:items-start">
+            <div class="w-full md:w-1/3 flex justify-center mb-6 md:mb-0">
+                {% if article.image is not none %}
+                    <img class="w-48 h-48 object-contain"  
+                         src="{{ url_for('static', filename = 'images/')}}{{ article.image }}"  
+                         alt="image de {{ article.nom }}">
+                {% else %}
+                    <img class="w-48 h-48 object-contain"   
+                         src="{{ url_for('static', filename='images/no_photo.jpeg')}}"  
+                         alt="image de {{ article.nom }}">
+                {% endif %}
+            </div>
+            <div class="w-full md:w-2/3">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-white">{{ article.nom }}</h2>
+                    <span class="text-accent-blue text-2xl font-bold">{{ article.prix }}€</span>
+                </div>
+                <div class="bg-dark-accent p-4 rounded-lg mb-4">
+                    <h6 class="text-gray-300">Description : {{ article.description }}</h6>
+                </div>
+                {% if commandes_articles.nb_commandes_article is defined and commandes_articles.nb_commandes_article > 0 %}
+                    <div class="bg-accent-blue bg-opacity-20 text-accent-blue p-3 rounded-lg text-center">
+                        Vous avez commandé <strong>{{ commandes_articles.nb_commandes_article }}</strong> fois ce produit
+                    </div>
+                {% endif %}
+            </div>
         </div>
-        <div class="card-footer text-left"><h6>Description : {{ article.description }}</h6></div>
     </div>
 
-    <hr>  <!-- les notes -->
+    <!-- Notes Section -->
+    <div class="bg-dark-secondary rounded-lg shadow-lg p-6 mb-8">
+        <h3 class="text-xl font-bold text-white mb-4">Évaluation</h3>
+        
+        <div class="mb-6">
+            {% if article.moyenne_notes is not defined or article.nb_notes is not defined or article.moyenne_notes == None %}
+                <span class="text-gray-300">Pas de note</span>
+            {% else %}
+                <div class="flex items-center">
+                    <span class="text-accent-blue font-bold text-lg mr-2">{{ article.moyenne_notes }}</span>
+                    <div class="text-yellow-400 text-xl">
+                        {% for i in range(article.moyenne_notes|int) %}★{% endfor %}
+                        {% for i in range(5 - article.moyenne_notes|int) %}☆{% endfor %}
+                    </div>
+                    <span class="ml-2 text-gray-300">({{ article.nb_notes }} note(s))</span>
+                </div>
+            {% endif %}
+        </div>
 
-    <div class="row">
-
-    <div class="col-12">
-        {% if article.moyenne_notes is not defined or  article.nb_notes is not defined or  article.moyenne_notes == None %}
-            <strong>Pas de Note</strong>
-        {% else %}
-            <strong>Note moyenne de cet article : {{ article.moyenne_notes }}</strong>&nbsp;({{ article.nb_notes }} note(s))
-        {% endif %}
-    </div>
         {% if commandes_articles.nb_commandes_article is defined and commandes_articles.nb_commandes_article > 0 %}
-            <div class="col-12">
+            <div class="bg-dark-accent rounded-lg p-4">
                 {% if note is defined and note is number %}
-
-                    <form  action="/client/note/edit"   method="post" class="row">
-                    <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                    <div class="col-md-3">
-                        <label for="input_note" class="d-flex justify-content-end align-items-end pe-3">Modifier votre note sur cet article : </label>
-                    </div>
-                    <div class="col-md-1">
-                        <input type="number" name="note" id="input_note" step="0.1" min="0" max="5" class="form-control col-md-2" value="{{ note }}" >
-                    </div>
-                     <div class="col-md-2">
-                         <button class="btn btn-primary" > Modifier votre note </button>
-                     </div>
+                    <form action="/client/note/edit" method="post" class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                        <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                        <label for="input_note" class="text-gray-300">Modifier votre note :</label>
+                        <input type="number" name="note" id="input_note" step="0.1" min="0" max="5" 
+                               class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue w-20" 
+                               value="{{ note }}">
+                        <button class="bg-accent-blue hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm transition-colors duration-200">
+                            Modifier votre note
+                        </button>
                     </form>
-                    <form  action="/client/note/delete"   method="post" class="row">
-                    <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                     <div class="col-md-2">
-                         <button class="btn btn-primary" > Supprimer votre note </button>
-                     </div>
+                    
+                    <form action="/client/note/delete" method="post" class="mt-3">
+                        <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                        <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
+                            Supprimer votre note
+                        </button>
                     </form>
                 {% else %}
-                    <form  action="/client/note/add"   method="post" class="row">
-                    <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                    <div class="col-md-3">
-                        <label for="input_note" class="d-flex justify-content-end align-items-end pe-3">Mettre une note  sur cet article : </label>
-                    </div>
-                    <div class="col-md-1">
-                        <input type="number" name="note" id="input_note" step="0.1" min="0" max="5" class="form-control col-md-2" value="" >
-                    </div>
-                     <div class="col-md-2">
-                        <button class="btn btn-primary" > Mettre une note </button></div>
+                    <form action="/client/note/add" method="post" class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                        <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                        <label for="input_note" class="text-gray-300">Mettre une note :</label>
+                        <input type="number" name="note" id="input_note" step="0.1" min="0" max="5" 
+                               class="bg-gray-700 rounded-md px-2 py-1 text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue w-20" 
+                               value="">
+                        <button class="bg-accent-blue hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm transition-colors duration-200">
+                            Mettre une note
+                        </button>
                     </form>
                 {% endif %}
             </div>
         {% else %}
-            <small>(seul les clients qui ont acheté cet article peuvent le noter)</small>
+            <p class="text-gray-400 text-sm italic">Seuls les clients qui ont acheté cet article peuvent le noter</p>
         {% endif %}
     </div>
 
-    <br>
-    <hr>
-
-  <div class="row" style="background-color: #faf1d7">
-      <div class="col-12">
-      {% if nb_commentaires.nb_commentaires_total is not defined or nb_commentaires.nb_commentaires_utilisateur is not defined %}
-         <strong>NB commentaire(s) not defined</strong>
-                {% else %}
-            <strong>Nombre de commentaire(s) : {{ nb_commentaires.nb_commentaires_utilisateur }} commentaire(s) / 3 maxi pour un article acheté </strong><br>
-            <strong>Nombre de commentaire(s) total :  {{nb_commentaires.nb_commentaires_total }}</strong><br>
-          {% if nb_commentaires.nb_commentaires_utilisateur_valide is not defined or nb_commentaires.nb_commentaires_total_valide is not defined %}
-               <strong>NB commentaire(s) valide(s) not defined</strong>
-              {% else %}
-           Nombre de commentaire(s) validé(s) total de l'utilisateur :  {{nb_commentaires.nb_commentaires_utilisateur_valide }} /  Nombre de commentaire(s) validé(s) {{nb_commentaires.nb_commentaires_total_valide }}<br>
-          {% endif %}
-        {% endif %}
-      </div>
-      {% if commandes_articles.nb_commandes_article is defined and commandes_articles.nb_commandes_article > 0 and
-            ((nb_commentaires.nb_commentaires_utilisateur is defined and nb_commentaires.nb_commentaires_utilisateur <3) or nb_commentaires.nb_commentaires_utilisateur is not defined) %}
-          <form  action="/client/commentaire/add"   method="post">
-                <div class="col">
-                  <label for="input_commentaire" class="form-label">Mettez un commentaire sur cet article : </label>
-                     <textarea name="commentaire" class="form-control" aria-label="Votre commentaire" id="input_commentaire"  placeholder="Votre commentaire"></textarea>
+    <!-- Commentaires Section -->
+    <div class="bg-dark-secondary rounded-lg shadow-lg p-6 mb-8">
+        <h3 class="text-xl font-bold text-white mb-4">Commentaires</h3>
+        
+        <div class="bg-dark-accent bg-opacity-50 p-4 rounded-lg mb-6">
+            {% if nb_commentaires.nb_commentaires_total is not defined or nb_commentaires.nb_commentaires_utilisateur is not defined %}
+                <span class="text-gray-300">Information sur les commentaires non disponible</span>
+            {% else %}
+                <div class="text-gray-300">
+                    <div class="mb-1">Vos commentaires : <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_utilisateur }}</span> sur 3 maximum pour un article acheté</div>
+                    <div class="mb-1">Commentaires totaux : <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_total }}</span></div>
+                    {% if nb_commentaires.nb_commentaires_utilisateur_valide is defined and nb_commentaires.nb_commentaires_total_valide is defined %}
+                        <div>Commentaires validés : <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_utilisateur_valide }}</span> / <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_total_valide }}</span></div>
+                    {% endif %}
                 </div>
-              <input type="hidden" name="action" value="add_commentaire">
-              <input type="hidden" name="id_article" value="{{ article.id_article }}">
-                <form  action="/client/comment/add"  style="display: inline-block;"  method="post" >
-                        <button class="btn btn-primary mt-2" > Ajouter un commentaire </button>
-                </form>
+            {% endif %}
+        </div>
+
+        {% if commandes_articles.nb_commandes_article is defined and commandes_articles.nb_commandes_article > 0 and 
+              ((nb_commentaires.nb_commentaires_utilisateur is defined and nb_commentaires.nb_commentaires_utilisateur < 3) or nb_commentaires.nb_commentaires_utilisateur is not defined) %}
+            <form action="/client/commentaire/add" method="post" class="mb-6">
+                <div class="mb-4">
+                    <label for="input_commentaire" class="block text-sm text-gray-300 mb-2">Ajouter un commentaire :</label>
+                    <textarea name="commentaire" 
+                              class="w-full bg-gray-700 rounded-md px-3 py-2 text-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-blue" 
+                              id="input_commentaire" 
+                              rows="4" 
+                              placeholder="Votre commentaire"></textarea>
+                </div>
+                <input type="hidden" name="action" value="add_commentaire">
+                <input type="hidden" name="id_article" value="{{ article.id_article }}">
+                <div class="text-right">
+                    <button class="bg-accent-blue hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm transition-colors duration-200">
+                        Ajouter un commentaire
+                    </button>
+                </div>
             </form>
         {% else %}
-            <small>(seul les clients qui ont acheté cet article peuvent le commenter ou nombre maxi de commentaires sur cet article (5) atteind)</small>
+            <p class="text-gray-400 text-sm italic mb-6">Seuls les clients qui ont acheté cet article peuvent le commenter ou nombre maximum de commentaires atteint</p>
         {% endif %}
 
+        <!-- Liste des commentaires -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-dark-accent">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Utilisateur</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Commentaire</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    {% if commentaires %}
+                        {% for commentaire in commentaires %}
+                            <tr class="hover:bg-dark-accent/50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-300">
+                                    {{ commentaire.nom }} <span class="text-xs text-gray-400">({{ commentaire.id_utilisateur }})</span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-300">
+                                    {% if commentaire.utilisateur_id == 1 %}
+                                        <span class="text-red-500 font-medium">(Réponse de l'administrateur) :</span>
+                                    {% endif %}
+                                    {{ commentaire.commentaire }}
+                                    {% if commentaire.valider == 1 %}
+                                        <span class="ml-2 inline-block px-2 py-1 bg-green-800 text-green-300 rounded-full text-xs">Validé</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if commentaire.id_utilisateur == session['id_user'] %}
+                                        <form action="/client/commentaire/delete" method="post" class="inline">
+                                            <input type="hidden" name="id_article" value="{{ commentaire.id_article }}">
+                                            <input type="hidden" name="id_utilisateur" value="{{ commentaire.id_utilisateur }}">
+                                            <input type="hidden" name="date_publication" value="{{ commentaire.date_publication }}">
+                                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr class="bg-dark-accent/30">
+                            <td colspan="3" class="px-6 py-4 text-gray-400 text-center">Pas de commentaire</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="row">
-            <div class="col-5 bg-light p-3">
-        <h3>Les commentaires</h3>
-            </div>
-        <table class="table" style="border: solid #8959A8 1px ">
-        {% if commentaires %}
-            <thead class="thead-dark">
-            <tr>
-                <th>nom(pseudo)</th>
-                <th>Commentaires</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody>
-
-                {% for commentaire in commentaires %}
-                    <tr>
-                        <td>{{ commentaire.nom }}({{ commentaire.id_utilisateur }})</td>
-                        <td>{% if commentaire.utilisateur_id == 1 %}
-                            <span style="color: red">(réponse de l'administrateur du site (webmaster) ) :</span>
-                            {% endif %}
-                            {{ commentaire.commentaire }}
-                            {% if commentaire.valider == 1 %}
-                            <span style="color: red">(v)</span>
-                            {% endif %}
-                        </td>
-{#                        <td>{{ commentaire.note }}#}
-{#                        {{ commentaire.__dict__ }}#}
-{#                        </td>#}
-                        <td>
-                            {% if commentaire.id_utilisateur == session['id_user'] %}
-                                  <form  action="/client/commentaire/delete"  style="display: inline-block;"  method="post" >
-                                      <input type="hidden" name="id_article" value="{{ commentaire.id_article }}">
-                                      <input type="hidden" name="id_utilisateur" value="{{ commentaire.id_utilisateur }}">
-                                      <input type="hidden" name="date_publication" value="{{ commentaire.date_publication }}">
-                                      <button class="btn btn-primary" > supprimer </button>
-                                  </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            {% else %}
-                <tr class="table-warning"><td>Pas de commentaire</td><td></td></tr>
-            {% endif %}
-            </tbody>
-        </table>
-        <a class="btn btn-outline-primary btn-lg" href="/client/article/show">Retour vers la page d'accueil</a>
+    <div class="text-center mb-10">
+        <a href="/client/article/show" class="bg-accent-blue hover:bg-blue-600 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200 inline-block">
+            Retour vers la page d'accueil
+        </a>
     </div>
 </div>
-
-
-
 {% endblock %}
