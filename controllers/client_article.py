@@ -22,7 +22,12 @@ def client_article_show():                                 # remplace client_ind
                 , MAX(prix_skin) AS prix_max
                 , MIN(image) AS image
                 , MIN(libelle_type_skin) AS libelle_type_article
+                , ROUND(AVG(note.note),1) AS moyenne_notes
+                , COUNT(note.note) AS nb_notes
+                , COUNT(commentaire.commentaire) AS nb_commentaires
         FROM skin
+        LEFT JOIN note ON skin.id_skin = note.skin_id
+        LEFT JOIN commentaire ON skin.id_skin = commentaire.skin_id
         INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
         WHERE 1=1
         '''
@@ -143,6 +148,7 @@ def client_article_show():                                 # remplace client_ind
         prix_total = mycursor.fetchone()['prix_total']
     else:
         prix_total = None
+    
     return render_template('client/boutique/panier_article.html'
                            , articles=articles
                            , articles_panier=articles_panier

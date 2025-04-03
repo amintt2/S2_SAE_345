@@ -170,7 +170,15 @@
                                 {% endif %}
                             </span>
                         </div>
+                    </div>
 
+                    <div class="flex items-center text-sm text-gray-400 space-x-2">
+                        {% if article.nb_notes == 0 or article.moyenne_notes == None %}
+                            <span>Aucune note</span>
+                        {% else %}
+                            <span>Notes: {{ article.moyenne_notes }} ({{ article.nb_notes }} notes)</span>
+                        {% endif %}
+                        <span> -  {{ article.nb_commentaires }} commentaires</span>
                     </div>
 
                     <!-- TODO: Remettre la vérification des stocks -->
