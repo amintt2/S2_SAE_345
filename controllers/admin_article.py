@@ -31,8 +31,8 @@ def show_article():
         MIN(declinaison.stock) AS min_stock,
         COUNT(DISTINCT commande.id_commande) AS nb_commandes,
         COUNT(DISTINCT ligne_panier.utilisateur_id) AS nb_paniers,
-        SUM(DISTINCT IF(valide = 0, 1, 0)) AS nb_commentaires_nouveaux,
-        COUNT(DISTINCT commentaire.skin_id, commentaire.utilisateur_id, commentaire.date_publication) AS nb_commentaires,
+        COUNT(DISTINCT CASE WHEN valide = 0 THEN id_commentaire ELSE NULL END) AS nb_commentaires_nouveaux,
+        COUNT(DISTINCT commentaire.id_commentaire) AS nb_commentaires,
         AVG(note.note) AS note_moyenne,
         COUNT(DISTINCT note.skin_id, note.utilisateur_id) AS nb_notes
     FROM skin

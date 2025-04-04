@@ -173,12 +173,14 @@ def fct_fixtures_load():
 
      sql='''
      CREATE TABLE commentaire (
+          id_commentaire INT AUTO_INCREMENT,
           utilisateur_id INT NOT NULL,
           skin_id INT NOT NULL,
-          date_publication DATETIME,
+          date_publication DATETIME NOT NULL,
           commentaire TEXT,
           valide TINYINT(1),
-          PRIMARY KEY(utilisateur_id, skin_id, date_publication),
+          PRIMARY KEY(id_commentaire),
+          UNIQUE(utilisateur_id, skin_id, date_publication),
           CONSTRAINT fk_commentaire_utilisateur
                FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
           CONSTRAINT fk_commentaire_skin

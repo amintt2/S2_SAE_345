@@ -126,16 +126,21 @@ CREATE TABLE note (
 ) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE commentaire (
+   id_commentaire INT AUTO_INCREMENT,
    utilisateur_id INT NOT NULL,
    skin_id INT NOT NULL,
-   date_publication DATETIME,
+   date_publication DATETIME NOT NULL,
    commentaire TEXT,
    valide TINYINT(1),
-   PRIMARY KEY(utilisateur_id, skin_id, date_publication),
+   commentaire_id_parent INT,
+   PRIMARY KEY(id_commentaire),
+   UNIQUE(utilisateur_id, skin_id, date_publication),
    CONSTRAINT fk_commentaire_utilisateur
       FOREIGN KEY(utilisateur_id) REFERENCES utilisateur(id_utilisateur),
    CONSTRAINT fk_commentaire_skin
-      FOREIGN KEY(skin_id) REFERENCES skin(id_skin)
+      FOREIGN KEY(skin_id) REFERENCES skin(id_skin),
+   CONSTRAINT fk_commentaire_commentaire
+      FOREIGN KEY(commentaire_id_parent) REFERENCES commentaire(id_commentaire)
 ) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE declinaison (

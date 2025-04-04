@@ -44,12 +44,33 @@ def client_article_details():
     nb_commentaires=[]
     if article is None:
         abort(404, "pb id article")
+    
     sql = '''
-        SELECT commentaire, date_publication, utilisateur_id, nom, skin_id AS id_article, valide
-        FROM commentaire
-        JOIN utilisateur ON utilisateur.id_utilisateur = commentaire.utilisateur_id
-        WHERE skin_id = %s
-        ORDER BY valide DESC, date_publication DESC;
+    SELECT 
+        commentaire.id_commentaire,
+        commentaire.skin_id AS id_article, 
+        commentaire.utilisateur_id AS id_utilisateur, 
+        commentaire.commentaire,
+        commentaire.date_publication,
+        commentaire.valide,
+        utilisateur.nom as nom_utilisateur,
+
+        commentaire_admin.id_commentaire AS id_commentaire_admin,
+        commentaire_admin.utilisateur_id AS id_admin,
+        commentaire_admin.commentaire AS commentaire_admin,
+        commentaire_admin.date_publication AS date_publication_admin,
+        commentaire_admin.valide AS valide_admin,
+        admin.nom as nom_utilisateur_admin
+        
+    FROM commentaire
+    JOIN utilisateur ON commentaire.utilisateur_id = utilisateur.id_utilisateur
+    LEFT JOIN (
+        SELECT * FROM commentaire 
+        WHERE commentaire_id_parent IS NOT NULL
+    ) AS commentaire_admin ON commentaire_admin.commentaire_id_parent = commentaire.id_commentaire
+    LEFT JOIN utilisateur AS admin ON commentaire_admin.utilisateur_id = admin.id_utilisateur
+    WHERE commentaire.skin_id = %s AND commentaire.commentaire_id_parent IS NULL
+    ORDER BY commentaire.valide DESC, commentaire.date_publication DESC
     '''
     mycursor.execute(sql, ( id_article))
     commentaires = mycursor.fetchall()
@@ -149,15 +170,17 @@ def client_comment_detete():
     id_author = request.form.get('utilisateur_id', None)
     id_article = request.form.get('id_article', None)
     date_publication = request.form.get('date_publication', None)
+    id_commentaire = request.form.get('id_commentaire', None)
+
     if (id_author == id_client):
         flash(u'Vous ne pouvez pas supprimer un commentaire qui ne vous appartien pas', 'alert-info')
         return redirect('/client/article/details?id_article='+id_article)
 
     sql = '''
     DELETE FROM commentaire
-    WHERE utilisateur_id = %s AND skin_id = %s AND date_publication = %s;
+    WHERE id_commentaire = %s;
     '''
-    tuple_delete=(id_client,id_article,date_publication)
+    tuple_delete=(id_commentaire)
     print(tuple_delete)
     mycursor.execute(sql, tuple_delete)
     get_db().commit()
