@@ -62,7 +62,9 @@ def client_panier_add():
 
     mycursor = get_db().cursor()
     sql = '''
-        SELECT stock FROM declinaison WHERE id_declinaison = %s
+        SELECT stock 
+        FROM declinaison 
+        WHERE id_declinaison = %s
     '''
     mycursor.execute(sql, (id_declinaison,))
     declinaison = mycursor.fetchone()
@@ -81,7 +83,9 @@ def client_panier_add():
         '''
         mycursor.execute(sql, (id_client, id_declinaison))
         sql = '''
-            UPDATE declinaison SET stock = stock - 1 WHERE id_declinaison = %s
+            UPDATE declinaison 
+            SET stock = stock - 1 
+            WHERE id_declinaison = %s
         '''
         mycursor.execute(sql, (id_declinaison,))
         get_db().commit()

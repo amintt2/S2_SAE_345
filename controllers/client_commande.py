@@ -122,7 +122,7 @@ def client_commande_add():
     return redirect('/client/article/show')
 
 
-@client_commande.route('/client/commande/show', methods=['get','post'])
+@client_commande.route('/client/commande/show')
 def client_commande_show():
     print('client_commande_show')
     
@@ -130,22 +130,22 @@ def client_commande_show():
     identifiant_client = session['id_user']
     
     # Récupération de toutes les commandes du client
-    requete_sql = '''
+    sql = '''
         SELECT 
-            commande.id_commande AS identifiant_commande,
-            commande.date_achat AS date_achat,
-            etat.libelle_etat AS libelle_etat,
-            etat.id_etat AS identifiant_etat,
-            COUNT(ligne_commande.commande_id) AS nombre_articles,
-            SUM(ligne_commande.prix * ligne_commande.quantite) AS prix_total_commande
-        FROM commande
-        INNER JOIN etat ON commande.etat_id = etat.id_etat
-        LEFT JOIN ligne_commande ON commande.id_commande = ligne_commande.commande_id
-        WHERE commande.utilisateur_id = %s
-        GROUP BY commande.id_commande, commande.date_achat, etat.libelle_etat, etat.id_etat
-        ORDER BY commande.date_achat DESC
-        '''
-    curseur.execute(requete_sql, (identifiant_client,))
+            c.id_commande AS identifiant_commande,
+            c.date_achat,
+            SUM(lc.quantite) AS nombre_articles,
+            SUM(lc.prix * lc.quantite) AS prix_total_commande,
+            e.libelle_etat,
+            e.id_etat AS identifiant_etat
+        FROM commande AS c
+        LEFT JOIN ligne_commande AS lc ON c.id_commande = lc.commande_id
+        LEFT JOIN etat AS e ON c.etat_id = e.id_etat
+        WHERE c.utilisateur_id = %s
+        GROUP BY c.id_commande, c.date_achat, e.libelle_etat, e.id_etat
+        ORDER BY c.date_achat DESC
+    '''
+    curseur.execute(sql, (identifiant_client,))
     commandes = curseur.fetchall()
 
     articles_commande = None
@@ -156,25 +156,27 @@ def client_commande_show():
         print(identifiant_commande)
         
         # Récupération des articles de la commande
-        requete_sql = '''
+        sql = '''
             SELECT 
-                skin.nom_skin AS nom_article,
-                skin.image AS image_article,
-                ligne_commande.quantite AS quantite_article,
-                ligne_commande.prix AS prix_unitaire,
-                (ligne_commande.prix * ligne_commande.quantite) AS prix_total_ligne,
-                usure.libelle_usure AS libelle_usure,
-                type_skin.libelle_type_skin AS libelle_type_skin,
-                special.libelle_special AS libelle_special
-            FROM ligne_commande
-            INNER JOIN declinaison ON ligne_commande.declinaison_id = declinaison.id_declinaison
-            INNER JOIN skin ON declinaison.skin_id = skin.id_skin
-            INNER JOIN usure ON declinaison.usure_id = usure.id_usure
-            INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
-            INNER JOIN special ON declinaison.special_id = special.id_special
-            WHERE ligne_commande.commande_id = %s
+                s.nom_skin AS nom_article,
+                s.image AS image_article,
+                ts.libelle_type_skin,
+                u.libelle_usure,
+                sp.libelle_special,
+                SUM(lc.quantite) AS quantite_article,
+                lc.prix AS prix_unitaire,
+                SUM(lc.prix * lc.quantite) AS prix_total_ligne
+            FROM ligne_commande AS lc
+            JOIN declinaison AS d ON lc.declinaison_id = d.id_declinaison
+            JOIN skin AS s ON d.skin_id = s.id_skin
+            JOIN type_skin AS ts ON s.type_skin_id = ts.id_type_skin
+            JOIN usure AS u ON d.usure_id = u.id_usure
+            JOIN special AS sp ON d.special_id = sp.id_special
+            WHERE lc.commande_id = %s
+            GROUP BY s.nom_skin, s.image, ts.libelle_type_skin, u.libelle_usure, 
+                     sp.libelle_special, lc.prix
         '''
-        curseur.execute(requete_sql, (identifiant_commande,))
+        curseur.execute(sql, (identifiant_commande,))
         articles_commande = curseur.fetchall()
         
         # Récupération des informations d'adresses pour la commande
