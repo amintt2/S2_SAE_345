@@ -16,15 +16,15 @@ def admin_article_details():
     # Récupérer les informations de l'article et ses commentaires
     sql = '''
     SELECT 
-        s.id_skin as id_article,
-        s.nom_skin as nom,
-        s.image,
-        s.description,
-        COUNT(c.id_commentaire) as nb_commentaires
-    FROM skin s
-    LEFT JOIN commentaire c ON s.id_skin = c.skin_id
-    WHERE s.id_skin = %s
-    GROUP BY s.id_skin, s.nom_skin, s.image, s.description
+        skin.id_skin as id_article,
+        skin.nom_skin as nom,
+        skin.image,
+        skin.description,
+        COUNT(DISTINCT commentaire.skin_id, commentaire.utilisateur_id, commentaire.date_publication) as nb_commentaires
+    FROM skin
+    LEFT JOIN commentaire ON skin.id_skin = commentaire.skin_id
+    WHERE skin.id_skin = %s
+    GROUP BY skin.id_skin, skin.nom_skin, skin.image, skin.description
     '''
     mycursor.execute(sql, (id_article,))
     article = mycursor.fetchone()
@@ -32,17 +32,18 @@ def admin_article_details():
     # Récupérer les commentaires de l'article
     sql = '''
     SELECT 
-        c.id_commentaire,
-        c.commentaire,
-        c.date_publication,
-        c.note,
-        u.id_utilisateur,
-        u.nom as nom_utilisateur,
-        u.email
-    FROM commentaire c
-    JOIN utilisateur u ON c.utilisateur_id = u.id_utilisateur
-    WHERE c.skin_id = %s
-    ORDER BY c.date_publication DESC
+        commentaire.skin_id AS id_article, 
+        commentaire.utilisateur_id AS id_utilisateur, 
+        commentaire.commentaire,
+        commentaire.date_publication,
+        commentaire.valide,
+        utilisateur.nom as nom_utilisateur,
+        utilisateur.email
+    FROM skin
+    JOIN commentaire ON skin.id_skin = commentaire.skin_id
+    JOIN utilisateur ON commentaire.utilisateur_id = utilisateur.id_utilisateur
+    WHERE skin.id_skin = %s
+    ORDER BY commentaire.valide DESC, commentaire.date_publication DESC
     '''
     mycursor.execute(sql, (id_article,))
     commentaires = mycursor.fetchall()
@@ -64,18 +65,21 @@ def admin_article_details():
 @admin_commentaire.route('/admin/article/commentaires/delete', methods=['POST'])
 def admin_comment_delete():
     mycursor = get_db().cursor()
-    id_commentaire = request.form.get('id_commentaire', None)
+    id_utilisateur = request.form.get('id_utilisateur', None)
     id_article = request.form.get('id_article', None)
+    date_publication = request.form.get('date_publication', None)
     
-    if not id_commentaire or not id_article:
+    if not id_utilisateur or not id_article or not date_publication:
         flash('Erreur lors de la suppression du commentaire', 'alert-danger')
+        if not id_article:
+            return redirect('/admin/article/show')
         return redirect('/admin/article/commentaires?id_article=' + str(id_article))
 
     sql = '''
-    DELETE FROM commentaire 
-    WHERE id_commentaire = %s
+        DELETE FROM commentaire 
+        WHERE utilisateur_id = %s AND skin_id = %s AND date_publication = %s
     '''
-    mycursor.execute(sql, (id_commentaire,))
+    mycursor.execute(sql, (id_utilisateur, id_article, date_publication))
     get_db().commit()
     
     flash('Commentaire supprimé avec succès', 'alert-success')
@@ -109,11 +113,15 @@ def admin_comment_add():
 def admin_comment_valider():
     id_article = request.args.get('id_article', None)
     mycursor = get_db().cursor()
+
+    if not id_article:
+        flash('Article is not provided', 'alert-danger')
+        return redirect('/admin/article/show')
     
     sql = '''
-    UPDATE commentaire 
-    SET valide = 1 
-    WHERE skin_id = %s AND valide = 0
+        UPDATE commentaire 
+        SET valide = 1 
+        WHERE skin_id = %s AND valide = 0
     '''
     mycursor.execute(sql, (id_article,))
     get_db().commit()

@@ -19,27 +19,33 @@ def show_article():
     mycursor = get_db().cursor()
     sql = '''
     SELECT 
-        skin.id_skin as id_article,
-        skin.nom_skin as nom,
+        skin.id_skin AS id_article,
+        skin.nom_skin As nom,
         skin.image,
         skin.description,
-        type_skin.id_type_skin as type_article_id,
-        type_skin.libelle_type_skin as libelle,
-        MIN(d.prix_declinaison) as prix_min,
-        MAX(d.prix_declinaison) as prix_max,
-        SUM(d.stock) as stock_total,
-        MIN(d.stock) as min_stock,
-        COUNT(DISTINCT commande.id_commande) as nb_commandes,
-        COUNT(DISTINCT ligne_panier.utilisateur_id) as nb_paniers
+        type_skin.id_type_skin AS type_article_id,
+        type_skin.libelle_type_skin AS libelle,
+        MIN(declinaison.prix_declinaison) AS prix_min,
+        MAX(declinaison.prix_declinaison) AS prix_max,
+        SUM(declinaison.stock) AS stock_total,
+        MIN(declinaison.stock) AS min_stock,
+        COUNT(DISTINCT commande.id_commande) AS nb_commandes,
+        COUNT(DISTINCT ligne_panier.utilisateur_id) AS nb_paniers,
+        SUM(DISTINCT IF(valide = 0, 1, 0)) AS nb_commentaires_nouveaux,
+        COUNT(DISTINCT commentaire.skin_id, commentaire.utilisateur_id, commentaire.date_publication) AS nb_commentaires,
+        AVG(note.note) AS note_moyenne,
+        COUNT(DISTINCT note.skin_id, note.utilisateur_id) AS nb_notes
     FROM skin
     LEFT JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
-    LEFT JOIN declinaison d ON skin.id_skin = d.skin_id
-    LEFT JOIN ligne_commande ON d.id_declinaison = ligne_commande.declinaison_id
+    LEFT JOIN declinaison ON skin.id_skin = declinaison.skin_id
+    LEFT JOIN ligne_commande ON declinaison.id_declinaison = ligne_commande.declinaison_id
     LEFT JOIN commande ON ligne_commande.commande_id = commande.id_commande
-    LEFT JOIN ligne_panier ON d.id_declinaison = ligne_panier.declinaison_id
+    LEFT JOIN ligne_panier ON declinaison.id_declinaison = ligne_panier.declinaison_id
+    LEFT JOIN note ON skin.id_skin = note.skin_id
+    LEFT JOIN commentaire ON skin.id_skin = commentaire.skin_id
     GROUP BY skin.id_skin, skin.nom_skin, skin.image, 
-             skin.description, type_skin.id_type_skin, type_skin.libelle_type_skin
-    ORDER BY skin.nom_skin
+            skin.description, type_skin.id_type_skin, type_skin.libelle_type_skin
+    ORDER BY nb_commentaires_nouveaux DESC, nb_commentaires DESC, note_moyenne DESC, skin.nom_skin, skin.nom_skin, skin.image, skin.description, type_skin.id_type_skin, type_skin.libelle_type_skin;
     '''
     mycursor.execute(sql)
     articles = mycursor.fetchall()

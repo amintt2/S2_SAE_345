@@ -141,17 +141,29 @@
             <table class="min-w-full">
                 <thead class="bg-dark-accent">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"></th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Utilisateur</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Commentaire</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date de publication</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
                     {% if commentaires %}
                         {% for commentaire in commentaires %}
+                            
                             <tr class="hover:bg-dark-accent/50 transition-colors duration-200">
+                                <td class="px-2 py-2 whitespace-nowrap">
+                                    {% if commentaire.valide == 1 %}
+                                    <svg width="15" height="15" viewBox="0 0 40 40">
+                                        <circle cx="20" cy="20" r="20" fill="#4CAF50"/>
+                                        <path d="M12 20L17 25L28 14" stroke="white" stroke-width="3" fill="none"/>
+                                    </svg>
+                                    {% endif %}
+                                </td>
+
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-300">
-                                    {{ commentaire.nom }} <span class="text-xs text-gray-400">({{ commentaire.id_utilisateur }})</span>
+                                    {{ commentaire.nom }} <span class="text-xs text-gray-400">({{ commentaire.utilisateur_id }})</span>
                                 </td>
                                 <td class="px-6 py-4 text-gray-300">
                                     {% if commentaire.utilisateur_id == 1 %}
@@ -162,11 +174,14 @@
                                         <span class="ml-2 inline-block px-2 py-1 bg-green-800 text-green-300 rounded-full text-xs">Validé</span>
                                     {% endif %}
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-300">
+                                    {{ commentaire.date_publication.strftime('%d/%m/%Y %H:%M') }} 
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {% if commentaire.id_utilisateur == session['id_user'] %}
+                                    {% if commentaire.utilisateur_id == session['id_user'] %}
                                         <form action="/client/commentaire/delete" method="post" class="inline">
                                             <input type="hidden" name="id_article" value="{{ commentaire.id_article }}">
-                                            <input type="hidden" name="id_utilisateur" value="{{ commentaire.id_utilisateur }}">
+                                            <input type="hidden" name="utilisateur_id" value="{{ commentaire.utilisateur_id }}">
                                             <input type="hidden" name="date_publication" value="{{ commentaire.date_publication }}">
                                             <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
                                                 Supprimer
