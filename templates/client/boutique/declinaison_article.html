@@ -12,11 +12,19 @@
         <div class="bg-dark-secondary rounded-lg p-4 shadow-lg">
             <img src="/static/images/{{ declinaison.image }}" class="w-full h-60 object-contain" alt="Image de la déclinaison">
             <h3 class="text-lg font-semibold text-white mt-2">{{ declinaison.libelle_usure }}</h3>
+
             {% if declinaison.libelle_special != 'Normal' %}
                 <p class="text-yellow-400">{{ declinaison.libelle_special }}</p>
             {% endif %}
+            
             <p class="text-gray-400">Prix : {{ declinaison.prix_declinaison }}€</p>
-            <p class="text-gray-400">Stock : {{ declinaison.stock }}</p>
+            
+            {% if declinaison.stock != 0 %}    
+                <p class="text-gray-400">Stock : {{ declinaison.stock }}</p>
+            {% else %}
+                <p class="text-red-500">Rupture de stock</p>
+            {% endif %}
+
             <form action="/client/panier/add" method="post" class="mt-4">
                 <input type="hidden" name="id_declinaison" value="{{ declinaison.id_declinaison }}">
                 <button type="submit" class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
