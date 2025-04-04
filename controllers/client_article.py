@@ -15,22 +15,33 @@ def client_article_show():                                 # remplace client_ind
     id_client = session['id_user']
     list_param = []
 
-    # V1 - Adjusted for ONLY_FULL_GROUP_BY
+    # V1
     sql = '''
         SELECT 
-                MIN(skin.id_skin) AS id_skin, # Aggregate id_skin
-                skin.nom_skin AS nom, 
-                skin.image,
-                type_skin.libelle_type_skin AS libelle_type_article
-                , ROUND(AVG(note.note),1) AS moyenne_notes
-                , COUNT(note.note) AS nb_notes
-                , COUNT(commentaire.commentaire) AS nb_commentaires
+            skin.nom_skin AS nom,
+            MIN(skin.id_skin) AS id_skin,
+            MIN(skin.image) AS image,
+            MIN(type_skin.libelle_type_skin) AS libelle_type_article,
+            ROUND(AVG(note.note),1) AS moyenne_notes,
+            COUNT(note.note) AS nb_notes,
+            COUNT(commentaire.commentaire) AS nb_commentaires,
+            COUNT(declinaison.id_declinaison) AS nb_declinaisons,
+            MIN(special.libelle_special) AS libelle_special,
+            MIN(usure.libelle_usure) AS libelle_usure,
+            MIN(declinaison.prix_declinaison) as prix_min,
+            MAX(declinaison.prix_declinaison) as prix_max,
+            MIN(declinaison.stock) as stock_min,
+            MAX(declinaison.stock) as stock_max
         FROM skin
+        LEFT JOIN declinaison ON skin.id_skin = declinaison.skin_id
         LEFT JOIN note ON skin.id_skin = note.skin_id
         LEFT JOIN commentaire ON skin.id_skin = commentaire.skin_id
         INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
+        LEFT JOIN special ON declinaison.special_id = special.id_special
+        LEFT JOIN usure ON declinaison.usure_id = usure.id_usure
         WHERE 1=1
     '''
+
     # Version avant modification des declinaisons
     # sql = '''
     #     SELECT DISTINCT nom_skin AS nom
@@ -44,9 +55,10 @@ def client_article_show():                                 # remplace client_ind
     #     WHERE 1=1
     #     '''
 
+    # Gestion des filtres
     if 'filter_types' in session and session['filter_types']:
         placeholders = ','.join(['%s'] * len(session['filter_types']))
-        sql += f' AND ts.id_type_skin IN ({placeholders})'
+        sql += f' AND id_type_skin IN ({placeholders})'
         list_param.extend(session['filter_types'])
 
     if 'filter_word' in session and session['filter_word']:
@@ -83,29 +95,31 @@ def client_article_show():                                 # remplace client_ind
             sql += ' AND prix_skin <= %s'
             list_param.append(int(session['filter_prix_max']))
             
-    # Group by all non-aggregated columns
-    sql += ' GROUP BY skin.nom_skin, skin.image, type_skin.libelle_type_skin' 
+    # Group by
+    sql += ' GROUP BY skin.nom_skin' 
     
-    # Fetch articles from base query
+
+    # Récupération des articles depuis la requête principale
     mycursor.execute(sql, tuple(list_param) if list_param else None)
     articles = mycursor.fetchall()
 
-    # Fetch declinations for each article
-    articles_with_declinaisons = []
+    # Récupération des déclinaisons pour chaque article
+    temp = []
     if articles:
         for article in articles:
-            declinaisons = get_declinaison(article['nom']) # Use base skin name
-            # Only include articles that have available declinations
-            if declinaisons: 
+            declinaisons = get_declinaison(article['nom'])
+            # Inclut uniquement les articles ayant des déclinaisons disponibles
+            if declinaisons:
                 article['declinaisons'] = declinaisons
-                # Add price info for display (optional, could be done in template)
-                article['prix_min'] = min(d['prix_declinaison'] for d in declinaisons) if declinaisons else 0
-                article['prix_max'] = max(d['prix_declinaison'] for d in declinaisons) if declinaisons else 0
-                articles_with_declinaisons.append(article)
-    
-    articles = articles_with_declinaisons # Replace original list
+                article['prix_min'] = declinaisons[0]['prix_min']
+                article['prix_max'] = declinaisons[0]['prix_max']
+                article['stock_min'] = declinaisons[0]['stock_min']
+                article['stock_max'] = declinaisons[0]['stock_max']
+                temp.append(article)
 
-    # pour le filtre (type_skin should be correct)
+    articles = temp
+
+    # Pour le filtre
     types_article = []
     sql = '''
         SELECT  id_type_skin AS id_type_article
@@ -118,7 +132,7 @@ def client_article_show():                                 # remplace client_ind
     types_article = types_skin
     
     
-    # Refactored articles_panier query
+    # Requête refactorisée pour les articles dans le panier
     sql = '''
         SELECT 
             ligne_panier.quantite,
@@ -141,7 +155,7 @@ def client_article_show():                                 # remplace client_ind
     mycursor.execute(sql, (id_client,))
     articles_panier = mycursor.fetchall()
 
-    # Calculate overall total price for the cart
+    # Calcul du prix total pour le panier
     if articles_panier:
         prix_total = sum(item['prix_total_ligne'] for item in articles_panier)
     else:
@@ -164,18 +178,20 @@ def get_declinaison(nom_skin_base):
             declinaison.prix_declinaison, 
             declinaison.stock,
             usure.libelle_usure,
-            special.libelle_special
+            special.libelle_special,
+            MIN(declinaison.prix_declinaison) OVER () AS prix_min,
+            MAX(declinaison.prix_declinaison) OVER () AS prix_max,
+            MIN(declinaison.stock) OVER () AS stock_min,
+            MAX(declinaison.stock) OVER () AS stock_max
         FROM declinaison
         JOIN skin ON declinaison.skin_id = skin.id_skin
         JOIN usure ON declinaison.usure_id = usure.id_usure
         JOIN special ON declinaison.special_id = special.id_special
         WHERE skin.nom_skin = %s AND declinaison.stock > 0
-        ORDER BY usure.id_usure, special.id_special  # Optional: order for consistent display
     '''
     mycursor.execute(sql, (nom_skin_base,))
     declinaisons = mycursor.fetchall()
 
-    # Return the list of declinaison details
     return declinaisons
 
 
@@ -240,7 +256,7 @@ def client_article_filtre():
 
 @client_article.route('/client/article/filtre/delete', methods=['POST'])
 def client_article_filtre_delete():
-    # suppression des variables en session
+    # Suppression des variables en session
     if 'filter_word' in session:
         session.pop('filter_word')
     if 'filter_prix_min' in session:
@@ -250,5 +266,6 @@ def client_article_filtre_delete():
     if 'filter_types' in session:
         session.pop('filter_types')
     return redirect('/client/article/show')
+
 
 

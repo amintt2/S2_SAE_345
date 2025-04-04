@@ -51,72 +51,81 @@ def _restore_declinaison_stock(declinaison_id, quantity_to_add):
 
 @client_panier.route('/client/panier/add', methods=['POST'])
 def client_panier_add():
+    if 'id_user' not in session:
+        flash(u'Vous devez être connecté', 'alert-warning')
+        return redirect('/client/article/show')
+
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    declinaison_id = request.form.get('declinaison_id')
+    id_declinaison = request.form.get('id_declinaison')
+    nb_declinaisons = int(request.form.get('nb_declinaisons', 0))
 
-    if not declinaison_id:
-        flash('Veuillez sélectionner une version de l\'article.', 'alert-warning')
+    print("Form data:", request.form)  # Debug info
+
+    # Vérifiez que l'ID de déclinaison est fourni
+    if not id_declinaison:
+        flash(u'Article non trouvé (ID de déclinaison manquant)', 'alert-warning')
         return redirect('/client/article/show')
 
-    try:
-        declinaison_id = int(declinaison_id)
-    except ValueError:
-        flash(u'ID de version invalide.', 'alert-danger')
-        return redirect('/client/article/show')
-
-    # Check stock for the selected declinaison
-    sql_check_stock = 'SELECT stock FROM declinaison WHERE id_declinaison = %s'
-    mycursor.execute(sql_check_stock, (declinaison_id,))
-    declinaison_data = mycursor.fetchone()
-
-    if not declinaison_data:
-        flash(u'Version de l\'article non trouvée.', 'alert-danger')
-        return redirect('/client/article/show')
-
-    if declinaison_data['stock'] <= 0:
-        flash(u'Cette version de l\'article est en rupture de stock.', 'alert-warning')
-        return redirect('/client/article/show')
-
-    # Check if this specific declinaison is already in the cart
-    sql_check_cart = '''
-        SELECT quantite 
-        FROM ligne_panier 
-        WHERE utilisateur_id = %s AND declinaison_id = %s
+    # Vérifiez que la déclinaison existe et a du stock
+    sql = '''
+        SELECT stock 
+        FROM declinaison 
+        WHERE id_declinaison = %s
     '''
-    mycursor.execute(sql_check_cart, (id_client, declinaison_id))
-    ligne_panier = mycursor.fetchone()
+    mycursor.execute(sql, (id_declinaison,))
+    declinaison = mycursor.fetchone()
 
-    quantity_to_add = 1 # Add one item at a time for now
+    if not declinaison:
+        flash(u'Déclinaison non trouvée', 'alert-warning')
+        return redirect('/client/article/show')
 
-    if ligne_panier:
-        # Check if adding one more exceeds stock
-        if ligne_panier['quantite'] + quantity_to_add > declinaison_data['stock']:
-            flash(u'Quantité demandée supérieure au stock disponible.', 'alert-warning')
-            return redirect('/client/article/show')
-        
-        # Update quantity in cart
-        sql_update = '''
-            UPDATE ligne_panier 
-            SET quantite = quantite + %s 
+    if declinaison['stock'] <= 0:
+        flash(u'Article en rupture de stock', 'alert-warning')
+        return redirect('/client/article/show')
+
+    # Ajoutez la déclinaison au panier
+    try:
+        sql = '''
+            SELECT quantite 
+            FROM ligne_panier 
             WHERE utilisateur_id = %s AND declinaison_id = %s
         '''
-        mycursor.execute(sql_update, (quantity_to_add, id_client, declinaison_id))
-    else:
-        # Insert new line into cart
-        sql_insert = '''
-            INSERT INTO ligne_panier(utilisateur_id, declinaison_id, quantite, date_ajout) 
-            VALUES (%s, %s, %s, NOW())
+        mycursor.execute(sql, (id_client, id_declinaison))
+        ligne_panier = mycursor.fetchone()
+
+        if ligne_panier:
+            # Mettez à jour la quantité si déjà dans le panier
+            sql = '''
+                UPDATE ligne_panier 
+                SET quantite = quantite + 1 
+                WHERE utilisateur_id = %s AND declinaison_id = %s
+            '''
+            mycursor.execute(sql, (id_client, id_declinaison))
+        else:
+            # Ajoutez une nouvelle ligne au panier
+            sql = '''
+                INSERT INTO ligne_panier(utilisateur_id, declinaison_id, quantite, date_ajout) 
+                VALUES (%s, %s, 1, NOW())
+            '''
+            mycursor.execute(sql, (id_client, id_declinaison))
+
+        # Mettez à jour le stock
+        sql = '''
+            UPDATE declinaison
+            SET stock = stock - 1
+            WHERE id_declinaison = %s
         '''
-        mycursor.execute(sql_insert, (id_client, declinaison_id, quantity_to_add))
-
-    # Decrease stock
-    actual_removed = _decrease_declinaison_stock(declinaison_id, quantity_to_add)
-    if actual_removed < quantity_to_add:
-         flash(u'Attention: Stock ajusté car insuffisant.', 'alert-warning') # Should not happen due to checks above, but good fallback
-
-    get_db().commit()
-    flash(u'Article ajouté au panier', 'alert-success')
+        mycursor.execute(sql, (id_declinaison,))
+        
+        get_db().commit()
+        flash(u'Article ajouté au panier', 'alert-success')
+        
+    except Exception as e:
+        print("Erreur :", str(e))
+        get_db().rollback()
+        flash(u'Erreur lors de l\'ajout au panier', 'alert-danger')
+    
     return redirect('/client/article/show')
 
 
@@ -209,8 +218,13 @@ def client_panier_delete():
     # partie 2 : on supprime une déclinaison de l'article
     id_declinaison_article = request.form.get('id_declinaison_article', None)
 
-
-    _delete_article_from_panier(quantite, id_article)
+    if id_declinaison_article:
+        deleted = _delete_line_and_restore_stock(id_declinaison_article, id_client)
+        if deleted:
+            get_db().commit()
+            flash(u'Article supprimé du panier.', 'alert-success')
+        else:
+            flash(u'Article non trouvé dans le panier.', 'alert-warning')
  
     return redirect('/client/article/show')
 
