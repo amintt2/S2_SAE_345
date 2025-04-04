@@ -104,11 +104,14 @@
                 <span class="text-gray-300">Information sur les commentaires non disponible</span>
             {% else %}
                 <div class="text-gray-300">
-                    <div class="mb-1">Vos commentaires : <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_utilisateur }}</span> sur 3 maximum pour un article acheté</div>
-                    <div class="mb-1">Commentaires totaux : <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_total }}</span></div>
-                    {% if nb_commentaires.nb_commentaires_utilisateur_valide is defined and nb_commentaires.nb_commentaires_total_valide is defined %}
-                        <div>Commentaires validés : <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_utilisateur_valide }}</span> / <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_total_valide }}</span></div>
-                    {% endif %}
+                    <div class="mb-1">Vos commentaires : 
+                        <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_utilisateur }}</span> sur 3 maximum pour un article acheté - dont 
+                        <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_utilisateur_valide }} validés</span> commande(s)
+                    </div>
+                    <div class="mb-1">Commentaires totaux : 
+                        <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_total }}</span> - dont 
+                        <span class="text-accent-blue font-medium">{{ nb_commentaires.nb_commentaires_total_valide }} validés</span> commande(s)
+                    </div>
                 </div>
             {% endif %}
         </div>
@@ -141,7 +144,6 @@
             <table class="min-w-full">
                 <thead class="bg-dark-accent">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider"></th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Utilisateur</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Commentaire</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date de publication</th>
@@ -151,26 +153,13 @@
                 <tbody class="divide-y divide-gray-700">
                     {% if commentaires %}
                         {% for commentaire in commentaires %}
-                            
                             <tr class="hover:bg-dark-accent/50 transition-colors duration-200">
-                                <td class="px-2 py-2 whitespace-nowrap">
-                                    {% if commentaire.valide == 1 %}
-                                    <svg width="15" height="15" viewBox="0 0 40 40">
-                                        <circle cx="20" cy="20" r="20" fill="#4CAF50"/>
-                                        <path d="M12 20L17 25L28 14" stroke="white" stroke-width="3" fill="none"/>
-                                    </svg>
-                                    {% endif %}
-                                </td>
-
                                 <td class="px-6 py-4 whitespace-nowrap text-gray-300">
-                                    {{ commentaire.nom }} <span class="text-xs text-gray-400">({{ commentaire.utilisateur_id }})</span>
+                                    {{ commentaire.nom_utilisateur }} <span class="text-xs text-gray-400">({{ commentaire.id_utilisateur }})</span>
                                 </td>
                                 <td class="px-6 py-4 text-gray-300">
-                                    {% if commentaire.utilisateur_id == 1 %}
-                                        <span class="text-red-500 font-medium">(Réponse de l'administrateur) :</span>
-                                    {% endif %}
                                     {{ commentaire.commentaire }}
-                                    {% if commentaire.valider == 1 %}
+                                    {% if commentaire.valide == 1 %}
                                         <span class="ml-2 inline-block px-2 py-1 bg-green-800 text-green-300 rounded-full text-xs">Validé</span>
                                     {% endif %}
                                 </td>
@@ -178,11 +167,12 @@
                                     {{ commentaire.date_publication.strftime('%d/%m/%Y %H:%M') }} 
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {% if commentaire.utilisateur_id == session['id_user'] %}
+                                    {% if commentaire.id_utilisateur == session['id_user'] %}
                                         <form action="/client/commentaire/delete" method="post" class="inline">
                                             <input type="hidden" name="id_article" value="{{ commentaire.id_article }}">
-                                            <input type="hidden" name="utilisateur_id" value="{{ commentaire.utilisateur_id }}">
+                                            <input type="hidden" name="utilisateur_id" value="{{ commentaire.id_utilisateur }}">
                                             <input type="hidden" name="date_publication" value="{{ commentaire.date_publication }}">
+                                            <input type="hidden" name="id_commentaire" value="{{ commentaire.id_commentaire }}">
                                             <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors duration-200">
                                                 Supprimer
                                             </button>
@@ -190,6 +180,27 @@
                                     {% endif %}
                                 </td>
                             </tr>
+                            
+                            {% if commentaire.id_commentaire_admin is defined and commentaire.id_commentaire_admin is not none %}
+                            <tr class="hover:bg-dark-accent/50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-300">
+                                    {{ commentaire.nom_utilisateur_admin }} <span class="text-xs text-gray-400">({{ commentaire.id_admin }})</span>
+                                </td>
+                                <td class="px-6 py-4 text-gray-300">
+                                    <span class="text-red-500 font-medium">(Réponse de l'administrateur) :</span>
+                                    {{ commentaire.commentaire_admin }}
+                                    {% if commentaire.valide_admin == 1 %}
+                                        <span class="ml-2 inline-block px-2 py-1 bg-green-800 text-green-300 rounded-full text-xs">Validé</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-300">
+                                    {{ commentaire.date_publication_admin.strftime('%d/%m/%Y %H:%M') }} 
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                </td>
+                            </tr>
+                            {% endif %}
+
                         {% endfor %}
                     {% else %}
                         <tr class="bg-dark-accent/30">
