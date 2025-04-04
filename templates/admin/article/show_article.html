@@ -32,6 +32,7 @@ articles (tableau de dictionnaires)
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Prix</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Stock</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Notes</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Avis</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Décl.</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
@@ -95,12 +96,26 @@ articles (tableau de dictionnaires)
                                     {% endif %}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    {% if ligne.nb_commentaires_nouveaux is defined %}
-                                        {% if ligne.nb_commentaires_nouveaux > 0 %}
+                                    {% if ligne.note_moyenne is defined and ligne.note_moyenne is not none %}
+                                    <div class="flex items-center">
+                                        <span class="text-accent-blue font-medium">{{ "%.1f"|format(ligne.note_moyenne) }}</span>
+                                        <div class="text-yellow-400 text-xs ml-2">
+                                            {% for i in range(ligne.note_moyenne|int) %}★{% endfor %}
+                                            {% for i in range(5 - ligne.note_moyenne|int) %}☆{% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="text-gray-400 text-xs mt-1">sur {{ ligne.nb_notes }} note(s)</div>
+                                    {% else %}
+                                        <span class="text-gray-400">Pas de note</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if ligne.nb_commentaires_nouveaux is defined and ligne.nb_commentaires is defined %}
+                                        {% if ligne.nb_commentaires_nouveaux > 0 or ligne.nb_commentaires > 0 %}
                                             <a href="/admin/article/commentaires?id_article={{ ligne.id_article }}" 
                                                class="inline-flex items-center text-accent-blue hover:text-blue-400 transition-colors duration-200">
                                                 <span class="font-medium">{{ ligne.nb_commentaires_nouveaux }}</span>
-                                                <span class="text-xs ml-1">nouveau(x)</span>
+                                                <span class="text-xs ml-1">nouveau(x) / {{ ligne.nb_commentaires }}</span>
                                             </a>
                                         {% else %}
                                             <span class="text-gray-400">Aucun</span>

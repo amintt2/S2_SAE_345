@@ -33,19 +33,30 @@
         {% if commentaires and commentaires|length > 0 %}
             <div class="space-y-4">
                 {% for commentaire in commentaires %}
-                    <div class="bg-gray-700 rounded-lg p-4">
+                    {% if commentaire.utilisateur_id == session['id_user'] %}
+                    <div class="bg-green-500 rounded-lg p-4">
+                    {% elif commentaire.valide == 1 %}
+                    <div class="bg-yellow-200 rounded-lg p-4">
+                    {% else %}
+                    <div class="bg-white rounded-lg p-4">
+                    {% endif %}
                         <div class="flex justify-between items-start">
-                            <div>
+                            <div class="text-gray-400">
                                 <p class="font-medium">{{ commentaire.nom_utilisateur }}</p>
                                 <p class="text-sm text-gray-400">{{ commentaire.date_publication }}</p>
+                                <p class="mt-2">{{ commentaire.commentaire }}</p>
                             </div>
-                            {% if commentaire.note %}
-                                <div class="bg-blue-500 text-white px-2 py-1 rounded">
-                                    Note: {{ commentaire.note }}/5
-                                </div>
-                            {% endif %}
+                            <div class="flex items-center space-x-2">
+                                <form action="/admin/article/commentaires/delete" method="post">
+                                    <input type="hidden" name="id_article" value="{{ commentaire.id_article }}">
+                                    <input type="hidden" name="id_utilisateur" value="{{ commentaire.id_utilisateur }}">
+                                    <input type="hidden" name="date_publication" value="{{ commentaire.date_publication }}">
+                                    <button class="text-red-500 hover:text-red-700 transition-colors duration-200">Supprimer</button>
+                                </form>
+                                <a href="/admin/article/commentaires/repondre?id_article={{ commentaire.id_article }}" class="text-blue-500 hover:text-blue-700 transition-colors duration-200">Répondre</a>
+                            </div>
+                            
                         </div>
-                        <p class="mt-2">{{ commentaire.commentaire }}</p>
                     </div>
                 {% endfor %}
             </div>
