@@ -268,4 +268,30 @@ def client_article_filtre_delete():
     return redirect('/client/article/show')
 
 
+@client_article.route('/client/article/declinaisons')
+def client_article_declinaisons():
+    id_article = request.args.get('id_article')
+    if not id_article:
+        flash(u"Article non trouvé", "alert-warning")
+        return redirect('/client/article/show')
+
+    mycursor = get_db().cursor()
+    sql = '''
+        SELECT d.id_declinaison, d.stock, d.prix_declinaison, d.image,
+               u.libelle_usure, s.libelle_special
+        FROM declinaison d
+        JOIN usure u ON d.usure_id = u.id_usure
+        JOIN special s ON d.special_id = s.id_special
+        WHERE d.skin_id = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+    declinaisons = mycursor.fetchall()
+
+    if not declinaisons:
+        flash(u"Aucune déclinaison disponible pour cet article", "alert-warning")
+        return redirect('/client/article/show')
+
+    return render_template('client/boutique/declinaison_article.html', declinaisons=declinaisons)
+
+
 

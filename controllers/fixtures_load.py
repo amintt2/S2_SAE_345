@@ -318,7 +318,7 @@ def fct_fixtures_load():
      ('Flip Knife | Doppler', 1, 4, 'flip_doppler.png', 'A flip knife with a doppler finish.'),
      ('M4A1-S | Mud-Spec', 1, 6, 'm4a1s_mudspec.png', 'A common M4A1-S skin with a mud spec pattern.'),
      ('Natus Vincere Glitter', 1, 2, 'sticker_navi_glitter.png', 'A glitter sticker for Natus Vincere team.');
-'''
+     '''
      mycursor.execute(sql)
 
      sql='''

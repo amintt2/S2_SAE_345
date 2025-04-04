@@ -210,20 +210,14 @@
                         <input type="hidden" name="nb_declinaisons" value="{{ article.nb_declinaisons }}">
                         {% if article.nb_declinaisons == 1 %}
                             <input type="hidden" name="id_declinaison" value="{{ article.declinaisons[0].id_declinaison }}">
-                        {% endif %}
-                        
-                        <div class="flex gap-2">
                             <button type="submit" class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
-                                {% if article.nb_declinaisons > 1 %}
-                                    Choisir une version
-                                {% else %}
-                                    Ajouter au panier
-                                {% endif %}
+                                Ajouter au panier
                             </button>
-                            <a href="/client/envie/add?id_article={{ article.id_skin }}" class="inline-flex items-center justify-center bg-dark-accent hover:bg-dark-accent/80 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
-                                <span>💛</span>
+                        {% else %}
+                            <a href="/client/article/declinaisons?id_article={{ article.id_skin }}" class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200 text-center block">
+                                Choisir une version
                             </a>
-                        </div>
+                        {% endif %}
                     </form>
                 </div>
             </div>
