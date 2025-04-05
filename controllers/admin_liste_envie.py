@@ -87,44 +87,29 @@ def admin_wishlist_stats():
     history_cat_monthly_values_py = [item['consultation_count'] for item in consultation_category_monthly_stats]
 
     if selected_category:
-        # Détails des articles en wishlist pour la catégorie sélectionnée
-        sql_category_articles_wishlist = """
+        # Détails des articles en wishlist et consultations pour la catégorie sélectionnée (30 derniers jours)
+        sql_category_articles = """
             SELECT 
                 s.nom_skin AS article_name,
-                COUNT(DISTINCT le.utilisateur_id) AS wishlist_count
-            FROM skin s
-            LEFT JOIN liste_envie le ON s.id_skin = le.skin_id
-            JOIN type_skin ts ON s.type_skin_id = ts.id_type_skin
-            WHERE ts.libelle_type_skin = %s
-            GROUP BY s.id_skin, s.nom_skin
-            ORDER BY wishlist_count DESC, s.nom_skin;
-        """
-        mycursor.execute(sql_category_articles_wishlist, (selected_category,))
-        category_articles_wishlist = mycursor.fetchall()
-        
-        # Détails des consultations pour la catégorie sélectionnée (30 derniers jours)
-        sql_category_articles_history = """
-            SELECT 
-                s.nom_skin AS article_name,
+                COUNT(DISTINCT le.utilisateur_id) AS wishlist_count,
                 COUNT(h.skin_id) AS consultation_count
             FROM skin s
+            LEFT JOIN liste_envie le ON s.id_skin = le.skin_id
             LEFT JOIN historique h ON s.id_skin = h.skin_id 
                 AND h.date_consultation >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
             JOIN type_skin ts ON s.type_skin_id = ts.id_type_skin
             WHERE ts.libelle_type_skin = %s
             GROUP BY s.id_skin, s.nom_skin
-            ORDER BY consultation_count DESC, s.nom_skin;
+            ORDER BY wishlist_count DESC, s.nom_skin;
         """
-        mycursor.execute(sql_category_articles_history, (selected_category,))
-        category_articles_history = mycursor.fetchall()
+        mycursor.execute(sql_category_articles, (selected_category,))
+        category_articles = mycursor.fetchall()
 
-        category_articles_labels = [item['article_name'] for item in category_articles_wishlist]
-        category_wishlist_values = [item['wishlist_count'] for item in category_articles_wishlist]
-        category_history_values = [next((h['consultation_count'] for h in category_articles_history if h['article_name'] == article), 0) 
-                                 for article in category_articles_labels]
+        category_articles_labels = [item['article_name'] for item in category_articles]
+        category_wishlist_values = [item['wishlist_count'] for item in category_articles]
+        category_history_values = [item['consultation_count'] for item in category_articles]
     else:
-        category_articles_wishlist = []
-        category_articles_history = []
+        category_articles = []
         category_articles_labels = []
         category_wishlist_values = []
         category_history_values = []
@@ -141,8 +126,8 @@ def admin_wishlist_stats():
                            history_cat_monthly_labels_py=history_cat_monthly_labels_py,
                            history_cat_monthly_values_py=history_cat_monthly_values_py,
                            selected_category=selected_category,
-                           category_articles_wishlist=category_articles_wishlist,
-                           category_articles_history=category_articles_history,
+                           category_articles_wishlist=category_articles,
+                           category_articles_history=category_articles,
                            category_articles_labels=category_articles_labels,
                            category_wishlist_values=category_wishlist_values,
                            category_history_values=category_history_values)
