@@ -24,11 +24,11 @@ def client_commande_valide():
         prix_total = None
     # etape 2 : selection des adresses
     return render_template('client/boutique/panier_validation_adresses.html'
-                           #, adresses=adresses
+                           , adresses=adresses
                            , articles_panier=articles_panier
                            , prix_total= prix_total
                            , validation=1
-                           #, id_adresse_fav=id_adresse_fav
+                           , id_adresse_fav=id_adresse_fav
                            )
 
 

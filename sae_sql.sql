@@ -63,6 +63,7 @@ CREATE TABLE skin(
 
 CREATE TABLE adresse (
    id_adresse INT AUTO_INCREMENT,
+   id_adresse_fav BOOLEAN,
    nom VARCHAR(255),
    rue VARCHAR(255),
    code_postal VARCHAR(255),
@@ -71,7 +72,9 @@ CREATE TABLE adresse (
    utilisateur_id INT NOT NULL,
    PRIMARY KEY(id_adresse),
    CONSTRAINT fk_adresse_utilisateur
-      FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur)
+      FOREIGN KEY (utilisateur_id) REFERENCES utilisateur(id_utilisateur),
+   CONSTRAINT fk_adresse_favorite
+      FOREIGN KEY (id_adresse_fav) REFERENCES adresse(id_adresse)
 ) DEFAULT CHARSET utf8mb4;
 
 CREATE TABLE commande(
