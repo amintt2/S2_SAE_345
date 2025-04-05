@@ -1,25 +1,18 @@
-from flask import Blueprint, render_template # Removed request, redirect, url_for, flash as they aren't used yet
-# Import the database connection function from your project structure
+from flask import Blueprint, render_template, request
 from connexion_db import get_db
 
-# Removed placeholder authentication imports and decorator
-
 admin_liste_envie_bp = Blueprint('admin_liste_envie', __name__,
-                                 url_prefix='/admin',  # Adding a common prefix for admin routes might be cleaner
-                                 template_folder='../templates') # Adjusted template folder path relative to blueprint
+                                 url_prefix='/admin',
+                                 template_folder='../templates')
 
 @admin_liste_envie_bp.route('/liste_envie/stats', methods=['GET'])
-# Removed @admin_required decorator - assuming auth is handled elsewhere or not needed for this specific route yet
 def admin_wishlist_stats():
-    """
-    Displays statistics about wishlists for the administrator.
-    - Number of articles (skins) per category in wishlists.
-    - Click count (consultation) of articles (skins).
-    """
     db = get_db()
     mycursor = db.cursor()
 
-    # --- Query 1: Articles (Skins) per Category in Wishlists ---
+    selected_category = request.args.get('category', None)
+
+    # Statistiques globales des articles par catégorie dans les wishlists
     sql_category_stats = """
         SELECT
             ts.libelle_type_skin AS category_name,
@@ -32,9 +25,10 @@ def admin_wishlist_stats():
     """
     mycursor.execute(sql_category_stats)
     stats_per_category = mycursor.fetchall()
+    wishlist_cat_labels_py = [item['category_name'] for item in stats_per_category]
+    wishlist_cat_values_py = [item['article_count'] for item in stats_per_category]
 
-    # --- Query 2: Article (Skin) Consultation Count ---
-    # Counts each time a skin appears in the historique table
+    # Nombre total de consultations par article
     sql_click_stats = """
         SELECT
             s.nom_skin AS article_name,
@@ -47,7 +41,7 @@ def admin_wishlist_stats():
     mycursor.execute(sql_click_stats)
     article_click_stats = mycursor.fetchall()
 
-    # --- Query 3: Individual Skin Wishlist Counts ---
+    # Nombre d'utilisateurs ayant ajouté chaque skin en wishlist
     sql_skin_wishlist_counts = """
         SELECT
             s.nom_skin AS skin_name,
@@ -61,11 +55,11 @@ def admin_wishlist_stats():
     mycursor.execute(sql_skin_wishlist_counts)
     skin_wishlist_counts = mycursor.fetchall()
 
-    # --- Query 4: Consultations per Category ---
+    # Statistiques de consultation par catégorie (total)
     sql_consultation_category_stats = """
         SELECT
             ts.libelle_type_skin AS category_name,
-            COUNT(h.skin_id) AS consultation_count  -- Count total consultations
+            COUNT(h.skin_id) AS consultation_count
         FROM historique h
         JOIN skin s ON h.skin_id = s.id_skin
         JOIN type_skin ts ON s.type_skin_id = ts.id_type_skin
@@ -75,16 +69,82 @@ def admin_wishlist_stats():
     mycursor.execute(sql_consultation_category_stats)
     consultation_category_stats = mycursor.fetchall()
 
-    mycursor.close() # Good practice to close cursor
+    # Statistiques de consultation par catégorie (30 derniers jours)
+    sql_consultation_category_monthly_stats = """
+        SELECT
+            ts.libelle_type_skin AS category_name,
+            COUNT(h.skin_id) AS consultation_count
+        FROM historique h
+        JOIN skin s ON h.skin_id = s.id_skin
+        JOIN type_skin ts ON s.type_skin_id = ts.id_type_skin
+        WHERE h.date_consultation >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        GROUP BY ts.id_type_skin, ts.libelle_type_skin
+        ORDER BY consultation_count DESC, ts.libelle_type_skin;
+    """
+    mycursor.execute(sql_consultation_category_monthly_stats)
+    consultation_category_monthly_stats = mycursor.fetchall()
+    history_cat_monthly_labels_py = [item['category_name'] for item in consultation_category_monthly_stats]
+    history_cat_monthly_values_py = [item['consultation_count'] for item in consultation_category_monthly_stats]
 
-    # Convert fetched data (list of tuples/dicts) into dictionaries suitable for the template if needed,
-    # or pass them directly if the template handles the structure.
-    # Assuming fetchall() returns list of dicts or similar that Jinja can iterate.
+    if selected_category:
+        # Détails des articles en wishlist pour la catégorie sélectionnée
+        sql_category_articles_wishlist = """
+            SELECT 
+                s.nom_skin AS article_name,
+                COUNT(DISTINCT le.utilisateur_id) AS wishlist_count
+            FROM skin s
+            LEFT JOIN liste_envie le ON s.id_skin = le.skin_id
+            JOIN type_skin ts ON s.type_skin_id = ts.id_type_skin
+            WHERE ts.libelle_type_skin = %s
+            GROUP BY s.id_skin, s.nom_skin
+            ORDER BY wishlist_count DESC, s.nom_skin;
+        """
+        mycursor.execute(sql_category_articles_wishlist, (selected_category,))
+        category_articles_wishlist = mycursor.fetchall()
+        
+        # Détails des consultations pour la catégorie sélectionnée (30 derniers jours)
+        sql_category_articles_history = """
+            SELECT 
+                s.nom_skin AS article_name,
+                COUNT(h.skin_id) AS consultation_count
+            FROM skin s
+            LEFT JOIN historique h ON s.id_skin = h.skin_id 
+                AND h.date_consultation >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            JOIN type_skin ts ON s.type_skin_id = ts.id_type_skin
+            WHERE ts.libelle_type_skin = %s
+            GROUP BY s.id_skin, s.nom_skin
+            ORDER BY consultation_count DESC, s.nom_skin;
+        """
+        mycursor.execute(sql_category_articles_history, (selected_category,))
+        category_articles_history = mycursor.fetchall()
+
+        category_articles_labels = [item['article_name'] for item in category_articles_wishlist]
+        category_wishlist_values = [item['wishlist_count'] for item in category_articles_wishlist]
+        category_history_values = [next((h['consultation_count'] for h in category_articles_history if h['article_name'] == article), 0) 
+                                 for article in category_articles_labels]
+    else:
+        category_articles_wishlist = []
+        category_articles_history = []
+        category_articles_labels = []
+        category_wishlist_values = []
+        category_history_values = []
+
+    mycursor.close()
 
     return render_template('admin/liste_envie/stats.html',
                            stats_per_category=stats_per_category,
                            article_click_stats=article_click_stats,
                            skin_wishlist_counts=skin_wishlist_counts,
-                           consultation_category_stats=consultation_category_stats)
+                           consultation_category_stats=consultation_category_stats,
+                           wishlist_cat_labels_py=wishlist_cat_labels_py,
+                           wishlist_cat_values_py=wishlist_cat_values_py,
+                           history_cat_monthly_labels_py=history_cat_monthly_labels_py,
+                           history_cat_monthly_values_py=history_cat_monthly_values_py,
+                           selected_category=selected_category,
+                           category_articles_wishlist=category_articles_wishlist,
+                           category_articles_history=category_articles_history,
+                           category_articles_labels=category_articles_labels,
+                           category_wishlist_values=category_wishlist_values,
+                           category_history_values=category_history_values)
 
 # Add more routes related to admin wishlist management if needed 
