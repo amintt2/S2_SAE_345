@@ -1,53 +1,81 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>ajouter un casque</title>
+    <title>Ajouter une déclinaison</title>
 {% endblock %}
 
 {% block body %}
-    <h2>ajouter une déclinaison d'un article</h2>
-    <div class="row mt-5">
-    {% if article.image is defined and article.image is not none %}
-        <img class="card-img-top rounded mx-4 d-block"  style="width:200px; height:200px; border: 1px solid black; padding: 25px;" id="output" src="{{ url_for('static', filename = 'images/')}}{{ article.image }}" alt="">
-    {% endif %}
-        <div class="w-25">
-            <form class="w-190" method="post" action="/admin/declinaison_article/add">
-                <input id="id_article" type="hidden" name="id_article" value="{{ article.id_article }}">
-                <label for="stock">stock :
-                    <input name="stock" id="stock" type="number" class="form-control" required>
-                </label>
-                {% if  d_couleur_uniq is defined and  d_couleur_uniq==1 %}
-                    <div>!</div><div><strong>Une couleur unique est définie </strong></div>
-                    <input type="hidden" name="couleur" value="1">
-                {% else %}
-                <label for="couleur">Couleur :
-                    <select name="couleur" required class="form-select">
-                        <option value="">Sélectionner une couleur</option>
-                        {% for couleur in couleurs %}
-                             <option value="{{ couleur.id_couleur }}"> {{ couleur.libelle }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                {% endif %}
-                {% if  d_taille_uniq is defined and  d_taille_uniq==1 %}
-                    <div>!</div><div><strong>Une taille unique est définie </strong></div>
-                    <input type="hidden" name="taille" value="1">
-                {% else %}
-                <label for="taille">Taille :
-                    <select id="taille" name="taille" required class="form-select">
-                        <option value="">Sélectionner une taille</option>
-                        {% for taille in tailles %}
-                            <option value="{{ taille.id_taille }}"> {{ taille.libelle }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                {% endif %}
-                <label for="submit">
-                    <input name="submit" type="submit" value="Ajouter" class="btn btn-primary mt-2">
-                </label>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-dark-secondary rounded-lg p-6 shadow-lg">
+        <h2 class="text-2xl font-bold text-white mb-6">Ajouter une déclinaison</h2>
 
-            </form>
-         <a href="/admin/article/edit?id_article={{ article.id_article }}"><button class="btn btn-secondary mt-2">annuler</button></a>
-        </div>
+        {% if article.image is defined and article.image is not none %}
+            <div class="mb-6">
+                <img class="h-32 w-32 object-cover rounded-lg" 
+                     src="{{ url_for('static', filename='images/' + article.image) }}"
+                     alt="Image de {{ article.nom }}">
+            </div>
+        {% endif %}
+
+        <form method="post" action="/admin/declinaison_article/add" class="space-y-6">
+            <input type="hidden" name="id_article" value="{{ article.id_article }}">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-300">Prix (€)</label>
+                    <input type="number" 
+                           name="prix" 
+                           min="0" 
+                           step="0.01"
+                           required
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-300">Stock</label>
+                    <input type="number" 
+                           name="stock" 
+                           min="0"
+                           required
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-300">État</label>
+                    <select name="id_taille" 
+                            required
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                        <option value="">Sélectionner un état</option>
+                        {% for taille in tailles %}
+                            <option value="{{ taille.id_usure }}">{{ taille.libelle_usure }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-300">Type</label>
+                    <select name="id_couleur" 
+                            required
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                        <option value="">Sélectionner un type</option>
+                        {% for couleur in couleurs %}
+                            <option value="{{ couleur.id_special }}">{{ couleur.libelle_special }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <button type="submit" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Ajouter
+                </button>
+                <a href="/admin/article/edit?id_article={{ article.id_article }}"
+                   class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                    Annuler
+                </a>
+            </div>
+        </form>
     </div>
+</div>
 {% endblock %}

@@ -80,29 +80,8 @@ articles (tableau de dictionnaires)
                                     {% if ligne.stock_total is defined %}
                                         {% if ligne.stock_total != None %}
                                             <div class="flex flex-col">
-                                                
-                                                <!-- Bouton de modification du stock -->
-
-                                                {% if ligne.nb_declinaisons == 1 %}
-                                                    <form method="post" action="/admin/article/stock/update" class="mt-2">
-                                                        <input type="hidden" name="id_article" value="{{ ligne.id_article }}">
-                                                        <div class="flex space-x-2">
-                                                            <input type="number" 
-                                                            name="stock" 
-                                                            value="{{ ligne.stock_total }}" 
-                                                            min="0"
-                                                            class="w-20 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm">
-                                                            <button type="submit" 
-                                                                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-2 py-1 rounded">
-                                                                Modifier
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                {% else %}
-                                                    <span class="text-green-400 font-medium">{{ ligne.stock_total }}</span>
-                                                {% endif %}
-
                                                 {% if ligne.stock_total > 0 %}
+                                                    <span class="text-green-400 font-medium">{{ ligne.stock_total }}</span>
                                                     {% if ligne.min_stock == 0 %}
                                                         <div class="text-red-400 text-xs mt-1">⚠️ Stock critique</div>
                                                     {% endif %}

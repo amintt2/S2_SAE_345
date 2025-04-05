@@ -44,8 +44,7 @@ types_article : tableau de dictionnaires
 
                 <div class="space-y-2">
                     <label class="block text-sm font-medium">Image</label>
-                    <input name="image" type="file" onchange="loadFile(event)"
-                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <input name="image" type="file" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                 </div>
 
                 <div class="space-y-2">
@@ -86,12 +85,10 @@ types_article : tableau de dictionnaires
     <div class="mt-12">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-2xl font-bold text-white">Déclinaisons de l'article</h3>
-            <button
-               class="px-4 py-2 bg-gray-500 text-gray-300 rounded-lg cursor-not-allowed opacity-50"
-               disabled
-               title="Fonctionnalité à venir">
-                Ajouter une déclinaison (Bientôt)
-            </button>
+            <a href="/admin/declinaison_article/add?id_article={{ article.id_article }}"
+               class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                Ajouter une déclinaison
+            </a>
         </div>
 
         <div class="overflow-x-auto">
@@ -191,14 +188,4 @@ types_article : tableau de dictionnaires
         </div>
     {% endif %}
 </div>
-
-<script>
-    var loadFile = function(event) {
-        var output = document.getElementById('img_output');
-        output.src = URL.createObjectURL(event.target.files[0]);
-        output.onload = function() {
-            URL.revokeObjectURL(output.src)
-        }
-    };
-</script>
 {% endblock %}

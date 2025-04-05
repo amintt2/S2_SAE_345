@@ -13,32 +13,58 @@ admin_declinaison_article = Blueprint('admin_declinaison_article', __name__,
 def add_declinaison_article():
     id_article=request.args.get('id_article')
     mycursor = get_db().cursor()
-    article=[]
-    couleurs=None
-    tailles=None
-    d_taille_uniq=None
-    d_couleur_uniq=None
-    return render_template('admin/article/add_declinaison_article.html'
-                           , article=article
-                           , couleurs=couleurs
-                           , tailles=tailles
-                           , d_taille_uniq=d_taille_uniq
-                           , d_couleur_uniq=d_couleur_uniq
-                           )
+    
+    # Get article info
+    sql = '''
+    SELECT 
+        s.id_skin as id_article,
+        s.nom_skin as nom,
+        s.image,
+        s.description
+    FROM skin s
+    WHERE s.id_skin = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+    article = mycursor.fetchone()
 
+    if not article:
+        flash(u'Article non trouvé', 'alert-warning')
+        return redirect('/admin/article/show')
+
+    # Get usures (tailles)
+    sql = "SELECT id_usure, libelle_usure FROM usure ORDER BY libelle_usure"
+    mycursor.execute(sql)
+    tailles = mycursor.fetchall()
+
+    # Get specials (couleurs)
+    sql = "SELECT id_special, libelle_special FROM special ORDER BY libelle_special"
+    mycursor.execute(sql)
+    couleurs = mycursor.fetchall()
+
+    return render_template('admin/article/add_declinaison_article.html',
+                         article=article,
+                         tailles=tailles,
+                         couleurs=couleurs)
 
 @admin_declinaison_article.route('/admin/declinaison_article/add', methods=['POST'])
 def valid_add_declinaison_article():
     mycursor = get_db().cursor()
 
     id_article = request.form.get('id_article')
+    prix = request.form.get('prix')
     stock = request.form.get('stock')
-    taille = request.form.get('taille')
-    couleur = request.form.get('couleur')
-    # attention au doublon
-    get_db().commit()
-    return redirect('/admin/article/edit?id_article=' + id_article)
+    usure_id = request.form.get('id_taille')
+    special_id = request.form.get('id_couleur')
 
+    sql = '''
+    INSERT INTO declinaison (skin_id, prix_declinaison, stock, usure_id, special_id)  
+    VALUES (%s, %s, %s, %s, %s)
+    '''
+    mycursor.execute(sql, (id_article, prix, stock, usure_id, special_id))
+    get_db().commit()
+
+    flash(u'Déclinaison ajoutée avec succès', 'alert-success')
+    return redirect(f'/admin/article/edit?id_article={id_article}')
 
 @admin_declinaison_article.route('/admin/declinaison_article/edit', methods=['GET'])
 def edit_declinaison_article():
