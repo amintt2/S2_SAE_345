@@ -31,7 +31,7 @@ def valid_add_type_article():
     get_db().commit()
     message = u'type ajouté , libellé :'+libelle
     flash(message, 'alert-success')
-    return redirect('/admin/type-article/show') #url_for('show_type_article')
+    return redirect('/admin/type-article/show') 
 
 @admin_type_article.route('/admin/type-article/delete', methods=['GET'])
 def delete_type_article():

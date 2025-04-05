@@ -76,7 +76,7 @@ def client_article_show():                                 # remplace client_ind
                 message = u'Le prix minimum doit être inférieur au prix maximum'
                 flash(message, 'alert-warning')
             else:
-                sql += ' AND prix_skin BETWEEN %s AND %s'
+                sql += ' AND prix_declinaison BETWEEN %s AND %s'
                 list_param.extend([min_val, max_val])
 
     elif 'filter_prix_min' in session and session['filter_prix_min']:
@@ -84,7 +84,7 @@ def client_article_show():                                 # remplace client_ind
             message = u'Les valeurs du prix doivent être numériques'
             flash(message, 'alert-warning')
         else:
-            sql += ' AND prix_skin >= %s'
+            sql += ' AND prix_declinaison >= %s'
             list_param.append(int(session['filter_prix_min']))
 
     elif 'filter_prix_max' in session and session['filter_prix_max']:
@@ -92,7 +92,7 @@ def client_article_show():                                 # remplace client_ind
             message = u'Les valeurs du prix doivent être numériques'
             flash(message, 'alert-warning')
         else:
-            sql += ' AND prix_skin <= %s'
+            sql += ' AND prix_declinaison <= %s'
             list_param.append(int(session['filter_prix_max']))
             
     # Group by

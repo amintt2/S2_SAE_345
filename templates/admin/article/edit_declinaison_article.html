@@ -1,61 +1,81 @@
 {% extends 'admin/layout_admin.html' %}
 {% block title %}
-    <title>modifier un exemplaire</title>
+    <title>Modifier les déclinaisons</title>
 {% endblock %}
 
 {% block body %}
-    <h2>modifier la déclinaison d'un article </h2>
-        <div class="row mt-5">
-            article : <strong>{{ declinaison_article.nom }}</strong><br>
-            {% if declinaison_article.image_article is defined and declinaison_article.image_article is not none %}
-            <img class="card-img-top rounded mx-4 d-block"  style="width:200px; height:200px; border: 1px solid black; padding: 25px;"  src="{{ url_for('static', filename = 'images/')}}{{ declinaison_article.image_article}}"  alt="image  de {{ declinaison_article["libelle"] }}" >
-            {% else %}
-            <i class="card-img-top rounded mx-4 d-block">pas de photo</i>{#{{ declinaison_article|pprint }}#}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-dark-secondary rounded-lg p-6 shadow-lg">
+        <h2 class="text-2xl font-bold text-white mb-6">Modifier les déclinaisons de : {{ declinaison_article.nom }}</h2>
+        
+        <div class="flex items-center space-x-4 mb-8">
+            {% if declinaison_article.image_article %}
+                <img class="h-32 w-32 object-cover rounded-lg" 
+                     src="{{ url_for('static', filename='images/' + declinaison_article.image_article) }}"
+                     alt="Image de {{ declinaison_article.nom }}">
             {% endif %}
-
-            <div class="w-25">
-                <form class="w-190" method="post" action="/admin/declinaison_article/edit" enctype="multipart/form-data">
-                    <input type="hidden" value="{{ declinaison_article.id_declinaison_article }}" name="id_declinaison_article">
-                    <input type="hidden" value="{{ declinaison_article.article_id }}" name="id_article">
-                    <label for="stock">Stock :
-                        <input name="stock" type="number" min="0.0" step="0.01" value="{{ declinaison_article.stock }}" class="form-control" >
-                    </label>
-                    {% if  d_taille_uniq is defined and  d_taille_uniq==1 %}
-                        <div>!</div><div><strong>Une taille unique est définie </strong></div>
-                        <div>il faut faut la supprimer pour modifier la taille</div>
-                        <input type="hidden" name="taille" value="1">
-                    {% else %}
-                    <label for="id_taille">taille :
-                        <select name="id_taille" class="form-select">
-                            {% for taille in tailles %}
-                                 <option value="{{ taille.id_taille }}"
-                                         {% if taille.id_taille == declinaison_article.taille_id %} selected {% endif %}
-                                 > {{ taille.libelle }}</option>
-                            {% endfor %}
-                        </select>
-                    </label>
-                    {% endif %}
-                    {% if  d_couleur_uniq is defined and  d_couleur_uniq==1 %}
-                        <div>!</div><div><strong>Une couleur unique est définie </strong></div>
-                          <div>il faut faut la supprimer pour modifier la couleur</div>
-                        <input type="hidden" name="couleur" value="1">
-                    {% else %}
-                    <label for="id_couleur"> couleur :
-                        <select name="id_couleur" class="form-select">
-                            {% for couleur in couleurs %}
-                                 <option value="{{ couleur.id_couleur }}"
-                                         {% if couleur.id_couleur == declinaison_article.couleur_id %} selected {% endif %}
-                                 > {{ couleur.libelle }}</option>
-                            {% endfor %}
-                        </select>
-                    </label>
-                    {% endif %}
-                    <br>
-                <label for="submit">
-                    <input name="submit" type="submit" value="Modifier" class="btn btn-primary mt-2">
-                </label>
-                </form>
-                <a href="/admin/article/edit?id_article={{ declinaison_article.article_id }}"><button class="btn btn-secondary  mt-4">annuler</button></a>
-            </div>
         </div>
+
+        <div class="space-y-6">
+            {% for decl in declinaisons %}
+                <div class="bg-dark-accent rounded-lg p-4">
+                    <form method="post" action="/admin/declinaison_article/edit" class="space-y-4">
+                        <input type="hidden" name="id_declinaison_article" value="{{ decl.id_declinaison_article }}">
+                        <input type="hidden" name="id_article" value="{{ declinaison_article.article_id }}">
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Stock</label>
+                                <input type="number" name="stock" value="{{ decl.stock }}" min="0" 
+                                       class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Prix</label>
+                                <input type="number" name="prix" value="{{ decl.prix_declinaison }}" 
+                                       min="0" step="0.01" 
+                                       class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">État</label>
+                                <select name="id_taille" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                                    {% for taille in tailles %}
+                                        <option value="{{ taille.id_usure }}"
+                                                {% if taille.id_usure == decl.id_usure %}selected{% endif %}>
+                                            {{ taille.libelle_usure }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Type</label>
+                                <select name="id_couleur" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                                    {% for couleur in couleurs %}
+                                        <option value="{{ couleur.id_special }}"
+                                                {% if couleur.id_special == decl.id_special %}selected{% endif %}>
+                                            {{ couleur.libelle_special }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-2">
+                            <button type="submit" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                                Enregistrer
+                            </button>
+                            <a href="/admin/article/edit?id_article={{ declinaison_article.article_id }}"
+                               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+                                Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

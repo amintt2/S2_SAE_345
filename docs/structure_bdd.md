@@ -29,7 +29,6 @@ Table principale des produits (skins CS:GO).
 | id_skin | INT AUTO_INCREMENT | Identifiant unique du skin (PK) |
 | nom_skin | VARCHAR(50) | Nom du skin |
 | disponible | TINYINT(1) | Disponibilité du skin |
-| prix_skin | DECIMAL(10,2) | Prix de base du skin |
 | type_skin_id | INT | Type de skin (FK vers type_skin) |
 | image | VARCHAR(255) | Chemin de l'image |
 | description | TEXT | Description du skin |

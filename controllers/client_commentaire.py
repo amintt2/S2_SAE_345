@@ -25,15 +25,16 @@ def client_article_details():
     SELECT 
         id_skin AS id_article,
         nom_skin AS nom, 
-        prix_skin AS prix,
+        prix_declinaison AS prix,
         description,
         image,
         ROUND(AVG(note), 1) AS moyenne_notes,
         COUNT(note) AS nb_notes
     FROM skin
     LEFT JOIN note ON note.skin_id = skin.id_skin
+    LEFT JOIN declinaison ON declinaison.skin_id = skin.id_skin
     WHERE id_skin = %s
-    GROUP BY id_skin, nom_skin, prix_skin, description, image;
+    GROUP BY id_skin, nom_skin, prix_declinaison, description, image;
     '''
     # -- Description, moyenne_notes, nb_notes
     mycursor.execute(sql, (id_article,))

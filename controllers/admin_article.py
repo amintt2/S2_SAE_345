@@ -103,7 +103,7 @@ def valid_add_article():
         filename=None
 
     sql = '''
-    INSERT INTO skin(nom_skin, image, prix_skin, type_skin_id, usure_id, special_id, stock, description)
+    INSERT INTO skin(nom_skin, image, prix_declinaison, type_skin_id, usure_id, special_id, stock, description)
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     '''
     tuple_add = (nom, filename, prix, type_article_id, usure_id, special_id, stock, description)
@@ -182,7 +182,8 @@ def edit_article():
     SELECT 
         skin.id_skin as id_article,
         skin.nom_skin as nom,
-        skin.prix_skin as prix,
+        MIN(d.prix_declinaison) as prix_min,
+        MAX(d.prix_declinaison) as prix_max,
         SUM(d.stock) as stock,
         skin.image,
         skin.description,
@@ -192,7 +193,7 @@ def edit_article():
     LEFT JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
     LEFT JOIN declinaison d ON skin.id_skin = d.skin_id
     WHERE skin.id_skin = %s
-    GROUP BY skin.id_skin, skin.nom_skin, skin.prix_skin, skin.image, 
+    GROUP BY skin.id_skin, skin.nom_skin, skin.image, 
              skin.description, skin.type_skin_id, type_skin.libelle_type_skin
     '''
     mycursor.execute(sql, (id_article,))
@@ -216,39 +217,84 @@ def valid_edit_article():
     id_article = request.form.get('id_article')
     nom = request.form.get('nom')
     prix = request.form.get('prix')
+    stock = request.form.get('stock')  # Get stock value from form
     description = request.form.get('description')
     type_article_id = request.form.get('type_article_id')
     image = request.files.get('image', None)
 
-    if image:
-        sql = '''
-        UPDATE skin 
-        SET nom_skin = %s, prix_skin = %s, 
-            type_skin_id = %s, description = %s, image = %s
-        WHERE id_skin = %s
-        RETURNING image as old_image
-        '''
-        tuple_update = (nom, prix, type_article_id, description, image.filename, id_article)
-    else:
-        sql = '''
-        UPDATE skin 
-        SET nom_skin = %s, prix_skin = %s, 
-            type_skin_id = %s, description = %s
-        WHERE id_skin = %s
-        '''
-        tuple_update = (nom, prix, type_article_id, description, id_article)
+    try:
+        # Start transaction
+        mycursor.execute("START TRANSACTION")
 
-    mycursor.execute(sql, tuple_update)
+        # Update skin table
+        if image:
+            sql = '''
+            UPDATE skin 
+            SET nom_skin = %s, type_skin_id = %s, 
+                description = %s, image = %s
+            WHERE id_skin = %s
+            RETURNING image as old_image
+            '''
+            tuple_update = (nom, type_article_id, description, image.filename, id_article)
+        else:
+            sql = '''
+            UPDATE skin 
+            SET nom_skin = %s, type_skin_id = %s, 
+                description = %s
+            WHERE id_skin = %s
+            '''
+            tuple_update = (nom, type_article_id, description, id_article)
 
-    if image:
-        image.save(os.path.join('static/images/', image.filename))
-        if mycursor.rowcount > 0:
-            old_image = mycursor.fetchone()['old_image']
-            if old_image and os.path.exists(os.path.join('static/images/', old_image)):
-                os.remove(os.path.join('static/images/', old_image))
+        mycursor.execute(sql, tuple_update)
 
-    get_db().commit()
-    flash(f'Article {nom} modifié avec succès', 'success')
+        # Update stock in declinaison table
+        if stock is not None and stock != '':
+            try:
+                stock = int(stock)
+                if stock >= 0:
+                    sql_stock = '''
+                    UPDATE declinaison 
+                    SET stock = %s 
+                    WHERE skin_id = %s
+                    '''
+                    mycursor.execute(sql_stock, (stock, id_article))
+                else:
+                    flash('Le stock ne peut pas être négatif', 'error')
+            except ValueError:
+                flash('Le stock doit être un nombre entier', 'error')
+
+        # Update price in declinaison table
+        if prix and prix.strip() != '':
+            try:
+                prix = float(prix.replace(',', '.'))
+                sql_price = '''
+                UPDATE declinaison 
+                SET prix_declinaison = %s
+                WHERE skin_id = %s
+                '''
+                mycursor.execute(sql_price, (prix, id_article))
+            except ValueError:
+                flash('Le prix doit être un nombre valide', 'error')
+                raise
+
+        # Handle image upload and deletion
+        if image and mycursor.rowcount > 0:
+            image.save(os.path.join('static/images/', image.filename))
+            if 'old_image' in locals():
+                old_image = mycursor.fetchone()['old_image']
+                if old_image and os.path.exists(os.path.join('static/images/', old_image)):
+                    os.remove(os.path.join('static/images/', old_image))
+
+        # Commit transaction
+        get_db().commit()
+        flash(f'Article {nom} modifié avec succès', 'success')
+
+    except Exception as e:
+        # Rollback in case of error
+        get_db().rollback()
+        flash(f'Erreur lors de la modification : {str(e)}', 'error')
+        print(f"Error: {str(e)}")
+
     return redirect('/admin/article/show')
 
 
@@ -297,7 +343,7 @@ def update_stock():
 @admin_article.route('/admin/article/stock/update', methods=['POST'])
 def update_article_stock():
     mycursor = get_db().cursor()
-    id_article = request.form.get('id_article')
+    id_declinaison = request.form.get('id_declinaison')
     new_stock = request.form.get('stock', type=int)
     
     if new_stock is None:
@@ -308,13 +354,67 @@ def update_article_stock():
         flash('Le stock ne peut pas être négatif', 'alert-danger')
         return redirect('/admin/article/show')
     
-    sql = '''
-    UPDATE declinaison 
-    SET stock = %s 
-    WHERE skin_id = %s
-    '''
-    mycursor.execute(sql, (new_stock, id_article))
-    get_db().commit()
+    try:
+        # Start transaction
+        mycursor.execute("START TRANSACTION")
+        
+        # Update stock in declinaison table
+        sql = '''
+        UPDATE declinaison 
+        SET stock = %s 
+        WHERE id_declinaison = %s
+        '''
+        mycursor.execute(sql, (new_stock, id_declinaison))
+        
+        if mycursor.rowcount == 0:
+            get_db().rollback()
+            flash('Erreur : déclinaison non trouvée', 'alert-danger')
+            return redirect('/admin/article/show')
+            
+        # Commit transaction
+        get_db().commit()
+        flash('Stock mis à jour avec succès', 'alert-success')
+        
+    except Exception as e:
+        get_db().rollback()
+        flash(f'Erreur lors de la mise à jour du stock : {str(e)}', 'alert-danger')
+        print(f"Error: {str(e)}")
     
-    flash('Stock mis à jour avec succès', 'alert-success')
     return redirect('/admin/article/show')
+
+
+@admin_article.route('/admin/article/choose-declinaison')
+def choose_declinaison():
+    id_article = request.args.get('id_article')
+    action = request.args.get('action')
+    
+    if not id_article or not action:
+        flash(u'Paramètres manquants', 'error')
+        return redirect('/admin/article/show')
+        
+    mycursor = get_db().cursor()
+    sql = '''
+    SELECT 
+        d.id_declinaison,
+        s.nom_skin as nom_article,
+        d.prix_declinaison,
+        d.stock,
+        u.libelle_usure,
+        sp.libelle_special
+    FROM declinaison d
+    JOIN skin s ON d.skin_id = s.id_skin
+    JOIN usure u ON d.usure_id = u.id_usure
+    JOIN special sp ON d.special_id = sp.id_special
+    WHERE s.id_skin = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+    declinaisons = mycursor.fetchall()
+    
+    if not declinaisons:
+        flash(u'Article non trouvé', 'error')
+        return redirect('/admin/article/show')
+        
+    return render_template('admin/article/choose_declinaison.html', 
+                         declinaisons=declinaisons,
+                         action=action,
+                         id_article=id_article)

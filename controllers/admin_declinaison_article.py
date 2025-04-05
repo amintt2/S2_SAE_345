@@ -42,33 +42,87 @@ def valid_add_declinaison_article():
 
 @admin_declinaison_article.route('/admin/declinaison_article/edit', methods=['GET'])
 def edit_declinaison_article():
-    id_declinaison_article = request.args.get('id_declinaison_article')
+    id_article = request.args.get('id_article')
     mycursor = get_db().cursor()
-    declinaison_article=[]
-    couleurs=None
-    tailles=None
-    d_taille_uniq=None
-    d_couleur_uniq=None
-    return render_template('admin/article/edit_declinaison_article.html'
-                           , tailles=tailles
-                           , couleurs=couleurs
-                           , declinaison_article=declinaison_article
-                           , d_taille_uniq=d_taille_uniq
-                           , d_couleur_uniq=d_couleur_uniq
-                           )
+    
+    # Get article info
+    sql = '''
+    SELECT 
+        s.id_skin as article_id,
+        s.nom_skin as nom,
+        s.image as image_article
+    FROM skin s
+    WHERE s.id_skin = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+    declinaison_article = mycursor.fetchone()
+    
+    # Get declinations
+    sql = '''
+    SELECT 
+        d.id_declinaison as id_declinaison_article,
+        d.prix_declinaison,
+        d.stock,
+        d.skin_id as article_id,
+        u.id_usure,
+        u.libelle_usure,
+        sp.id_special,
+        sp.libelle_special
+    FROM declinaison d
+    JOIN usure u ON d.usure_id = u.id_usure
+    JOIN special sp ON d.special_id = sp.id_special
+    WHERE d.skin_id = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+    declinaisons = mycursor.fetchall()
 
+    # Get all states options
+    sql = "SELECT id_usure, libelle_usure FROM usure"
+    mycursor.execute(sql)
+    tailles = mycursor.fetchall()  # Keep original variable name
+
+    # Get all special options
+    sql = "SELECT id_special, libelle_special FROM special"
+    mycursor.execute(sql)
+    couleurs = mycursor.fetchall()  # Keep original variable name
+
+    return render_template('admin/article/edit_declinaison_article.html',
+                         declinaison_article=declinaison_article,
+                         declinaisons=declinaisons,
+                         tailles=tailles,
+                         couleurs=couleurs,
+                         d_taille_uniq=None,
+                         d_couleur_uniq=None)
 
 @admin_declinaison_article.route('/admin/declinaison_article/edit', methods=['POST'])
 def valid_edit_declinaison_article():
-    id_declinaison_article = request.form.get('id_declinaison_article','')
-    id_article = request.form.get('id_article','')
-    stock = request.form.get('stock','')
-    taille_id = request.form.get('id_taille','')
-    couleur_id = request.form.get('id_couleur','')
-    mycursor = get_db().cursor()
+    id_declinaison_article = request.form.get('id_declinaison_article')
+    id_article = request.form.get('id_article')
+    stock = request.form.get('stock')
+    usure_id = request.form.get('id_taille')  # Keep form field names consistent
+    special_id = request.form.get('id_couleur')  # Keep form field names consistent
+    prix = request.form.get('prix')
+    
+    if not all([id_declinaison_article, id_article, stock, usure_id, special_id, prix]):
+        flash(u'Tous les champs sont obligatoires', 'alert-warning')
+        return redirect(f'/admin/declinaison_article/edit?id_article={id_article}')
 
-    message = u'declinaison_article modifié , id:' + str(id_declinaison_article) + '- stock :' + str(stock) + ' - taille_id:' + str(taille_id) + ' - couleur_id:' + str(couleur_id)
-    flash(message, 'alert-success')
+    try:
+        mycursor = get_db().cursor()
+        sql = '''
+        UPDATE declinaison 
+        SET stock = %s, usure_id = %s, special_id = %s, prix_declinaison = %s
+        WHERE id_declinaison = %s AND skin_id = %s
+        '''
+        mycursor.execute(sql, (stock, usure_id, special_id, prix, id_declinaison_article, id_article))
+        get_db().commit()
+
+        message = f'déclinaison modifiée , id:{id_declinaison_article} - stock:{stock} - usure_id:{usure_id} - special_id:{special_id}'
+        flash(message, 'alert-success')
+    except Exception as e:
+        get_db().rollback()
+        flash(str(e), 'alert-danger')
+    
     return redirect('/admin/article/edit?id_article=' + str(id_article))
 
 
