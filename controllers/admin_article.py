@@ -91,6 +91,8 @@ def valid_add_article():
     stock = request.form.get('stock', '')
     description = request.form.get('description', '')
     type_article_id = request.form.get('type_article_id', '')
+    usure_id = request.form.get('usure_id', '')
+    special_id = request.form.get('special_id', '')
     image = request.files.get('image', None)
 
     # Start transaction
@@ -111,12 +113,11 @@ def valid_add_article():
     if image:
         image.save(os.path.join('static/images/', image.filename))
 
-    # Add initial declinaison with default usure and special
     sql = '''
     INSERT INTO declinaison (stock, prix_declinaison, usure_id, special_id, skin_id)
-    VALUES (%s, %s, 1, 1, %s)
+    VALUES (%s, %s, %s, %s, %s)
     '''
-    mycursor.execute(sql, (stock, prix, skin_id))
+    mycursor.execute(sql, (stock, prix, usure_id, special_id, skin_id))
 
     get_db().commit()
     flash(u'Article ajouté avec succès', 'success')
