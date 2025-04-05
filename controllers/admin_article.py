@@ -196,11 +196,14 @@ def edit_article():
         d.usure_id,
         d.special_id,
         u.libelle_usure,
-        s.libelle_special
+        s.libelle_special,
+        COUNT(lc.declinaison_id) as nb_commandes
     FROM declinaison d
     JOIN usure u ON d.usure_id = u.id_usure
     JOIN special s ON d.special_id = s.id_special
+    LEFT JOIN ligne_commande lc ON d.id_declinaison = lc.declinaison_id
     WHERE d.skin_id = %s
+    GROUP BY d.id_declinaison
     '''
     mycursor.execute(sql, (id_article,))
     declinaisons = mycursor.fetchall()

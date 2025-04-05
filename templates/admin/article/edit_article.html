@@ -161,6 +161,20 @@ types_article : tableau de dictionnaires
                                                     class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
                                                 Enregistrer
                                             </button>
+                                            
+                                            {% if decl.nb_commandes == 0 %}
+                                                <a href="/admin/declinaison_article/delete?id_declinaison={{ decl.id_declinaison }}&id_article={{ article.id_article }}"
+                                                   onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette déclinaison ?')"
+                                                   class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                                                    Supprimer
+                                                </a>
+                                            {% else %}
+                                                <button disabled 
+                                                        title="Cette déclinaison a déjà été commandée"
+                                                        class="px-4 py-2 bg-gray-600 text-gray-400 rounded cursor-not-allowed">
+                                                    Supprimer
+                                                </button>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </form>

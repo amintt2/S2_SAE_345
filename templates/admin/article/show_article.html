@@ -144,7 +144,7 @@ articles (tableau de dictionnaires)
                                             <img src="https://img.icons8.com/ios/50/000000/edit--v1.png" class="h-5 w-5" alt="Éditer" />
                                         </a>
 
-                                        {% if ligne.nb_commandes == 0 %}
+                                        {% if ligne.nb_commandes == 0 and ligne.nb_declinaisons == 1 %}
                                             <a href="/admin/article/delete?id_article={{ ligne.id_article }}"
                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?')"
                                                class="rounded-md bg-red-600 p-2 text-white shadow-sm hover:bg-red-700 transition-colors duration-200"
@@ -154,7 +154,7 @@ articles (tableau de dictionnaires)
                                         {% else %}
                                             <button disabled
                                                     class="rounded-md bg-gray-600 p-2 text-gray-400 cursor-not-allowed"
-                                                    title="Article commandé - Suppression impossible">
+                                                    title="Article commandé ou multiple déclinaisons - Suppression impossible">
                                                 <img src="https://img.icons8.com/ios/50/000000/trash.png" class="h-5 w-5" alt="Supprimer" />
                                             </button>
                                         {% endif %}

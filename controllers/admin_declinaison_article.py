@@ -148,10 +148,30 @@ def valid_edit_declinaison_article():
     return redirect('/admin/article/edit?id_article=' + str(id_article))
 
 
-@admin_declinaison_article.route('/admin/declinaison_article/delete', methods=['GET'])
-def admin_delete_declinaison_article():
-    id_declinaison_article = request.args.get('id_declinaison_article','')
-    id_article = request.args.get('id_article','')
 
-    flash(u'declinaison supprimée, id_declinaison_article : ' + str(id_declinaison_article),  'alert-success')
-    return redirect('/admin/article/edit?id_article=' + str(id_article))
+@admin_declinaison_article.route('/admin/declinaison_article/delete')
+def delete_declinaison_article():
+    mycursor = get_db().cursor()
+    id_declinaison = request.args.get('id_declinaison')
+    id_article = request.args.get('id_article')
+
+    # Vérifier si la déclinaison est commandée
+    sql = '''
+    SELECT COUNT(*) as nb_commandes
+    FROM ligne_commande
+    WHERE declinaison_id = %s
+    '''
+    mycursor.execute(sql, (id_declinaison,))
+    result = mycursor.fetchone()
+
+    if result['nb_commandes'] > 0:
+        flash(u'Impossible de supprimer une déclinaison qui a été commandée', 'alert-warning')
+        return redirect(f'/admin/article/edit?id_article={id_article}')
+
+    # Supprimer la déclinaison
+    sql = "DELETE FROM declinaison WHERE id_declinaison = %s"
+    mycursor.execute(sql, (id_declinaison,))
+    get_db().commit()
+
+    flash(u'Déclinaison supprimée avec succès', 'alert-success')
+    return redirect(f'/admin/article/edit?id_article={id_article}')
