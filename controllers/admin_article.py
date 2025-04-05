@@ -30,6 +30,7 @@ def show_article():
         SUM(declinaison.stock) AS stock_total,
         MIN(declinaison.stock) AS min_stock,
         COUNT(DISTINCT commande.id_commande) AS nb_commandes,
+        COUNT(DISTINCT declinaison.id_declinaison) AS nb_declinaisons,
         COUNT(DISTINCT ligne_panier.utilisateur_id) AS nb_paniers,
         COUNT(DISTINCT CASE WHEN valide = 0 THEN id_commentaire ELSE NULL END) AS nb_commentaires_nouveaux,
         COUNT(DISTINCT commentaire.id_commentaire) AS nb_commentaires,
@@ -122,55 +123,48 @@ def valid_add_article():
 def delete_article():
     id_article = request.args.get('id_article')
     mycursor = get_db().cursor()
-    
-    # Vérifier si l'article est dans un panier
-    sql = '''
-    SELECT COUNT(*) as count 
-    FROM ligne_panier 
-    WHERE skin_id = %s
-    '''
-    mycursor.execute(sql, (id_article,))
-    count_panier = mycursor.fetchone()['count']
 
-    # Vérifier si l'article est dans une commande
-    sql = '''
-    SELECT COUNT(*) as count 
-    FROM ligne_commande 
-    WHERE skin_id = %s
-    '''
-    mycursor.execute(sql, (id_article,))
-    count_commande = mycursor.fetchone()['count']
+    try:
+        # Start transaction
+        mycursor.execute("START TRANSACTION")
+        
+        # Check if article has any orders
+        sql = '''
+        SELECT COUNT(*) as nb_commandes
+        FROM ligne_commande lc
+        JOIN declinaison d ON lc.declinaison_id = d.id_declinaison
+        WHERE d.skin_id = %s
+        '''
+        mycursor.execute(sql, (id_article,))
+        result = mycursor.fetchone()
+        
+        if result and result['nb_commandes'] > 0:
+            flash(u'Impossible de supprimer cet article : il a déjà été commandé', 'alert-warning')
+            return redirect('/admin/article/show')
 
-    if count_panier > 0:
-        flash("Impossible de supprimer l'article : il est présent dans un panier", 'error')
-        return redirect('/admin/article/show')
+        # Delete from declinaison first (foreign key constraint)
+        sql = '''
+        DELETE FROM declinaison 
+        WHERE skin_id = %s
+        '''
+        mycursor.execute(sql, (id_article,))
 
-    if count_commande > 0:
-        flash("Impossible de supprimer l'article : il est présent dans une commande", 'error')
-        return redirect('/admin/article/show')
-    
-    # Récupérer l'image avant la suppression
-    sql = '''
-    SELECT image 
-    FROM skin 
-    WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (id_article,))
-    image = mycursor.fetchone()['image']
-    
-    # Supprimer l'article
-    sql = '''
-    DELETE FROM skin 
-    WHERE id_skin = %s
-    '''
-    mycursor.execute(sql, (id_article,))
-    get_db().commit()
-    
-    # Supprimer l'image si elle existe
-    if image and os.path.exists(os.path.join('static/images/', image)):
-        os.remove(os.path.join('static/images/', image))
-    
-    flash('Article supprimé avec succès', 'success')
+        # Delete from skin table
+        sql = '''
+        DELETE FROM skin 
+        WHERE id_skin = %s
+        '''
+        mycursor.execute(sql, (id_article,))
+
+        # Commit transaction
+        get_db().commit()
+        flash(u'Article supprimé', 'alert-success')
+
+    except Exception as e:
+        get_db().rollback()
+        flash(f'Erreur lors de la suppression : {str(e)}', 'alert-danger')
+        print(f"Error: {str(e)}")
+
     return redirect('/admin/article/show')
 
 
@@ -178,26 +172,50 @@ def delete_article():
 def edit_article():
     id_article = request.args.get('id_article')
     mycursor = get_db().cursor()
+    
+    # Get article info
     sql = '''
     SELECT 
         skin.id_skin as id_article,
         skin.nom_skin as nom,
-        MIN(d.prix_declinaison) as prix_min,
-        MAX(d.prix_declinaison) as prix_max,
-        SUM(d.stock) as stock,
-        skin.image,
         skin.description,
-        skin.type_skin_id as type_article_id,
-        type_skin.libelle_type_skin as libelle
+        skin.image,
+        skin.type_skin_id as type_article_id
     FROM skin
-    LEFT JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
-    LEFT JOIN declinaison d ON skin.id_skin = d.skin_id
     WHERE skin.id_skin = %s
-    GROUP BY skin.id_skin, skin.nom_skin, skin.image, 
-             skin.description, skin.type_skin_id, type_skin.libelle_type_skin
     '''
     mycursor.execute(sql, (id_article,))
     article = mycursor.fetchone()
+
+    # Get declinations
+    sql = '''
+    SELECT 
+        d.id_declinaison,
+        d.prix_declinaison,
+        d.stock,
+        d.usure_id,
+        d.special_id,
+        u.libelle_usure,
+        s.libelle_special
+    FROM declinaison d
+    JOIN usure u ON d.usure_id = u.id_usure
+    JOIN special s ON d.special_id = s.id_special
+    WHERE d.skin_id = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+    declinaisons = mycursor.fetchall()
+
+    # Get usures
+    sql = "SELECT id_usure, libelle_usure FROM usure ORDER BY libelle_usure"
+    mycursor.execute(sql)
+    usures = mycursor.fetchall()
+
+    # Get specials
+    sql = "SELECT id_special, libelle_special FROM special ORDER BY libelle_special"
+    mycursor.execute(sql)
+    specials = mycursor.fetchall()
+
+    # Get types
     sql = '''
     SELECT id_type_skin as id_type_article, libelle_type_skin as libelle 
     FROM type_skin
@@ -208,7 +226,10 @@ def edit_article():
 
     return render_template('admin/article/edit_article.html',
                          article=article,
-                         types_article=types_article)
+                         types_article=types_article,
+                         declinaisons=declinaisons,
+                         usures=usures,
+                         specials=specials)
 
 
 @admin_article.route('/admin/article/edit', methods=['POST'])
@@ -343,20 +364,28 @@ def update_stock():
 @admin_article.route('/admin/article/stock/update', methods=['POST'])
 def update_article_stock():
     mycursor = get_db().cursor()
-    id_declinaison = request.form.get('id_declinaison')
+    id_article = request.form.get('id_article')
     new_stock = request.form.get('stock', type=int)
-    
-    if new_stock is None:
-        flash('Le stock doit être spécifié', 'alert-danger')
-        return redirect('/admin/article/show')
-        
-    if new_stock < 0:
-        flash('Le stock ne peut pas être négatif', 'alert-danger')
-        return redirect('/admin/article/show')
     
     try:
         # Start transaction
         mycursor.execute("START TRANSACTION")
+        
+        # Get declinaison ID first
+        sql = '''
+        SELECT id_declinaison 
+        FROM declinaison 
+        WHERE skin_id = %s
+        '''
+        mycursor.execute(sql, (id_article,))
+        result = mycursor.fetchone()
+        
+        if not result:
+            get_db().rollback()
+            flash('Erreur : déclinaison non trouvée', 'error')
+            return redirect('/admin/article/show')
+            
+        id_declinaison = result['id_declinaison']
         
         # Update stock in declinaison table
         sql = '''
@@ -366,11 +395,6 @@ def update_article_stock():
         '''
         mycursor.execute(sql, (new_stock, id_declinaison))
         
-        if mycursor.rowcount == 0:
-            get_db().rollback()
-            flash('Erreur : déclinaison non trouvée', 'alert-danger')
-            return redirect('/admin/article/show')
-            
         # Commit transaction
         get_db().commit()
         flash('Stock mis à jour avec succès', 'alert-success')

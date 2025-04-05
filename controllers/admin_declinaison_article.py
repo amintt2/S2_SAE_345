@@ -105,7 +105,7 @@ def valid_edit_declinaison_article():
     
     if not all([id_declinaison_article, id_article, stock, usure_id, special_id, prix]):
         flash(u'Tous les champs sont obligatoires', 'alert-warning')
-        return redirect(f'/admin/declinaison_article/edit?id_article={id_article}')
+        return redirect(f'/admin/article/edit?id_article={id_article}')
 
     try:
         mycursor = get_db().cursor()

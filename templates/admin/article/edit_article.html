@@ -43,19 +43,6 @@ types_article : tableau de dictionnaires
                 </div>
 
                 <div class="space-y-2">
-                    <label class="block text-sm font-medium">Prix (€)</label>
-                    <input name="prix" type="number" min="0.0" step="0.01" value="{{ article.prix_min }}"
-                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-sm font-medium">Stock Global</label>
-                    <input name="stock" type="number" min="0" step="1" value="{{ article.stock if article.stock is defined else 0 }}"
-                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                    <p class="text-sm text-gray-400 mt-1">Nombre total d'articles disponibles</p>
-                </div>
-
-                <div class="space-y-2">
                     <label class="block text-sm font-medium">Image</label>
                     <input name="image" type="file" onchange="loadFile(event)"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
@@ -95,9 +82,10 @@ types_article : tableau de dictionnaires
     </div>
 
     <!-- Déclinaisons -->
+
     <div class="mt-12">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-2xl font-bold">Déclinaisons de l'article</h3>
+            <h3 class="text-2xl font-bold text-white">Déclinaisons de l'article</h3>
             <button
                class="px-4 py-2 bg-gray-500 text-gray-300 rounded-lg cursor-not-allowed opacity-50"
                disabled
@@ -110,37 +98,81 @@ types_article : tableau de dictionnaires
             <table class="w-full bg-gray-800 rounded-lg overflow-hidden">
                 <thead class="bg-gray-700">
                     <tr>
-                        <th class="px-6 py-3 text-left">Taille</th>
-                        <th class="px-6 py-3 text-left">Couleur</th>
+                        <th class="px-6 py-3 text-left">Prix (€)</th>
                         <th class="px-6 py-3 text-left">Stock</th>
+                        <th class="px-6 py-3 text-left">État</th>
+                        <th class="px-6 py-3 text-left">Type</th>
                         <th class="px-6 py-3 text-left">Opérations</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
-                    {% if declinaisons_article | length == 0 %}
-                        <tr>
-                            <td colspan="4" class="px-6 py-4">Aucun modèle</td>
-                        </tr>
-                    {% else %}
-                        {% for declinaison_article in declinaisons_article %}
+                    {% if declinaisons|length > 0 %}
+                        {% for decl in declinaisons %}
                             <tr class="hover:bg-gray-700">
-                                <td class="px-6 py-4">{{ declinaison_article.libelle_taille }}</td>
-                                <td class="px-6 py-4">{{ declinaison_article.libelle_couleur }}</td>
-                                <td class="px-6 py-4">{{ declinaison_article.stock }}</td>
-                                <td class="px-6 py-4">
-                                    <div class="flex space-x-2">
-                                        <a href="/admin/declinaison_article/delete?id_declinaison_article={{ declinaison_article.id_declinaison_article }}&amp;id_article={{ declinaison_article.article_id }}"
-                                           class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
-                                            Supprimer
-                                        </a>
-                                        <a href="/admin/declinaison_article/edit?id_declinaison_article={{ declinaison_article.id_declinaison_article }}"
-                                           class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors">
-                                            Éditer
-                                        </a>
-                                    </div>
-                                </td>
+                                <form method="post" action="/admin/declinaison_article/edit">
+                                    <input type="hidden" name="id_declinaison_article" value="{{ decl.id_declinaison }}">
+                                    <input type="hidden" name="id_article" value="{{ article.id_article }}">
+
+                                    <td class="px-6 py-4">
+                                        <input type="number" 
+                                               name="prix" 
+                                               value="{{ decl.prix_declinaison }}" 
+                                               min="0" 
+                                               step="0.01"
+                                               required
+                                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <input type="number" 
+                                               name="stock" 
+                                               value="{{ decl.stock }}" 
+                                               min="0"
+                                               required
+                                               class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <select name="id_taille"
+                                                required
+                                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                                            {% for usure in usures %}
+                                                <option value="{{ usure.id_usure }}"
+                                                        {% if usure.id_usure == decl.usure_id %}selected{% endif %}>
+                                                    {{ usure.libelle_usure }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <select name="id_couleur" 
+                                                required
+                                                class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                                            {% for special in specials %}
+                                                <option value="{{ special.id_special }}"
+                                                        {% if special.id_special == decl.special_id %}selected{% endif %}>
+                                                    {{ special.libelle_special }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <div class="flex space-x-2">
+                                            <button type="submit" 
+                                                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                                                Enregistrer
+                                            </button>
+                                        </div>
+                                    </td>
+                                </form>
                             </tr>
                         {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-400">Aucune déclinaison disponible pour cet article</td>
+                        </tr>
                     {% endif %}
                 </tbody>
             </table>
@@ -152,6 +184,7 @@ types_article : tableau de dictionnaires
             ⚠️ Attention : une taille unique est définie avec d'autres tailles
         </div>
     {% endif %}
+    
     {% if pb_couleur_uniq is defined and pb_couleur_uniq==1 %}
         <div class="mt-4 p-4 bg-yellow-100 text-yellow-700 rounded-lg">
             ⚠️ Attention : une couleur unique est définie avec d'autres couleurs
