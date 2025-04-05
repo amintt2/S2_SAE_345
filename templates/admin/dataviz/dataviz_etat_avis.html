@@ -1,0 +1,137 @@
+{% extends 'admin/layout_admin.html' %}
+
+{% block javascripts %}
+    {{ super() }}
+{% endblock %}
+
+{% block javascripts_head %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Afficher les types d'article</title>
+{% endblock %}
+
+{% block body %}
+<div class="p-6 space-y-6">
+
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-800 rounded-lg p-6 space-y-4 md:space-y-0 md:space-x-6">
+    
+        <div class="text-left md:w-1/2 space-y-2">
+            <h2 class="text-2xl font-semibold text-white">Visualisation de données : Chart.js</h2>
+            <h3 class="text-lg text-gray-400">Documentation :</h3>
+            <div class="flex flex-wrap gap-4 text-blue-400 underline">
+                <a href="https://tobiasahlin.com/blog/chartjs-charts-to-get-you-started/" target="_blank">Tuto partie 1</a>
+                <a href="https://tobiasahlin.com/blog/introduction-to-chartjs" target="_blank">Tuto partie 2</a>
+                <a href="https://www.youtube.com/watch?v=E2hytuQvLlE" target="_blank">Vidéo Flask + Chart.js</a>
+            </div>
+        </div>
+    
+        <div class="md:w-1/2 flex justify-end w-full">
+            <form action="/admin/dataviz/avis" method="get" class="flex flex items-center space-y-6 bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl space-x-4">
+                <div class="flex flex-col space-y-3 w-full max-w-xs mr-4">
+                    <label for="id_type_article" class="text-sm font-semibold text-gray-800 dark:text-gray-200">Type de skin :</label>
+                    <select name="id_type_article" id="id_type_article" class="bg-white dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out transform hover:scale-105">
+                        <option value="0">Tous</option>
+                        {% for type_skin in types_article %}
+                            <option value="{{ type_skin.id_type_article }}"
+                            {% if type_skin.id_type_article|string == id_type_article %} selected {% endif %}
+                            >{{ type_skin.libelle }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 transition duration-150 transform hover:scale-105 w-full max-w-xs">Afficher</button>
+            </form>
+        </div>        
+
+    </div>
+    
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Tableau -->
+        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-blue-800">
+            <table class="min-w-full text-sm text-left text-gray-500 dark:text-gray-300">
+                <thead class="uppercase bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th class="px-4 py-2">Type d'article (ID)</th>
+                        <th class="px-4 py-2">Moyenne des notes</th>
+                        <th class="px-4 py-2">Nombre de notes</th>
+                        <th class="px-4 py-2">Nombre de commentaires</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ligne in datas_show %}
+                        <tr class="border-t dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <td class="px-4 py-2">{{ ligne.libelle }} ({{ ligne.id }})</td>
+                            {% if ligne.nb_notes is not none and ligne.nb_notes != 0 %}
+                                <td class="px-4 py-2">{{ ligne.note_moyenne }}</td>
+                                <td class="px-4 py-2">{{ ligne.nb_notes }}</td>
+                            {% else %}
+                                <td class="px-4 py-2 text-gray-400">-</td>
+                                <td class="px-4 py-2 text-gray-400">-</td>
+                            {% endif %}
+                            <td class="px-4 py-2">
+                                {% if ligne.nb_commentaires is not none and ligne.nb_commentaires != 0 %}
+                                    {{ ligne.nb_commentaires }}
+                                {% else %}
+                                    <span class="text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Graphiques -->
+        {% set graphs = [("Chart_moyenne_notes", "Moyenne des notes"), ("Chart_nb_notes", "Nombre de notes"), ("Chart_nb_commentaires", "Nombre de commentaires")] %}
+        {% for chart_id, title in graphs %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-blue-800">
+                <p class="text-center text-blue-400 font-medium mt-2">{{ title }}</p>
+                <canvas id="{{ chart_id }}" class="w-full h-64"></canvas>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-blue-400 underline space-x-4">
+        <a href="https://www.youtube.com/watch?v=TcwYXIIM-fs" target="_blank">C'est quoi la dataviz ? (1 min)</a>
+        <a href="https://www.youtube.com/watch?v=bZDnSUjfMt8" target="_blank">C'est quoi la dataviz ? (complète)</a>
+    </div>
+</div>
+
+<script>
+function make_chart(ctx, labels, values, type = "bar") {
+    return new Chart(ctx, {
+        type: type,
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                fill: false,
+                backgroundColor: "rgba(54, 162, 235, 0.6)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            legend: { 
+                display: false 
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                    }
+                }]
+            }
+        }
+    });
+}
+
+make_chart(document.getElementById("Chart_nb_notes").getContext("2d"), {{ labels | safe }}, {{ nb_notes | safe }});
+make_chart(document.getElementById("Chart_nb_commentaires").getContext("2d"), {{ labels | safe }}, {{ nb_commentaires | safe }});
+make_chart(document.getElementById("Chart_moyenne_notes").getContext("2d"), {{ labels | safe }}, {{ moyenne_notes | safe }});
+
+</script>
+{% endblock %}
