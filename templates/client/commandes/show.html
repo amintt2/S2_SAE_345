@@ -1,40 +1,40 @@
 {% extends "client/layout_client.html" %}
 {% block body %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow-sm ring-1 ring-gray-700">
+    <div class="container mx-auto px-4 py-8">
+            <div class="mb-8 bg-dark-secondary rounded-lg shadow-lg p-6">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-4 items-end">
                     <div>
-                        <label for="from_date" class="block text-sm font-medium text-gray-200 mb-2">DATE DE DÉBUT</label>
-                        <input type="date" id="from_date" name="from_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                        <label for="from_date" class="block text-sm font-medium text-gray-300 mb-2">DATE DE DÉBUT</label>
+                        <input type="date" id="from_date" name="from_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
                     </div>
                     <div>
-                        <label for="to_date" class="block text-sm font-medium text-gray-200 mb-2">DATE DE FIN</label>
-                        <input type="date" id="to_date" name="to_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                        <label for="to_date" class="block text-sm font-medium text-gray-300 mb-2">DATE DE FIN</label>
+                        <input type="date" id="to_date" name="to_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
                     </div>
                     <div>
-                        <label for="status" class="block text-sm font-medium text-gray-200 mb-2">STATUT</label>
-                        <select id="status" name="status" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                        <label for="status" class="block text-sm font-medium text-gray-300 mb-2">STATUT</label>
+                        <select id="status" name="status" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
                             <option value="">Sélectionner...</option>
                             <option value="submitted">En attente</option>
                             <option value="invoiced">Facturée</option>
                         </select>
                     </div>
                     <div class="flex gap-2">
-                        <button type="button" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">EFFACER</button>
-                        <button type="button" class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">RECHERCHER</button>
+                        <button type="button" class="rounded-md bg-dark-accent hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm transition-colors duration-200">EFFACER</button>
+                        <button type="button" class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">RECHERCHER</button>
                     </div>
                 </div>
             </div>
 
             {% if articles_commande %}
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-white-900">Recapitulatif de la commande selectionnée</h3>
-                <a href="/client/commande/show" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
+                <h3 class="text-xl font-bold text-white">Recapitulatif de la commande selectionnée</h3>
+                <a href="/client/commande/show" class="rounded-md bg-dark-accent hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm transition-colors duration-200">
                     Retour
                 </a>
             </div>
-            <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
-                <thead>
+            <table class="min-w-full divide-y divide-gray-700 bg-dark-secondary shadow-lg rounded-lg">
+                <thead class="bg-dark-accent">
                     <tr>
                         <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
                         <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
@@ -45,7 +45,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-700">
                         {% for article in articles_commande %}
-                            <tr class="hover:bg-gray-700">
+                            <tr class="hover:bg-dark-accent transition-colors duration-200">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
                                     {% if article.image_article %}
                                         <img class="h-12 w-12 rounded-full object-cover" 
@@ -58,11 +58,11 @@
                                     {% endif %}
                                 </td>
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ article.nom_article }}
-                                    <span class="text-blue-400 ml-2">( {{ article.libelle_usure }} )</span>
+                                    <span class="text-accent-blue ml-2">( {{ article.libelle_usure }} )</span>
                                     <div class="text-sm text-gray-400">
-                                        <span class="text-indigo-400">{{ article.libelle_type_skin }}</span>
+                                        <span class="text-accent-blue">{{ article.libelle_type_skin }}</span>
                                         {% if article.libelle_special != "Aucun" %}
-                                            <span class="text-amber-400 ml-2">{{ article.libelle_special }}</span>
+                                            <span class="text-yellow-400 ml-2">{{ article.libelle_special }}</span>
                                         {% endif %}
                                     </div>
                                 </td>
@@ -73,26 +73,28 @@
                         {% endfor %}
                 </tbody>
             </table>
-                <div class="mt-8 bg-amber-50 p-6 rounded-lg shadow-sm ring-1 ring-amber-200">
-                <strong class="text-amber-900">Adresse livraison : </strong>{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}
+                <div class="mt-8 bg-dark-accent p-6 rounded-lg shadow-lg">
+                <strong class="text-accent-blue">Adresse livraison : </strong><span class="text-gray-300">{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}</span>
                 <br>
-                <strong class="text-amber-900">Adresse facturation : </strong>
+                <strong class="text-accent-blue">Adresse facturation : </strong>
+                <span class="text-gray-300">
                 {% if commande_adresses.adresse_identique == 'adresse_identique' %}
                     adresse identique
                 {% else %}
                     {{ commande_adresses.nom_facturation }} {{ commande_adresses.rue_facturation }} {{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}
                 {% endif %}
+                </span>
                 </div>
-            <hr class="my-8 border-gray-200">
+            <hr class="my-8 border-gray-700">
             {% endif %}
-        <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+        <div class="bg-dark-secondary shadow-lg rounded-lg">
             <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
-                <h3 class="text-lg font-medium leading-6 text-gray-200">Toutes mes commandes</h3>
+                <h3 class="text-xl font-bold text-white">Toutes mes commandes</h3>
             </div>
             <div class="px-4 py-5 sm:p-6">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-700">
-                        <thead>
+                        <thead class="bg-dark-accent">
                         <tr>
                             <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Date de commande</th>
                             <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Nombre d'articles</th>
@@ -103,26 +105,26 @@
                         </thead>
                         <tbody class="divide-y divide-gray-700">
                             {% for commande in commandes %}
-                            <tr class="{% if commande.identifiant_etat == 1 %}bg-amber-900/50{% else %}bg-gray-800{% endif %} hover:bg-gray-700">
+                            <tr class="{% if commande.identifiant_etat == 1 %}bg-amber-900/30{% else %}bg-dark-secondary{% endif %} hover:bg-dark-accent transition-colors duration-200">
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.nombre_articles }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300 text-center">{{ commande.nombre_articles }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300 text-center">
                                     {{ "{:,.2f} €".format(commande.prix_total_commande) }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
                                     {% if commande.identifiant_etat == 1 %}
-                                    <span class="inline-flex items-center rounded-full bg-amber-900/50 px-2.5 py-0.5 text-sm font-medium text-amber-200">
+                                    <span class="inline-flex items-center rounded-full bg-amber-900/30 px-2.5 py-0.5 text-sm font-medium text-amber-200">
                                         {{ commande.libelle_etat }}
                                     </span>
                                     {% else %}
-                                    <span class="inline-flex items-center rounded-full bg-green-900/50 px-2.5 py-0.5 text-sm font-medium text-green-200">
+                                    <span class="inline-flex items-center rounded-full bg-green-900/30 px-2.5 py-0.5 text-sm font-medium text-green-200">
                                         {{ commande.libelle_etat }}
                                     </span>
                                     {% endif %}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
                                     <a href="/client/commande/show?id_commande={{ commande.identifiant_commande }}">
-                                        <button class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Details</button>
+                                        <button class="rounded-md bg-accent-blue hover:bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">Details</button>
                                     </a>
                                 </td>
                             </tr>

@@ -107,21 +107,17 @@ def valid_edit_declinaison_article():
         flash(u'Tous les champs sont obligatoires', 'alert-warning')
         return redirect(f'/admin/article/edit?id_article={id_article}')
 
-    try:
-        mycursor = get_db().cursor()
-        sql = '''
-        UPDATE declinaison 
-        SET stock = %s, usure_id = %s, special_id = %s, prix_declinaison = %s
-        WHERE id_declinaison = %s AND skin_id = %s
-        '''
-        mycursor.execute(sql, (stock, usure_id, special_id, prix, id_declinaison_article, id_article))
-        get_db().commit()
+    mycursor = get_db().cursor()
+    sql = '''
+    UPDATE declinaison 
+    SET stock = %s, usure_id = %s, special_id = %s, prix_declinaison = %s
+    WHERE id_declinaison = %s AND skin_id = %s
+    '''
+    mycursor.execute(sql, (stock, usure_id, special_id, prix, id_declinaison_article, id_article))
+    get_db().commit()
 
-        message = f'déclinaison modifiée , id:{id_declinaison_article} - stock:{stock} - usure_id:{usure_id} - special_id:{special_id}'
-        flash(message, 'alert-success')
-    except Exception as e:
-        get_db().rollback()
-        flash(str(e), 'alert-danger')
+    message = f'déclinaison modifiée , id:{id_declinaison_article} - stock:{stock} - usure_id:{usure_id} - special_id:{special_id}'
+    flash(message, 'alert-success')
     
     return redirect('/admin/article/edit?id_article=' + str(id_article))
 

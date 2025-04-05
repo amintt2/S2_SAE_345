@@ -1,26 +1,62 @@
 {% extends 'admin/layout_admin.html' %}
-
 {% block title %}
-    <title>commentaire d'un article</title>
+    <title>Répondre à un commentaire</title>
 {% endblock %}
-
 {% block body %}
-<h3>article</h3>
-   <div class="row">
-            <div class="col-5 bg-light p-3">
-        <h3>répondre à un commentaire</h3>
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold mb-6">Répondre à un commentaire</h2>
+
+    <!-- Comment Form Section -->
+    <div class="bg-gray-800 rounded-lg p-6 mb-8">
+        <h3 class="text-xl font-semibold mb-4 text-white">Formulaire de réponse</h3>
+        
+        <form action="/admin/article/commentaires/repondre" method="post" class="space-y-6">
+            <input type="hidden" name="id_article" value="{{ id_article }}">
+            <input type="hidden" name="id_commentaire_parent" value="{{ id_commentaire_parent }}">
+            
+            <div class="w-full">
+                <label for="input_commentaire" class="block text-sm font-medium text-gray-300 mb-2">
+                    Votre réponse au commentaire :
+                </label>
+                <textarea 
+                    name="commentaire" 
+                    id="input_commentaire" 
+                    rows="5"
+                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                    placeholder="Saisissez votre réponse ici..."></textarea>
             </div>
-                 <form  action="/admin/article/commentaires/repondre"  style="display: inline-block;"  method="post" >
-                      <input type="hidden" name="id_article" value="{{ id_article }}">
-                      <input type="hidden" name="id_commentaire_parent" value="{{ id_commentaire_parent }}">
-                      <div class="col">
-                       <label for="input_commentaire" class="form-label">Mettez un commentaire sur cet article : </label>
-                      <textarea name="commentaire" class="form-control" aria-label="Votre commentaire" id="input_commentaire"  placeholder="Votre commentaire"></textarea>
-                      </div>
-                      <button class="btn btn-primary mt-4 mb-4" href="/admin/article/commentaires/repondre"> répondre </button>
-                 </form>
-
-        <a class="btn btn-outline-primary btn-lg" href="/admin/article/show">Retour vers la page d'accueil</a>
+            
+            <div class="flex items-center space-x-4">
+                <button type="submit" 
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Publier la réponse
+                </button>
+                
+                <a href="/admin/article/commentaires?id_article={{ id_article }}" 
+                    class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                    Retour au skin
+                </a>
+            </div>
+        </form>
     </div>
-
+    
+    <!-- Original Comment (Optional - similar to how the example shows comments) -->
+    <div class="bg-gray-800 rounded-lg p-6">
+        <h3 class="text-xl font-semibold mb-4 text-white">Commentaire original</h3>
+        
+        {% if commentaire_parent %}
+        <div class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="font-medium">{{ commentaire_parent.nom_utilisateur }}</p>
+                    <p class="text-sm text-gray-400">{{ commentaire_parent.date_publication }}</p>
+                    <p class="mt-2">{{ commentaire_parent.commentaire }}</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-center text-gray-400">Commentaire non disponible</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

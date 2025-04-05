@@ -1,47 +1,47 @@
 {% extends "client/layout_client.html" %}
 {% block body %}
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg p-6">
-        <h3 class="text-lg font-medium leading-6 text-gray-200 mb-6">Ajouter une adresse</h3>
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-dark-secondary shadow-lg rounded-lg p-6">
+        <h3 class="text-xl font-bold text-white mb-6">Ajouter une adresse</h3>
         <form action="/client/coordonnee/add_adresse" method="post">
             <div class="space-y-4">
-                <div class="rounded-md bg-gray-700/50 p-4">
-                    <p class="text-sm text-gray-200">
+                <div class="bg-dark-accent rounded-md p-4">
+                    <p class="text-sm text-gray-300">
                         Utilisateur connecté : 
-                        <span class="text-green-400">nom : {{ utilisateur.nom }}, login : {{ utilisateur.login }}</span>
+                        <span class="text-accent-blue">nom : {{ utilisateur.nom }}, login : {{ utilisateur.login }}</span>
                     </p>
                 </div>
                 
                 <div>
-                    <label for="nom" class="block text-sm font-medium text-gray-200 mb-2">Nom prénom (pour la livraison/facturation)</label>
+                    <label for="nom" class="block text-sm font-medium text-gray-300 mb-2">Nom prénom (pour la livraison/facturation)</label>
                     <input type="text" name="nom" id="nom" required maxlength="50" value="{{ nom }}" 
-                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
                 </div>
                 
                 <div>
-                    <label for="rue" class="block text-sm font-medium text-gray-200 mb-2">Numéro de rue et nom</label>
+                    <label for="rue" class="block text-sm font-medium text-gray-300 mb-2">Numéro de rue et nom</label>
                     <input type="text" name="rue" id="rue" required value="{{ rue }}" 
-                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
                 </div>
                 
                 <div>
-                    <label for="code_postal" class="block text-sm font-medium text-gray-200 mb-2">Code postal</label>
+                    <label for="code_postal" class="block text-sm font-medium text-gray-300 mb-2">Code postal</label>
                     <input type="number" name="code_postal" id="code_postal" required minlength="5" maxlength="5" value="{{ code_postal }}" 
-                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
                 </div>
                 
                 <div>
-                    <label for="ville" class="block text-sm font-medium text-gray-200 mb-2">Ville</label>
+                    <label for="ville" class="block text-sm font-medium text-gray-300 mb-2">Ville</label>
                     <input type="text" name="ville" id="ville" required maxlength="50" value="{{ ville }}" 
-                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
+                        class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
                 </div>
                 
                 <div class="mt-6">
-                    <button type="submit" class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                    <button type="submit" class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
                         Valider
                     </button>
-                    <a href="/client/coordonnee/show" class="ml-2 rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
+                    <a href="/client/coordonnee/show" class="ml-2 rounded-md bg-dark-accent hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm transition-colors duration-200">
                         Retour
                     </a>
                 </div>

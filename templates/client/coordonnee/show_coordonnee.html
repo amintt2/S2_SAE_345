@@ -1,10 +1,10 @@
 {% extends "client/layout_client.html" %}
 {% block body %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="container mx-auto px-4 py-8">
     <!-- Informations personnelles -->
-    <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg mb-8">
+    <div class="bg-dark-secondary shadow-lg rounded-lg mb-8">
         <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
-            <h3 class="text-lg font-medium leading-6 text-gray-200">Mes informations</h3>
+            <h3 class="text-xl font-bold text-white">Mes informations</h3>
         </div>
         <div class="px-4 py-5 sm:p-6">
             <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
@@ -22,7 +22,7 @@
                 </div>
             </dl>
             <div class="mt-6">
-                <a href="/client/coordonnee/edit" class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                <a href="/client/coordonnee/edit" class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
                     Modifier son profil
                 </a>
             </div>
@@ -30,14 +30,14 @@
     </div>
 
     <!-- Adresses -->
-    <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+    <div class="bg-dark-secondary shadow-lg rounded-lg">
         <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
-            <h3 class="text-lg font-medium leading-6 text-gray-200">Mes adresses</h3>
+            <h3 class="text-xl font-bold text-white">Mes adresses</h3>
         </div>
         <div class="px-4 py-5 sm:p-6">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-700">
-                    <thead>
+                    <thead class="bg-dark-accent">
                         <tr>
                             <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
                             <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Rue</th>
@@ -51,7 +51,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-700">
                         {% for adresse in adresses %}
-                        <tr class="hover:bg-gray-700">
+                        <tr class="hover:bg-dark-accent transition-colors duration-200">
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6 text-gray-200">
                                 {{ adresse.nom }}
                             </td>
@@ -63,13 +63,13 @@
                             </td>
                             <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                 <a href="/client/coordonnee/edit_adresse?id_adresse={{ adresse.id_adresse }}" 
-                                   class="rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                                   class="rounded-md bg-accent-blue hover:bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
                                     Modifier
                                 </a>
                                 <form action="/client/coordonnee/delete_adresse" method="post" class="inline-block ml-2">
                                     <input type="hidden" name="id_adresse" value="{{ adresse.id_adresse }}">
                                     <button type="submit" 
-                                            class="rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
+                                            class="rounded-md bg-red-600 hover:bg-red-700 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
                                         Supprimer
                                     </button>
                                 </form>
@@ -84,17 +84,17 @@
                 {% if nb_adresses is defined %}
                     {% if nb_adresses < 4 %}
                         <a href="/client/coordonnee/add_adresse" 
-                           class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                           class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
                             Ajouter une adresse
                         </a>
                     {% endif %}
                     
-                    <p class="mt-4 text-sm text-green-400">
+                    <p class="mt-4 text-sm text-accent-blue">
                         (<strong>{{ nb_adresses }}</strong> / 4 adresses ; <strong>{{ nb_adresses_tot }}</strong> adresses pour l'utilisateur)
                     </p>
                 {% else %}
                     <a href="/client/coordonnee/add_adresse" 
-                       class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                       class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
                         Ajouter une adresse
                     </a>
                 {% endif %}
@@ -102,7 +102,7 @@
             
             <div class="mt-6 border-t border-gray-700 pt-6">
                 <a href="/client/article/show" 
-                   class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">
+                   class="rounded-md bg-dark-accent hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm transition-colors duration-200">
                     Retour aux articles
                 </a>
             </div>

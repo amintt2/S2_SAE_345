@@ -13,6 +13,7 @@ from controllers.client_panier import *
 from controllers.client_commande import *
 from controllers.client_commentaire import *
 from controllers.client_coordonnee import *
+from controllers.client_liste_envies import *
 
 from controllers.admin_article import *
 from controllers.admin_declinaison_article import *
@@ -20,7 +21,7 @@ from controllers.admin_commande import *
 from controllers.admin_type_article import *
 from controllers.admin_dataviz import *
 from controllers.admin_commentaire import *
-from controllers.client_liste_envies import *
+from controllers.admin_liste_envie import admin_liste_envie_bp
 
 app = Flask(__name__)
 app.secret_key = 'une cle(token) : grain de sel(any random string)'
@@ -81,6 +82,7 @@ app.register_blueprint(admin_commande)
 app.register_blueprint(admin_type_article)
 app.register_blueprint(admin_dataviz)
 app.register_blueprint(admin_commentaire)
+app.register_blueprint(admin_liste_envie_bp)
 
 
 if __name__ == '__main__':

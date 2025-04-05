@@ -118,27 +118,46 @@ def admin_comment_delete():
 
 @admin_commentaire.route('/admin/article/commentaires/repondre', methods=['POST','GET'])
 def admin_comment_add():
+    mycursor = get_db().cursor()
+
+    def have_already_replied(id_commentaire_parent):
+        sql = '''
+        SELECT COUNT(*)
+        FROM commentaire
+        WHERE commentaire_id_parent = %s;
+        '''
+        mycursor.execute(sql, (id_commentaire_parent))
+        count = mycursor.fetchone()['COUNT(*)']
+        if count >= 1:
+            flash("Vous ne pouvez pas répondre plus de 2 fois à un avis", 'alert-danger')
+            return True
+        return False
+    
     if request.method == 'GET':
         id_article = request.args.get('id_article', None)
         id_commentaire_parent = request.args.get('id_commentaire', None)
+        if have_already_replied(id_commentaire_parent):
+            return redirect('/admin/article/commentaires?id_article=' + str(id_article))
+        
+        sql = '''
+        SELECT nom AS nom_utilisateur, date_publication, commentaire
+        FROM commentaire
+        JOIN utilisateur ON utilisateur.id_utilisateur = commentaire.utilisateur_id
+        WHERE id_commentaire = %s
+        '''
+        mycursor.execute(sql, (id_commentaire_parent,))
+        commentaire_parent = mycursor.fetchone()
+        
         return render_template('admin/article/add_commentaire.html',
+                             commentaire_parent=commentaire_parent,
                              id_article=id_article,
                              id_commentaire_parent=id_commentaire_parent)
 
-    mycursor = get_db().cursor()
     id_article = request.form.get('id_article', None)
     commentaire = request.form.get('commentaire', None)
     id_commentaire_parent = request.form.get('id_commentaire_parent', None)
     
-    sql = '''
-    SELECT COUNT(*)
-    FROM commentaire
-    WHERE commentaire_id_parent = %s;
-    '''
-    mycursor.execute(sql, (id_commentaire_parent))
-    count = mycursor.fetchone()['COUNT(*)']
-    if count >= 1:
-        flash("Vous ne pouvez pas répondre plus de 2 fois à un avis", 'alert-danger')
+    if have_already_replied(id_commentaire_parent):
         return redirect('/admin/article/commentaires?id_article=' + str(id_article))
 
     sql = '''

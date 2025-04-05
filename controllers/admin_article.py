@@ -243,78 +243,65 @@ def valid_edit_article():
     type_article_id = request.form.get('type_article_id')
     image = request.files.get('image', None)
 
-    try:
-        # Start transaction
-        mycursor.execute("START TRANSACTION")
+    # Start transaction
+    mycursor.execute("START TRANSACTION")
 
-        # Update skin table
-        if image:
-            sql = '''
-            UPDATE skin 
-            SET nom_skin = %s, type_skin_id = %s, 
-                description = %s, image = %s
-            WHERE id_skin = %s
-            RETURNING image as old_image
+    # Update skin table
+    if image:
+        sql = '''
+        UPDATE skin 
+        SET nom_skin = %s, type_skin_id = %s, 
+            description = %s, image = %s
+        WHERE id_skin = %s
+        RETURNING image as old_image
+        '''
+        tuple_update = (nom, type_article_id, description, image.filename, id_article)
+    else:
+        sql = '''
+        UPDATE skin 
+        SET nom_skin = %s, type_skin_id = %s, 
+            description = %s
+        WHERE id_skin = %s
+        '''
+        tuple_update = (nom, type_article_id, description, id_article)
+
+    mycursor.execute(sql, tuple_update)
+
+    # Update stock in declinaison table
+    if stock is not None and stock != '':
+        stock = int(stock)
+        if stock >= 0:
+            sql_stock = '''
+            UPDATE declinaison 
+            SET stock = %s 
+            WHERE skin_id = %s
             '''
-            tuple_update = (nom, type_article_id, description, image.filename, id_article)
+            mycursor.execute(sql_stock, (stock, id_article))
         else:
-            sql = '''
-            UPDATE skin 
-            SET nom_skin = %s, type_skin_id = %s, 
-                description = %s
-            WHERE id_skin = %s
-            '''
-            tuple_update = (nom, type_article_id, description, id_article)
+            flash('Le stock ne peut pas être négatif', 'error')
 
-        mycursor.execute(sql, tuple_update)
+    # Update price in declinaison table
+    if prix and prix.strip() != '':
+        prix = float(prix.replace(',', '.'))
+        sql_price = '''
+        UPDATE declinaison 
+        SET prix_declinaison = %s
+        WHERE skin_id = %s
+        '''
+        mycursor.execute(sql_price, (prix, id_article))
 
-        # Update stock in declinaison table
-        if stock is not None and stock != '':
-            try:
-                stock = int(stock)
-                if stock >= 0:
-                    sql_stock = '''
-                    UPDATE declinaison 
-                    SET stock = %s 
-                    WHERE skin_id = %s
-                    '''
-                    mycursor.execute(sql_stock, (stock, id_article))
-                else:
-                    flash('Le stock ne peut pas être négatif', 'error')
-            except ValueError:
-                flash('Le stock doit être un nombre entier', 'error')
+    # Handle image upload and deletion
+    if image and mycursor.rowcount > 0:
+        image.save(os.path.join('static/images/', image.filename))
+        if 'old_image' in locals():
+            old_image = mycursor.fetchone()['old_image']
+            if old_image and os.path.exists(os.path.join('static/images/', old_image)):
+                os.remove(os.path.join('static/images/', old_image))
 
-        # Update price in declinaison table
-        if prix and prix.strip() != '':
-            try:
-                prix = float(prix.replace(',', '.'))
-                sql_price = '''
-                UPDATE declinaison 
-                SET prix_declinaison = %s
-                WHERE skin_id = %s
-                '''
-                mycursor.execute(sql_price, (prix, id_article))
-            except ValueError:
-                flash('Le prix doit être un nombre valide', 'error')
-                raise
+    # Commit transaction
+    get_db().commit()
+    flash(f'Article {nom} modifié avec succès', 'success')
 
-        # Handle image upload and deletion
-        if image and mycursor.rowcount > 0:
-            image.save(os.path.join('static/images/', image.filename))
-            if 'old_image' in locals():
-                old_image = mycursor.fetchone()['old_image']
-                if old_image and os.path.exists(os.path.join('static/images/', old_image)):
-                    os.remove(os.path.join('static/images/', old_image))
-
-        # Commit transaction
-        get_db().commit()
-        flash(f'Article {nom} modifié avec succès', 'success')
-
-    except Exception as e:
-        # Rollback in case of error
-        get_db().rollback()
-        flash(f'Erreur lors de la modification : {str(e)}', 'error')
-        print(f"Error: {str(e)}")
 
     return redirect('/admin/article/show')
 
@@ -367,25 +354,17 @@ def update_article_stock():
     id_article = request.form.get('id_article')
     new_stock = request.form.get('stock', type=int)
     
+    if new_stock is None:
+        flash('Le stock doit être spécifié', 'alert-danger')
+        return redirect('/admin/article/show')
+        
+    if new_stock < 0:
+        flash('Le stock ne peut pas être négatif', 'alert-danger')
+        return redirect('/admin/article/show')
+    
     try:
         # Start transaction
         mycursor.execute("START TRANSACTION")
-        
-        # Get declinaison ID first
-        sql = '''
-        SELECT id_declinaison 
-        FROM declinaison 
-        WHERE skin_id = %s
-        '''
-        mycursor.execute(sql, (id_article,))
-        result = mycursor.fetchone()
-        
-        if not result:
-            get_db().rollback()
-            flash('Erreur : déclinaison non trouvée', 'error')
-            return redirect('/admin/article/show')
-            
-        id_declinaison = result['id_declinaison']
         
         # Update stock in declinaison table
         sql = '''
@@ -395,14 +374,15 @@ def update_article_stock():
         '''
         mycursor.execute(sql, (new_stock, id_declinaison))
         
+        if mycursor.rowcount == 0:
+            get_db().rollback()
+            flash('Erreur : déclinaison non trouvée', 'alert-danger')
+            return redirect('/admin/article/show')
+            
         # Commit transaction
         get_db().commit()
         flash('Stock mis à jour avec succès', 'alert-success')
         
-    except Exception as e:
-        get_db().rollback()
-        flash(f'Erreur lors de la mise à jour du stock : {str(e)}', 'alert-danger')
-        print(f"Error: {str(e)}")
     
     return redirect('/admin/article/show')
 

@@ -1,0 +1,401 @@
+{% extends 'admin/layout_admin.html' %} {# Assumes this layout already includes Tailwind #}
+
+{% block javascripts_head %}
+    {# Include Chart.js library #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+{% endblock %}
+
+{% block title %}
+    Statistiques Wishlists & Consultations - Admin
+{% endblock %}
+
+{% block body %}
+<div class="w-full">
+    <div class="mb-8 bg-dark-secondary rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-white mb-8">Statistiques: Listes d'Envies & Consultations</h2>
+
+        {# Category Selector #}
+        <div class="mb-8">
+            <form action="{{ url_for('admin_liste_envie.admin_wishlist_stats') }}" method="GET" class="flex items-center space-x-4">
+                <select name="category" class="bg-dark-accent text-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Sélectionnez une catégorie</option>
+                    {% for stat in stats_per_category %}
+                        <option value="{{ stat.category_name }}" {% if selected_category == stat.category_name %}selected{% endif %}>
+                            {{ stat.category_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+                    Filtrer
+                </button>
+            </form>
+        </div>
+
+        {% if selected_category %}
+        {# Category-specific Statistics Section #}
+        <div class="mb-12 bg-gray-800 rounded-lg p-6 border border-blue-800">
+            <h3 class="text-xl font-semibold text-white mb-6">Détails pour la catégorie: {{ selected_category }}</h3>
+
+            {# Combined Table for Category Articles #}
+            <div class="mb-8">
+                <h4 class="text-lg font-medium text-gray-300 mb-4">Articles de la catégorie</h4>
+                <div class="overflow-x-auto rounded-lg shadow">
+                    <table class="min-w-full">
+                        <thead class="bg-dark-accent">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Article</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Dans les wishlists</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Consultations (30j)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            {% for article in category_articles_wishlist %}
+                                <tr class="hover:bg-dark-accent transition-colors duration-200">
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ article.article_name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ article.wishlist_count }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">
+                                        {% set history = namespace(found=false) %}
+                                        {% for h in category_articles_history %}
+                                            {% if h.article_name == article.article_name %}
+                                                {{ h.consultation_count }}
+                                                {% set history.found = true %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if not history.found %}0{% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {# Category-specific Charts #}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {# Wishlist Chart #}
+                <div class="bg-gray-800 rounded-lg shadow-md p-4 border border-blue-800">
+                    <h4 class="text-lg font-medium text-center text-blue-400 mb-4">Articles dans les Wishlists</h4>
+                    <canvas id="categoryWishlistChart" class="w-full h-64"></canvas>
+                </div>
+
+                {# History Chart #}
+                <div class="bg-gray-800 rounded-lg shadow-md p-4 border border-blue-800">
+                    <h4 class="text-lg font-medium text-center text-blue-400 mb-4">Consultations des Articles (30j)</h4>
+                    <canvas id="categoryHistoryChart" class="w-full h-64"></canvas>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# --- WISHLIST STATISTICS SECTION --- #}
+        <div class="mb-12">
+            <h3 class="text-xl font-semibold text-white mb-6 border-b border-gray-700 pb-2">Statistiques des Listes d'Envies</h3>
+
+            {# Table 1: Articles (Skins) per Category in Wishlists #}
+            <div class="mb-8">
+                <h4 class="text-lg font-medium text-gray-300 mb-4">Articles par Catégorie</h4>
+                {% if stats_per_category %}
+                    <div class="overflow-x-auto rounded-lg shadow">
+                        <table class="min-w-full">
+                            <thead class="bg-dark-accent">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Catégorie (Type Skin)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nombre d'articles uniques</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700">
+                                {% for stat in stats_per_category %}
+                                    <tr class="hover:bg-dark-accent transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ stat.category_name | default(stat[0]) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ stat.article_count | default(stat[1]) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-gray-400">Aucune donnée disponible.</p>
+                {% endif %}
+            </div>
+
+            {# Chart 1: Wishlist per Category #}
+            <div class="mt-8 bg-gray-800 rounded-lg shadow-md p-4 border border-blue-800">
+                <h4 class="text-lg font-medium text-center text-blue-400 mb-4">Articles par Catégorie (Wishlists)</h4>
+                <canvas id="wishlistCategoryChart" class="w-full h-64"></canvas>
+            </div>
+
+            {# Table 3: Individual Skin Wishlist Counts #}
+            <div class="mt-8"> {# Added margin-top #}
+                <h4 class="text-lg font-medium text-gray-300 mb-4">Présence des Skins Individuels</h4>
+                {% if skin_wishlist_counts %}
+                    <div class="overflow-x-auto rounded-lg shadow">
+                        <table class="min-w-full">
+                            <thead class="bg-dark-accent">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Skin</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nombre d'Utilisateurs L'ayant Souhaité</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700">
+                                {% for stat in skin_wishlist_counts %}
+                                    <tr class="hover:bg-dark-accent transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ stat.skin_name | default(stat[0]) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ stat.user_count | default(stat[1]) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-gray-400">Aucun skin n'est actuellement dans une liste d'envies.</p>
+                {% endif %}
+            </div>
+
+            {# Chart 2: History per Category (Last 30 Days) #}
+            <div class="mt-8 bg-gray-800 rounded-lg shadow-md p-4 border border-blue-800">
+                 <h4 class="text-lg font-medium text-center text-blue-400 mb-4">Consultations par Catégorie (30 derniers jours)</h4>
+                <canvas id="historyCategoryMonthlyChart" class="w-full h-64"></canvas>
+            </div>
+        </div>
+
+        {# --- HISTORY STATISTICS SECTION --- #}
+        <div>
+            <h3 class="text-xl font-semibold text-white mb-6 border-b border-gray-700 pb-2">Statistiques des Consultations (Historique)</h3>
+
+            {# Table 2: Article (Skin) Consultation Count #}
+            <div class="mb-8">
+                <h4 class="text-lg font-medium text-gray-300 mb-4">Consultations par Article</h4>
+                {% if article_click_stats %}
+                    <div class="overflow-x-auto rounded-lg shadow">
+                        <table class="min-w-full">
+                            <thead class="bg-dark-accent">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Article (Skin)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nombre de Consultations</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700">
+                                {% for stat in article_click_stats %}
+                                    <tr class="hover:bg-dark-accent transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ stat.article_name | default(stat[0]) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ stat.consultation_count | default(stat[1]) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-gray-400">Aucune donnée disponible.</p>
+                {% endif %}
+            </div>
+
+            {# Table 4: Consultations per Category #}
+            <div> {# No margin bottom as it's the last in this section #}
+                <h4 class="text-lg font-medium text-gray-300 mb-4">Consultations par Catégorie</h4>
+                 {% if consultation_category_stats %}
+                    <div class="overflow-x-auto rounded-lg shadow">
+                        <table class="min-w-full">
+                            <thead class="bg-dark-accent">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Catégorie (Type Skin)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nombre Total de Consultations</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700">
+                                {% for stat in consultation_category_stats %}
+                                    <tr class="hover:bg-dark-accent transition-colors duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ stat.category_name | default(stat[0]) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-accent-blue font-medium">{{ stat.consultation_count | default(stat[1]) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-gray-400">Aucune donnée disponible.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Chart Initialization Script #}
+<script>
+    // Chart 1: Wishlist per Category (Bar Chart)
+    var ctxWishlistCat = document.getElementById("wishlistCategoryChart").getContext('2d');
+    var wishlistCategoryChart = new Chart(ctxWishlistCat, {
+        type: 'bar',
+        data: {
+            labels: {{ wishlist_cat_labels_py | tojson | safe }},
+            datasets: [{
+                label: 'Nombre d\'articles uniques',
+                data: {{ wishlist_cat_values_py | tojson | safe }},
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 206, 86, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)', 'rgba(83, 102, 255, 0.6)', 'rgba(40, 159, 64, 0.6)',
+                    'rgba(210, 99, 132, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)',
+                    'rgba(255, 206, 86, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)', 'rgba(83, 102, 255, 1)', 'rgba(40, 159, 64, 1)',
+                    'rgba(210, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: { display: false },
+            title: {
+                display: true,
+                text: 'Articles par Catégorie dans les Wishlists',
+                fontColor: '#cbd5e0' // text-gray-300
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        fontColor: '#cbd5e0' // text-gray-300
+                    },
+                    gridLines: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: '#cbd5e0' // text-gray-300
+                    },
+                    gridLines: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }]
+            }
+        }
+    });
+
+    // Chart 2: History per Category - Last 30 Days (Pie Chart)
+    var ctxHistoryCatMonthly = document.getElementById("historyCategoryMonthlyChart").getContext('2d');
+    var historyCategoryMonthlyChart = new Chart(ctxHistoryCatMonthly, {
+        type: 'pie',
+        data: {
+            labels: {{ history_cat_monthly_labels_py | tojson | safe }},
+            datasets: [{
+                label: 'Consultations (30j)',
+                data: {{ history_cat_monthly_values_py | tojson | safe }},
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)', 'rgba(255, 206, 86, 0.7)', 'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)',
+                    'rgba(199, 199, 199, 0.7)', 'rgba(83, 102, 255, 0.7)', 'rgba(40, 159, 64, 0.7)',
+                    'rgba(210, 99, 132, 0.7)'
+                ],
+                borderColor: 'rgba(42, 46, 59, 1)', // dark-accent
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                position: 'bottom',
+                 labels: {
+                     fontColor: '#cbd5e0' // text-gray-300
+                 }
+            },
+            title: {
+                display: true,
+                text: 'Consultations par Catégorie (30 derniers jours)',
+                fontColor: '#cbd5e0' // text-gray-300
+            }
+        }
+    });
+
+    {% if selected_category %}
+    // Category-specific Wishlist Chart
+    var ctxCategoryWishlist = document.getElementById("categoryWishlistChart").getContext('2d');
+    new Chart(ctxCategoryWishlist, {
+        type: 'bar',
+        data: {
+            labels: {{ category_articles_labels | tojson | safe }},
+            datasets: [{
+                label: 'Nombre de wishlists',
+                data: {{ category_wishlist_values | tojson | safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: { display: false },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        fontColor: '#cbd5e0'
+                    },
+                    gridLines: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: '#cbd5e0',
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    gridLines: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }]
+            }
+        }
+    });
+
+    // Category-specific History Chart
+    var ctxCategoryHistory = document.getElementById("categoryHistoryChart").getContext('2d');
+    new Chart(ctxCategoryHistory, {
+        type: 'bar',
+        data: {
+            labels: {{ category_articles_labels | tojson | safe }},
+            datasets: [{
+                label: 'Nombre de consultations (30j)',
+                data: {{ category_history_values | tojson | safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: { display: false },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        fontColor: '#cbd5e0'
+                    },
+                    gridLines: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: '#cbd5e0',
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    gridLines: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }]
+            }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %} 
