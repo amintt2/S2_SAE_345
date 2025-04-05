@@ -75,25 +75,21 @@ def client_panier_add():
 
     # Ajout au panier
     id_client = session['id_user']
-    try:
-        sql = '''
-            INSERT INTO ligne_panier (utilisateur_id, declinaison_id, quantite, date_ajout)
-            VALUES (%s, %s, 1, NOW())
-            ON DUPLICATE KEY UPDATE quantite = quantite + 1
-        '''
-        mycursor.execute(sql, (id_client, id_declinaison))
-        sql = '''
-            UPDATE declinaison 
-            SET stock = stock - 1 
-            WHERE id_declinaison = %s
-        '''
-        mycursor.execute(sql, (id_declinaison,))
-        get_db().commit()
-        flash(u"Article ajouté au panier", "alert-success")
-    except Exception as e:
-        get_db().rollback()
-        flash(u"Erreur lors de l'ajout au panier", "alert-danger")
-        print("Erreur :", e)
+    
+    sql = '''
+        INSERT INTO ligne_panier (utilisateur_id, declinaison_id, quantite, date_ajout)
+        VALUES (%s, %s, 1, NOW())
+        ON DUPLICATE KEY UPDATE quantite = quantite + 1
+    '''
+    mycursor.execute(sql, (id_client, id_declinaison))
+    sql = '''
+        UPDATE declinaison 
+        SET stock = stock - 1 
+        WHERE id_declinaison = %s
+    '''
+    mycursor.execute(sql, (id_declinaison,))
+    get_db().commit()
+    flash(u"Article ajouté au panier", "alert-success")
 
     return redirect('/client/article/show')
 
@@ -104,13 +100,10 @@ def client_panier_update():
     # Use declinaison_id from form  
     declinaison_id = request.form.get('declinaison_id')
     
-    try:
-        new_quantity = int(request.form.get('quantite', 1))
-        declinaison_id = int(declinaison_id)
-        if new_quantity < 0: # Cannot have negative quantity
-            raise ValueError("Quantity cannot be negative")
-    except (ValueError, TypeError):
-        flash(u'ID de version ou quantité invalide.', 'alert-danger')
+    new_quantity = int(request.form.get('quantite', 1))
+    declinaison_id = int(declinaison_id)
+    if new_quantity < 0: # Cannot have negative quantity
+        flash(u"Quantité ne peut pas être négative", "alert-warning")
         return redirect('/client/article/show')
 
     mycursor = get_db().cursor()
@@ -258,11 +251,7 @@ def client_panier_delete_line():
     # Use declinaison_id from form
     declinaison_id = request.form.get('declinaison_id')
 
-    try:
-        declinaison_id = int(declinaison_id)
-    except (ValueError, TypeError):
-        flash(u'ID de version invalide.', 'alert-danger')
-        return redirect('/client/article/show')
+    declinaison_id = declinaison_id
 
     # Use the helper function to delete the line and restore stock
     deleted = _delete_line_and_restore_stock(declinaison_id, id_client)
