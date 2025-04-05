@@ -23,18 +23,23 @@ def client_article_details():
 
     sql = '''
     SELECT 
-        id_skin AS id_article,
-        nom_skin AS nom, 
-        prix_declinaison AS prix,
-        description,
-        image,
-        ROUND(AVG(note), 1) AS moyenne_notes,
-        COUNT(note) AS nb_notes
+        skin.id_skin AS id_article,
+        skin.nom_skin AS nom,
+        skin.description,
+        skin.image,
+        MIN(declinaison.prix_declinaison) as prix_min,
+        MAX(declinaison.prix_declinaison) as prix_max,
+        note.moyenne_notes AS moyenne_notes,
+        note.nb_notes AS nb_notes
     FROM skin
-    LEFT JOIN note ON note.skin_id = skin.id_skin
-    LEFT JOIN declinaison ON declinaison.skin_id = skin.id_skin
-    WHERE id_skin = %s
-    GROUP BY id_skin, nom_skin, prix_declinaison, description, image;
+    LEFT JOIN (
+        SELECT skin_id, ROUND(AVG(note), 1) AS moyenne_notes, COUNT(*) AS nb_notes
+        FROM note
+        GROUP BY skin_id
+    ) AS note ON note.skin_id = skin.id_skin
+    LEFT JOIN declinaison ON skin.id_skin = declinaison.skin_id
+    WHERE skin.id_skin = %s
+    GROUP BY skin.id_skin,skin. nom_skin, skin.description, skin.image, note.moyenne_notes, note.nb_notes
     '''
     # -- Description, moyenne_notes, nb_notes
     mycursor.execute(sql, (id_article,))
@@ -76,10 +81,11 @@ def client_article_details():
     mycursor.execute(sql, ( id_article))
     commentaires = mycursor.fetchall()
     sql = '''
-        SELECT COUNT(declinaison_id) AS nb_commandes_article
+        SELECT COUNT(declinaison.skin_id) AS nb_commandes_article
         FROM ligne_commande
         JOIN commande ON commande.id_commande = ligne_commande.commande_id
-        WHERE commande.utilisateur_id=%s and ligne_commande.declinaison_id=%s;
+        JOIN declinaison ON declinaison.id_declinaison = ligne_commande.declinaison_id
+        WHERE commande.utilisateur_id=%s AND declinaison.skin_id=%s;
     '''
     mycursor.execute(sql, (id_client, id_article))
     commandes_articles = mycursor.fetchone()

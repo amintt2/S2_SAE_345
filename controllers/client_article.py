@@ -22,9 +22,9 @@ def client_article_show():                                 # remplace client_ind
             MIN(skin.id_skin) AS id_skin,
             MIN(skin.image) AS image,
             MIN(type_skin.libelle_type_skin) AS libelle_type_article,
-            ROUND(AVG(note.note),1) AS moyenne_notes,
-            COUNT(note.note) AS nb_notes,
-            COUNT(commentaire.commentaire) AS nb_commentaires,
+            note.moyenne_notes,
+            note.nb_notes,
+            commentaire.nb_commentaires,
             COUNT(declinaison.id_declinaison) AS nb_declinaisons,
             MIN(special.libelle_special) AS libelle_special,
             MIN(usure.libelle_usure) AS libelle_usure,
@@ -34,8 +34,19 @@ def client_article_show():                                 # remplace client_ind
             MAX(declinaison.stock) as stock_max
         FROM skin
         LEFT JOIN declinaison ON skin.id_skin = declinaison.skin_id
-        LEFT JOIN note ON skin.id_skin = note.skin_id
-        LEFT JOIN commentaire ON skin.id_skin = commentaire.skin_id
+        LEFT JOIN (
+            SELECT skin_id, 
+                    AVG(note.note) AS moyenne_notes,
+                    COUNT(DISTINCT skin_id, utilisateur_id) AS nb_notes
+            FROM note
+            GROUP BY skin_id
+        ) AS note ON skin.id_skin = note.skin_id
+        LEFT JOIN (
+            SELECT skin_id, 
+                    COUNT(*) AS nb_commentaires
+            FROM commentaire
+            GROUP BY skin_id
+        ) AS commentaire ON skin.id_skin = commentaire.skin_id
         INNER JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
         LEFT JOIN special ON declinaison.special_id = special.id_special
         LEFT JOIN usure ON declinaison.usure_id = usure.id_usure
@@ -96,7 +107,7 @@ def client_article_show():                                 # remplace client_ind
             list_param.append(int(session['filter_prix_max']))
             
     # Group by
-    sql += ' GROUP BY skin.nom_skin' 
+    sql += ' GROUP BY skin.nom_skin, moyenne_notes, nb_notes, nb_commentaires' 
     
 
     # Récupération des articles depuis la requête principale
