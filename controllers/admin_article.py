@@ -382,7 +382,9 @@ def update_article_stock():
         # Commit transaction
         get_db().commit()
         flash('Stock mis à jour avec succès', 'alert-success')
-        
+    except Exception as e:
+        get_db().rollback()
+        flash(f'Erreur lors de la mise à jour : {str(e)}', 'alert-danger')
     
     return redirect('/admin/article/show')
 
