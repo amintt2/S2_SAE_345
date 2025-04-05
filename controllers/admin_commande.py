@@ -17,22 +17,20 @@ def admin_index():
 @admin_commande.route('/admin/commande/show', methods=['get','post'])
 def admin_commande_show():
     mycursor = get_db().cursor()
-    admin_id = session['id_user']
     sql = '''
-         SELECT 
+        SELECT 
             c.id_commande,
             c.date_achat,
             e.libelle_etat AS libelle,
             e.id_etat AS etat_id,
             SUM(lc.quantite) AS nbr_articles,
-            SUM(lc.prix * lc.quantite) AS prix_total_commande,
+            SUM(lc.prix * lc.quantite) AS prix_total,
             utilisateur.login
         FROM commande AS c
         LEFT JOIN ligne_commande AS lc ON c.id_commande = lc.commande_id
         LEFT JOIN etat AS e ON c.etat_id = e.id_etat
         LEFT JOIN utilisateur ON c.utilisateur_id = utilisateur.id_utilisateur
-        WHERE c.utilisateur_id = %s
-        GROUP BY c.id_commande, c.date_achat, e.libelle_etat, e.id_etat
+        GROUP BY c.id_commande, c.date_achat, e.libelle_etat, e.id_etat, utilisateur.login
         ORDER BY c.date_achat DESC
     '''
     mycursor.execute(sql)

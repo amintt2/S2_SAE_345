@@ -123,7 +123,13 @@
                                 <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ commande.login }}</td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ commande.nbr_articles }}</td>
-                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ "{:,.2f} €".format(commande.prix_total) }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
+                                    {% if commande.prix_total %}
+                                        {{ "{:,.2f} €".format(commande.prix_total) }}
+                                    {% else %}
+                                        0.00 €
+                                    {% endif %}
+                                </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
                                     {% if commande.etat_id == 1 %}
                                     <span class="inline-flex items-center rounded-full bg-amber-900/50 px-2.5 py-0.5 text-sm font-medium text-amber-200">

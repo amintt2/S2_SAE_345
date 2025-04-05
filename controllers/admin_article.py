@@ -59,7 +59,6 @@ def add_article():
     sql = '''
     SELECT id_type_skin as id_type_article, libelle_type_skin as libelle 
     FROM type_skin
-    ORDER BY libelle_type_skin
     '''
     mycursor.execute(sql)
     types_article = mycursor.fetchall()
@@ -88,34 +87,39 @@ def add_article():
 def valid_add_article():
     mycursor = get_db().cursor()
     nom = request.form.get('nom', '')
-    type_article_id = request.form.get('type_article_id', '')
     prix = request.form.get('prix', '')
-    stock = request.form.get('stock', 0)
-    usure_id = request.form.get('usure_id', '')
-    special_id = request.form.get('special_id', '')
+    stock = request.form.get('stock', '')
     description = request.form.get('description', '')
-    image = request.files.get('image', '')
+    type_article_id = request.form.get('type_article_id', '')
+    image = request.files.get('image', None)
 
-    if image:
-        filename = 'img_upload'+ str(int(2147483647 * random())) + '.png'
-        image.save(os.path.join('static/images/', filename))
-    else:
-        print("erreur")
-        filename=None
-
+    # Start transaction
+    mycursor.execute("START TRANSACTION")
+    
+    # Insert into skin table
     sql = '''
-    INSERT INTO skin(nom_skin, image, prix_declinaison, type_skin_id, usure_id, special_id, stock, description)
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO skin (nom_skin, disponible, type_skin_id, image, description)
+    VALUES (%s, 1, %s, %s, %s)
     '''
-    tuple_add = (nom, filename, prix, type_article_id, usure_id, special_id, stock, description)
-    mycursor.execute(sql, tuple_add)
-    get_db().commit()
+    image_filename = image.filename if image else 'no_photo.jpeg'
+    mycursor.execute(sql, (nom, type_article_id, image_filename, description))
+    
+    # Get the inserted skin id
+    skin_id = mycursor.lastrowid
 
-    print(u'article ajouté , nom: ', nom, ' - type_article:', type_article_id, ' - prix:', prix,
-          ' - description:', description, ' - image:', image)
-    message = u'article ajouté , nom:' + nom + '- type_article:' + type_article_id + ' - prix:' + prix + ' - description:' + description + ' - image:' + str(
-        image)
-    flash(message, 'alert-success')
+    # Save image if provided
+    if image:
+        image.save(os.path.join('static/images/', image.filename))
+
+    # Add initial declinaison with default usure and special
+    sql = '''
+    INSERT INTO declinaison (stock, prix_declinaison, usure_id, special_id, skin_id)
+    VALUES (%s, %s, 1, 1, %s)
+    '''
+    mycursor.execute(sql, (stock, prix, skin_id))
+
+    get_db().commit()
+    flash(u'Article ajouté avec succès', 'success')
     return redirect('/admin/article/show')
 
 
