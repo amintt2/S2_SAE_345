@@ -205,20 +205,27 @@
                         <span> -  {{ article.nb_commentaires }} commentaires</span>
                     </div>
 
-                    <form action="/client/panier/add" method="post" class="space-y-3">
-                        <input type="hidden" name="id_article" value="{{ article.id_skin }}">
-                        <input type="hidden" name="nb_declinaisons" value="{{ article.nb_declinaisons }}">
-                        {% if article.nb_declinaisons == 1 %}
-                            <input type="hidden" name="id_declinaison" value="{{ article.declinaisons[0].id_declinaison }}">
-                            <button type="submit" class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
-                                Ajouter au panier
-                            </button>
-                        {% else %}
-                            <a href="/client/article/declinaisons?id_article={{ article.id_skin }}" class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200 text-center block">
-                                Choisir une version
-                            </a>
-                        {% endif %}
-                    </form>
+                    <div class="mt-4 flex justify-between items-center space-x-2">
+                        <form action="/client/panier/add" method="post" class="flex-grow space-y-3">
+                            <input type="hidden" name="id_article" value="{{ article.id_skin }}">
+                            <input type="hidden" name="nb_declinaisons" value="{{ article.nb_declinaisons }}">
+                            {% if article.nb_declinaisons == 1 %}
+                                <input type="hidden" name="id_declinaison" value="{{ article.declinaisons[0].id_declinaison }}">
+                                <button type="submit" class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200">
+                                    Ajouter au panier
+                                </button>
+                            {% else %}
+                                <a href="/client/article/declinaisons?id_article={{ article.id_skin }}" class="w-full bg-accent-blue hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors duration-200 text-center block">
+                                    Choisir une version
+                                </a>
+                            {% endif %}
+                        </form>
+                        <a href="/client/envie/add?id_article={{ article.id_skin }}" 
+                           title="Ajouter à la liste de souhaits"
+                           class="flex-shrink-0 inline-flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-3 rounded transition-colors duration-200">
+                            <span>💛</span>
+                        </a>
+                    </div>
                 </div>
             </div>
             {% endfor %}
