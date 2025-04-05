@@ -1,11 +1,11 @@
 DROP TABLE IF EXISTS ligne_panier;
 DROP TABLE IF EXISTS ligne_commande;
+DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS declinaison;
 DROP TABLE IF EXISTS commentaire;
 DROP TABLE IF EXISTS note;
 DROP TABLE IF EXISTS historique;
 DROP TABLE IF EXISTS liste_envie;
-DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS adresse;
 DROP TABLE IF EXISTS skin;
 DROP TABLE IF EXISTS etat;
@@ -169,8 +169,8 @@ CREATE TABLE ligne_commande(
    prix DECIMAL(10,2),
    quantite INT,
    PRIMARY KEY(declinaison_id, commande_id),
-   CONSTRAINT fk_ligne_commande_skin
-      FOREIGN KEY(declinaison_id) REFERENCES skin(id_skin),
+   CONSTRAINT fk_ligne_commande_declinaison
+      FOREIGN KEY(declinaison_id) REFERENCES declinaison(id_declinaison),
    CONSTRAINT fk_ligne_commande_commande
       FOREIGN KEY(commande_id) REFERENCES commande(id_commande)
 ) DEFAULT CHARSET utf8mb4;
