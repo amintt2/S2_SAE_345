@@ -14,106 +14,119 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h1 class="text-center mb-4">Visualisation des commandes par départements</h1>
-                
-                <div class="d-flex justify-content-center mb-4">
-                    <a href="/admin/dataviz/etat2?type_viz=nombre" class="btn btn-primary me-2 {% if type_viz == 'nombre' %}active{% endif %}">Nombre de commandes</a>
-                    <a href="/admin/dataviz/etat2?type_viz=ca" class="btn btn-success {% if type_viz == 'ca' %}active{% endif %}">Chiffre d'affaires</a>
-                </div>
-                
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Carte de France - {% if type_viz == 'ca' %}Chiffre d'affaires{% else %}Nombre de commandes{% endif %}</h5>
-                    </div>
-                    <div class="card-body text-center">
-                        {% include 'admin/dataviz/franceMap.html' %}
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Tableau des données par département</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Département</th>
-                                    <th>Nombre de commandes</th>
-                                    <th>Chiffre d'affaires</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for element in adresses %}
-                                <tr>
-                                    <td>{{ element.dep }}</td>
-                                    <td>{{ element.nombre }}</td>
-                                    <td>{{ element.ca_format }} €</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="mt-4">
-                    <a href="/admin/dataviz/adresses" class="btn btn-primary">Voir les graphiques</a>
-                </div>
-            </div>
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold text-white text-center mb-6">Visualisation des commandes par départements</h1>
+    
+    <div class="flex justify-center mb-6 space-x-3">
+        <a href="/admin/dataviz/etat2?type_viz=nombre" class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200 {% if type_viz == 'nombre' %}ring-2 ring-white{% endif %}">
+            Nombre de commandes
+        </a>
+        <a href="/admin/dataviz/etat2?type_viz=ca" class="rounded-md bg-green-600 hover:bg-green-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200 {% if type_viz == 'ca' %}ring-2 ring-white{% endif %}">
+            Chiffre d'affaires
+        </a>
+    </div>
+    
+    <!-- Map Container -->
+    <div class="bg-dark-secondary rounded-lg shadow-lg mb-6 overflow-hidden">
+        <div class="border-b border-gray-700 px-4 py-4">
+            <h2 class="text-xl font-semibold text-white">Carte de France - {% if type_viz == 'ca' %}Chiffre d'affaires{% else %}Nombre de commandes{% endif %}</h2>
+        </div>
+        <div class="p-4 text-center">
+            {% include 'admin/dataviz/franceMap.html' %}
         </div>
     </div>
+    
+    <!-- Data Table -->
+    <div class="bg-dark-secondary rounded-lg shadow-lg mb-6 overflow-hidden">
+        <div class="border-b border-gray-700 px-4 py-4">
+            <h2 class="text-xl font-semibold text-white">Tableau des données par département</h2>
+        </div>
+        <div class="p-4 overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700">
+                <thead class="bg-dark-accent">
+                    <tr>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200">Département</th>
+                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Nombre de commandes</th>
+                        <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Chiffre d'affaires</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700 bg-dark-secondary">
+                    {% for element in adresses %}
+                    <tr class="hover:bg-dark-accent transition-colors duration-200">
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-300">{{ element.dep }}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ element.nombre }}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ element.ca_format }} €</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Navigation Button -->
+    <div class="mt-6 flex justify-center">
+        <a href="/admin/dataviz/adresses" class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
+            Voir les graphiques
+        </a>
+    </div>
+</div>
 
-    {# Hidden data for JavaScript #}
-    <div id="mapData" 
-         data-adresses="{{ adresses|tojson }}" 
-         data-is-revenue-view="{{ 'true' if type_viz == 'ca' else 'false' }}" 
-         style="display:none;"></div>
+{# Hidden data for JavaScript #}
+<div id="mapData" 
+     data-adresses="{{ adresses|tojson }}" 
+     data-is-revenue-view="{{ 'true' if type_viz == 'ca' else 'false' }}" 
+     style="display:none;"></div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get data from hidden div
-        var mapDataElement = document.getElementById('mapData');
-        var adressesData = JSON.parse(mapDataElement.getAttribute('data-adresses'));
-        var isRevenueView = mapDataElement.getAttribute('data-is-revenue-view') === 'true';
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get data from hidden div
+    var mapDataElement = document.getElementById('mapData');
+    var adressesData = JSON.parse(mapDataElement.getAttribute('data-adresses'));
+    var isRevenueView = mapDataElement.getAttribute('data-is-revenue-view') === 'true';
+    
+    // Set colors based on theme
+    var fillColor = isRevenueView ? "#10b981" : "#3b82f6"; // Green for revenue, accent-blue for count
+    
+    adressesData.forEach(function(element) {
+        var depId = element.dep;
+        var departement = document.getElementById(depId);
         
-        adressesData.forEach(function(element) {
-            var depId = element.dep;
-            var departement = document.getElementById(depId);
+        if (departement) {
+            // Set fill color based on visualization type
+            departement.style.fill = fillColor;
             
-            if (departement) {
-                // Set fill color based on visualization type
-                var fillColor = isRevenueView ? "#28a745" : "#007bff";
-                departement.style.fill = fillColor;
-                
-                // Set opacity based on visualization type
-                var opacity = isRevenueView ? element.indice_ca : element.indice_nombre;
-                departement.setAttribute("fill-opacity", opacity);
-                
-                // Add tooltip
-                var tooltipText = "Département " + depId + ": ";
-                tooltipText += isRevenueView ? element.ca_format + " €" : element.nombre + " commandes";
-                
-                departement.setAttribute("data-toggle", "tooltip");
-                departement.setAttribute("data-placement", "top");
-                departement.setAttribute("title", tooltipText);
-                
-                // Add hover effect
-                departement.addEventListener("mouseover", function() {
-                    this.style.stroke = "#000";
-                    this.style.strokeWidth = "1";
-                });
-                
-                departement.addEventListener("mouseout", function() {
-                    this.style.stroke = "#fff";
-                    this.style.strokeWidth = "0.5";
-                });
-            }
-        });
+            // Set opacity based on visualization type
+            var opacity = isRevenueView ? element.indice_ca : element.indice_nombre;
+            departement.setAttribute("fill-opacity", opacity);
+            
+            // Add tooltip
+            var tooltipText = "Département " + depId + ": ";
+            tooltipText += isRevenueView ? element.ca_format + " €" : element.nombre + " commandes";
+            
+            departement.setAttribute("data-toggle", "tooltip");
+            departement.setAttribute("data-placement", "top");
+            departement.setAttribute("title", tooltipText);
+            
+            // Add hover effect
+            departement.addEventListener("mouseover", function() {
+                this.style.stroke = "#f3f4f6"; // gray-100
+                this.style.strokeWidth = "1.5";
+                this.style.cursor = "pointer";
+            });
+            
+            departement.addEventListener("mouseout", function() {
+                this.style.stroke = "#4b5563"; // gray-600
+                this.style.strokeWidth = "0.5";
+            });
+        }
     });
-    </script>
+    
+    // Initialize Bootstrap tooltips
+    if (typeof $ !== 'undefined') {
+        $('[data-toggle="tooltip"]').tooltip();
+    }
+});
+</script>
 
 {#    /* couleur avec transparence */#}
 {#background-color : rgba(255,255,255,0.5);#}
