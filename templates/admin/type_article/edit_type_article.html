@@ -1,25 +1,50 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>modifier un type d'article</title>
+    <title>Modifier un type d'article</title>
 {% endblock %}
 
 {% block body %}
-  {% if error %}
-    <p class=error><strong>Error:</strong> {{ error }}
-  {% endif %}
-  <form method="post" action="/admin/type-article/edit">
-    <fieldset>
-        <legend> Modifier un type d'article</legend>
-        <div class="mb-3">
-        <input type="hidden" name="id_type_article" size="18" value="{{ type_article.id_type_article }}" id="id">
-        <label for="libelle">libellé</label><br>
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold text-white">Modifier un type d'article</h2>
+    </div>
+    
+    <div class="rounded-lg shadow-lg bg-gray-800 p-6 max-w-2xl mx-auto">
+        {% if error %}
+            <div class="mb-4 p-4 bg-red-600/20 border border-red-600 rounded-lg text-red-100">
+                <strong>Erreur:</strong> {{ error }}
+            </div>
+        {% endif %}
 
-        <input class="form-select" type="text" name="libelle" size="18" value="{{ type_article.libelle }}" id="libelle"><br>
-        </div>
-        <div class="col-12">
-        <button class="btn btn-primary" type="submit">Valider</button>
-        </div>
-    </fieldset>
-  </form>
+        <form method="post" action="/admin/type-article/edit" class="space-y-6">
+            <input type="hidden" name="id_type_article" value="{{ type_article.id_type_article }}">
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="libelle" class="block mb-2 text-sm font-medium text-gray-200">
+                        Libellé du type
+                    </label>
+                    <input type="text" 
+                           id="libelle" 
+                           name="libelle" 
+                           value="{{ type_article.libelle }}"
+                           required
+                           class="w-full rounded-md px-3 py-2 border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-700">
+                <a href="/admin/type-article/show" 
+                   class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 text-white font-medium transition-colors">
+                    Annuler
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white font-bold shadow-md transition-colors">
+                    Modifier
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

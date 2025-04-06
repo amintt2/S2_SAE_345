@@ -1,40 +1,85 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>afficher les types d'article</title>
+    <title>Types d'articles</title>
 {% endblock %}
 
 {% block body %}
-<h3>Déclinaison et/ou type d'article (catégorie)</h3>
-<a class="btn btn-outline-success" href="/admin/type-article/add">ajouter un type d'article</a>
-<br><br>
+<div class="w-full">
+    <div class="mb-8 bg-dark-secondary rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-white">Gestion des types d'articles</h3>
+            <a href="/admin/type-article/add" 
+               class="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 transition-colors duration-200 flex items-center gap-2">
+                <img src="https://img.icons8.com/ios/50/FFFFFF/plus--v1.png" alt="plus icon" width="25" height="25">
+                <span>Ajouter un type</span>
+            </a>
+        </div>
 
-<table class="table">
-    <thead class="thead-dark">
-        <tr>
-           <th>designation</th> <th>(id_type_article)</th><th>nombre d'articles</th><th>opération</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% if types_article | length >= 1 %}
-        {% for ligne in types_article %}
-           <tr>
-                  <td>{{ ligne.libelle }}</td>
-                  <td>{{ ligne.id_type_article }}</td>
-                   <td><span style="color: red">{{ ligne.nbr_articles }}</span></td>
-                  <td>
-                      <a class="btn btn-outline-danger" href="/admin/type-article/edit?id_type_article={{ ligne.id_type_article }}">editer</a>&nbsp;
-                      <a class="btn btn-outline-warning" href="/admin/type-article/delete?id_type_article={{ ligne.id_type_article }}">supprimer</a>
-                  </td>
-           </tr>
-        {% endfor %}
-    {% else %}
-            <tr>
-                  <td>
-                      pas de type d'article
-                  </td>
-           </tr>
-    {% endif %}
-    </tbody>
-</table>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700">
+                <thead class="bg-dark-accent">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Désignation</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Articles</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700 bg-dark-secondary">
+                    {% if types_article | length >= 1 %}
+                        {% for ligne in types_article %}
+                            <tr class="hover:bg-dark-accent transition-colors duration-200">
+                                <td class="px-6 py-4">
+                                    <div class="text-white font-medium">{{ ligne.libelle }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-accent-blue font-medium">{{ ligne.id_type_article }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        {% if ligne.nbr_articles > 0 %}
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-600 text-blue-100">
+                                                {{ ligne.nbr_articles }} article{% if ligne.nbr_articles > 1 %}s{% endif %}
+                                            </span>
+                                        {% else %}
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-600 text-gray-100">
+                                                Aucun article
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex justify-center space-x-2">
+                                        <a href="/admin/type-article/edit?id_type_article={{ ligne.id_type_article }}"
+                                           class="rounded-md bg-blue-600 p-2 text-white shadow-sm hover:bg-blue-700 transition-colors duration-200"
+                                           title="Éditer le type">
+                                            <img src="https://img.icons8.com/ios/50/000000/edit--v1.png" class="h-5 w-5" alt="Éditer" />
+                                        </a>
+
+                                        <a href="/admin/type-article/delete?id_type_article={{ ligne.id_type_article }}"
+                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce type ?')"
+                                            class="rounded-md bg-red-600 p-2 text-white shadow-sm hover:bg-red-700 transition-colors duration-200"
+                                            title="Supprimer">
+                                            <img src="https://img.icons8.com/ios/50/000000/trash.png" class="h-5 w-5" alt="Supprimer" />
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-sm text-gray-300 text-center">
+                                <div class="flex flex-col items-center justify-center space-y-2">
+                                    <img src="https://img.icons8.com/ios/50/000000/empty-box.png" class="h-10 w-10 text-gray-400" alt="Aucun type" />
+                                    <span>Aucun type d'article disponible</span>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

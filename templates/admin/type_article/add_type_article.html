@@ -1,24 +1,48 @@
 {% extends 'admin/layout_admin.html' %}
 
 {% block title %}
-    <title>ajouter un type d'article</title>
+    <title>Ajouter un type d'article</title>
 {% endblock %}
 
 {% block body %}
-{#  <h2>ajout d'un type d'article</h2>#}
-  {% if error %}
-    <p class=error><strong>Error:</strong> {{ error }}
-  {% endif %}
-  <form method="post" action="/admin/type-article/add">
-    <fieldset>
-        <legend> Créer un type d'article</legend>
-<div class="mb-3">
-        <label class="form-label" for="libelle">libellé</label><br>
-        <input  class="form-select" id="libelle" type="text" name="libelle" size="18" value="" placeholder="Saisir le libelle du type de l'article"><br>
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold text-white">Ajouter un type d'article</h2>
+    </div>
+    
+    <div class="rounded-lg shadow-lg bg-gray-800 p-6 max-w-2xl mx-auto">
+        {% if error %}
+            <div class="mb-4 p-4 bg-red-600/20 border border-red-600 rounded-lg text-red-100">
+                <strong>Erreur:</strong> {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="post" action="/admin/type-article/add" class="space-y-6">
+            <div class="space-y-4">
+                <div>
+                    <label for="libelle" class="block mb-2 text-sm font-medium text-gray-200">
+                        Libellé du type
+                    </label>
+                    <input type="text" 
+                           id="libelle" 
+                           name="libelle" 
+                           required
+                           placeholder="Saisir le libellé du type d'article"
+                           class="w-full rounded-md px-3 py-2 border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-700">
+                <a href="/admin/type-article/show" 
+                   class="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 text-white font-medium transition-colors">
+                    Annuler
+                </a>
+                <button type="submit" 
+                        class="px-6 py-2 rounded bg-green-500 hover:bg-green-600 text-white font-bold shadow-md transition-colors">
+                    Ajouter
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
-        <div class="col-12">
-        <button class="btn btn-primary" type="submit">Valider</button>
-        </div>
-    </fieldset>
-  </form>
 {% endblock %}
