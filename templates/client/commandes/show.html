@@ -1,107 +1,83 @@
 {% extends "client/layout_client.html" %}
 {% block body %}
     <div class="container mx-auto px-4 py-8">
-            <div class="mb-8 bg-dark-secondary rounded-lg shadow-lg p-6">
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-4 items-end">
-                    <div>
-                        <label for="from_date" class="block text-sm font-medium text-gray-300 mb-2">DATE DE DÉBUT</label>
-                        <input type="date" id="from_date" name="from_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
-                    </div>
-                    <div>
-                        <label for="to_date" class="block text-sm font-medium text-gray-300 mb-2">DATE DE FIN</label>
-                        <input type="date" id="to_date" name="to_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
-                    </div>
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-300 mb-2">STATUT</label>
-                        <select id="status" name="status" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-inset focus:ring-accent-blue sm:text-sm sm:leading-6">
-                            <option value="">Sélectionner...</option>
-                            <option value="submitted">En attente</option>
-                            <option value="invoiced">Facturée</option>
-                        </select>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="button" class="rounded-md bg-dark-accent hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm transition-colors duration-200">EFFACER</button>
-                        <button type="button" class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">RECHERCHER</button>
-                    </div>
-                </div>
-            </div>
 
-            {% if articles_commande %}
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-white">Recapitulatif de la commande selectionnée</h3>
-                <a href="/client/commande/show" class="rounded-md bg-dark-accent hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm transition-colors duration-200">
-                    Retour
-                </a>
-            </div>
-            <table class="min-w-full divide-y divide-gray-700 bg-dark-secondary shadow-lg rounded-lg">
-                <thead class="bg-dark-accent">
-                    <tr>
-                        <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
-                        <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
-                        <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Quantité</th>
-                        <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Prix unitaire</th>
-                        <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Prix total</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-700">
-                        {% for article in articles_commande %}
-                            <tr class="hover:bg-dark-accent transition-colors duration-200">
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
-                                    {% if article.image_article %}
-                                        <img class="h-12 w-12 rounded-full object-cover" 
-                                             src="/static/images/{{ article.image_article }}" 
-                                             alt="Image de {{ article.nom_article }}">
-                                    {% else %}
-                                        <img class="h-12 w-12 rounded-full object-cover"
-                                             src="/static/images/no_photo.jpeg" 
-                                             alt="Pas d'image">
+        {% if articles_commande %}
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-white">Recapitulatif de la commande selectionnée</h3>
+            <a href="/client/commande/show" class="rounded-md bg-dark-accent hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm transition-colors duration-200">
+                Retour
+            </a>
+        </div>
+        <table class="min-w-full divide-y divide-gray-700 bg-dark-secondary shadow-lg rounded-lg">
+            <thead class="bg-dark-accent">
+                <tr>
+                    <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Image</th>
+                    <th class="py-3.5 pl-4 pr-3 text-center text-sm font-semibold text-gray-200 sm:pl-6">Nom</th>
+                    <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Quantité</th>
+                    <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Prix unitaire</th>
+                    <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Prix total</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+                    {% for article in articles_commande %}
+                        <tr class="hover:bg-dark-accent transition-colors duration-200">
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
+                                {% if article.image_article %}
+                                    <img class="h-12 w-12 rounded-full object-cover" 
+                                            src="/static/images/{{ article.image_article }}" 
+                                            alt="Image de {{ article.nom_article }}">
+                                {% else %}
+                                    <img class="h-12 w-12 rounded-full object-cover"
+                                            src="/static/images/no_photo.jpeg" 
+                                            alt="Pas d'image">
+                                {% endif %}
+                            </td>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ article.nom_article }}
+                                <span class="text-accent-blue ml-2">( {{ article.libelle_usure }} )</span>
+                                <div class="text-sm text-gray-400">
+                                    <span class="text-accent-blue">{{ article.libelle_type_skin }}</span>
+                                    {% if article.libelle_special != "Aucun" %}
+                                        <span class="text-yellow-400 ml-2">{{ article.libelle_special }}</span>
                                     {% endif %}
-                                </td>
-                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">{{ article.nom_article }}
-                                    <span class="text-accent-blue ml-2">( {{ article.libelle_usure }} )</span>
-                                    <div class="text-sm text-gray-400">
-                                        <span class="text-accent-blue">{{ article.libelle_type_skin }}</span>
-                                        {% if article.libelle_special != "Aucun" %}
-                                            <span class="text-yellow-400 ml-2">{{ article.libelle_special }}</span>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ article.quantite_article }}</td>
-                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ article.prix_unitaire }} €</td>
-                                <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ article.prix_total_ligne }} €</td>
-                            </tr>
-                        {% endfor %}
-                </tbody>
-            </table>
-                <div class="mt-8 bg-dark-accent p-6 rounded-lg shadow-lg">
-                <h4 class="text-white font-semibold text-lg mb-4">Informations de livraison et facturation</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-dark-secondary p-4 rounded-md">
-                        <strong class="text-accent-blue font-medium block mb-2">Adresse de livraison :</strong>
-                        <div class="text-gray-300">
-                            <div>{{ commande_adresses.nom_livraison }}</div>
-                            <div>{{ commande_adresses.rue_livraison }}</div>
-                            <div>{{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-dark-secondary p-4 rounded-md">
-                        <strong class="text-accent-blue font-medium block mb-2">Adresse de facturation :</strong>
-                        {% if commande_adresses.adresse_identique == 'adresse_identique' %}
-                            <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30 mb-2">
-                                <span class="text-blue-300 font-medium">Identique à l'adresse de livraison</span>
-                            </div>
-                        {% endif %}
-                        <div class="text-gray-300">
-                            <div>{{ commande_adresses.nom_facturation }}</div>
-                            <div>{{ commande_adresses.rue_facturation }}</div>
-                            <div>{{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}</div>
-                        </div>
+                                </div>
+                            </td>
+                            <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ article.quantite_article }}</td>
+                            <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ article.prix_unitaire }} €</td>
+                            <td class="whitespace-nowrap text-center px-3 py-4 text-sm text-gray-300">{{ article.prix_total_ligne }} €</td>
+                        </tr>
+                    {% endfor %}
+            </tbody>
+        </table>
+            <div class="mt-8 bg-dark-accent p-6 rounded-lg shadow-lg">
+            <h4 class="text-white font-semibold text-lg mb-4">Informations de livraison et facturation</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-dark-secondary p-4 rounded-md">
+                    <strong class="text-accent-blue font-medium block mb-2">Adresse de livraison :</strong>
+                    <div class="text-gray-300">
+                        <div>{{ commande_adresses.nom_livraison }}</div>
+                        <div>{{ commande_adresses.rue_livraison }}</div>
+                        <div>{{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}</div>
                     </div>
                 </div>
+                
+                <div class="bg-dark-secondary p-4 rounded-md">
+                    <strong class="text-accent-blue font-medium block mb-2">Adresse de facturation :</strong>
+                    {% if commande_adresses.adresse_identique == 'adresse_identique' %}
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30 mb-2">
+                            <span class="text-blue-300 font-medium">Identique à l'adresse de livraison</span>
+                        </div>
+                    {% endif %}
+                    <div class="text-gray-300">
+                        <div>{{ commande_adresses.nom_facturation }}</div>
+                        <div>{{ commande_adresses.rue_facturation }}</div>
+                        <div>{{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}</div>
+                    </div>
                 </div>
-            <hr class="my-8 border-gray-700">
-            {% endif %}
+            </div>
+            </div>
+        <hr class="my-8 border-gray-700">
+        {% endif %}
         <div class="bg-dark-secondary shadow-lg rounded-lg">
             <div class="border-b border-gray-700 px-4 py-5 sm:px-6">
                 <h3 class="text-xl font-bold text-white">Toutes mes commandes</h3>
