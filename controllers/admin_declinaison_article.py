@@ -56,6 +56,18 @@ def valid_add_declinaison_article():
     special_id = request.form.get('id_couleur')
 
     sql = '''
+    SELECT COUNT(*) as nb_declinaisons
+    FROM declinaison
+    WHERE skin_id = %s AND usure_id = %s AND special_id = %s
+    '''
+    mycursor.execute(sql, (id_article, usure_id, special_id))
+    result = mycursor.fetchone()
+
+    if result and result['nb_declinaisons'] > 0:
+        flash(u'Cette combinaison état/type existe déjà pour cet article', 'alert-warning')
+        return redirect(f'/admin/declinaison_article/add?id_article={id_article}')
+
+    sql = '''
     INSERT INTO declinaison (skin_id, prix_declinaison, stock, usure_id, special_id)  
     VALUES (%s, %s, %s, %s, %s)
     '''
