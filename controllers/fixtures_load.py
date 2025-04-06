@@ -533,7 +533,7 @@ def fct_fixtures_load():
      INSERT INTO adresse (est_favori, est_valide, nom, rue, code_postal, ville, date_utilisation, utilisateur_id) VALUES
           (1, 1, 'Domicile', '123 Rue de la Paix', '75001', 'Paris', '2024-03-15 10:30:00', 2),
           (0, 1, 'Bureau', '45 Avenue des Champs-Élysées', '75008', 'Paris', '2024-03-10 08:15:00', 2),
-          (0, 1, 'Adresse secondaire', '8 Place de la Concorde', '75001', 'Paris', '2024-02-20 14:45:00', 2),
+          (0, 1, 'Adresse secondaire', '8 Place de la Concorde', '71001', 'Paris', '2024-02-20 14:45:00', 2),
           (1, 1, 'Maison principale', '27 Boulevard Haussmann', '75009', 'Paris', '2024-03-18 16:30:00', 3),
           (0, 1, 'Adresse de livraison', '14 Rue de Rivoli', '75004', 'Paris', '2024-03-05 11:20:00', 3),
           (1, 1, 'Résidence principale', '36 Avenue Montaigne', '75008', 'Paris', '2024-03-20 09:45:00', 4),
