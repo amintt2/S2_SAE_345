@@ -180,14 +180,21 @@ def client_commande_add():
         WHERE adresse.id_adresse IN (%s, %s)
         AND adresse.utilisateur_id = %s
     '''
+    # Ensure IDs are distinct for the IN clause if they are the same, 
+    # but it's better to handle this in Python logic after fetching.
     curseur.execute(sql, (identifiant_adresse_livraison, identifiant_adresse_facturation, identifiant_client))
     adresses_verifiees = curseur.fetchall()
     
-    # Vérification en Python
-    if len(adresses_verifiees) < 2:
-        flash(u'Une des adresses sélectionnées n\'existe pas', 'alert-warning')
+    # Vérification en Python - revised logic
+    returned_ids = {addr['id_adresse'] for addr in adresses_verifiees}
+    adresse_livraison_ok = int(identifiant_adresse_livraison) in returned_ids
+    adresse_facturation_ok = int(identifiant_adresse_facturation) in returned_ids
+
+    if not adresse_livraison_ok or not adresse_facturation_ok:
+        flash(u'Une des adresses sélectionnées n\'existe pas ou ne vous appartient pas.', 'alert-warning')
         return redirect('/client/commande/valide')
     
+    # Check if all verified addresses are actually valid (est_valide == 1)
     adresses_valides = all(adresse['est_valide'] == 1 for adresse in adresses_verifiees)
     if not adresses_valides:
         flash(u'Une des adresses sélectionnées n\'est pas valide', 'alert-warning')
