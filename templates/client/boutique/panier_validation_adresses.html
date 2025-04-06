@@ -30,14 +30,24 @@
                                 
                                 <div class="mb-4">
                                     <label for="id_adresse_livraison" class="block text-sm font-medium text-gray-300 mb-2">Choisir une adresse :</label>
-                                    <select id="id_adresse_livraison" name="adresse_livraison_id" onchange="this.form.submit()" class="block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:ring-accent-blue focus:border-accent-blue">
+                                    <select id="id_adresse_livraison" name="adresse_livraison_id" class="block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:ring-accent-blue focus:border-accent-blue">
                                         {% for adresse in adresses %}
-                                            <option value="{{ adresse.id_adresse }}" {% if request.values.get('adresse_livraison_id') == adresse.id_adresse|string or (not request.values.get('adresse_livraison_id') and id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse) %}selected{% endif %}>
-                                                {{ adresse.nom }} {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}(favori){% endif %} - {{ adresse.rue }} {{ adresse.code_postal }} {{ adresse.ville }}
-                                            </option>
+                                            {% if adresse.est_valide %}
+                                                {% set selected = false %}
+                                                {% if request.values.get('adresse_livraison_id') == adresse.id_adresse|string %}
+                                                    {% set selected = true %}
+                                                {% elif not request.values.get('adresse_livraison_id') and id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}
+                                                    {% set selected = true %}
+                                                {% endif %}
+                                                
+                                                <option value="{{ adresse.id_adresse }}" {% if selected %}selected{% endif %}>
+                                                    {{ adresse.nom }} 
+                                                    {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}(favori){% endif %} 
+                                                    - {{ adresse.rue }} {{ adresse.code_postal }} {{ adresse.ville }}
+                                                </option>
+                                            {% endif %}
                                         {% endfor %}
                                     </select>
-                                    <input type="hidden" name="validation_etape" value="adresse">
                                 </div>
                             </div>
                             
@@ -53,26 +63,37 @@
                                 <div class="mb-4">
                                     {% set adresse_livraison_id = request.values.get('adresse_livraison_id', id_adresse_fav|string if id_adresse_fav != 0 else '0') %}
                                     {% set adresse_facturation_id = request.values.get('adresse_facturation_id', id_adresse_fav|string if id_adresse_fav != 0 else '0') %}
+                                    {% set adresses_identiques = adresse_livraison_id == adresse_facturation_id and adresse_livraison_id != '0' %}
+                                    {% set message_class = "mb-3 p-2 rounded-md bg-green-500/20 text-green-300 text-sm" %}
                                     
                                     <!-- Message indiquant que les adresses sont identiques -->
-                                    {% if adresse_livraison_id == adresse_facturation_id and adresse_livraison_id != '0' %}
-                                    <div class="mb-3 p-2 rounded-md bg-green-500/20 text-green-300 text-sm">
+                                    <div id="msgIdentique" class="{{ message_class }} {% if not adresses_identiques %}hidden{% endif %}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                         </svg>
                                         L'adresse de facturation est identique à l'adresse de livraison
                                     </div>
-                                    <input type="hidden" name="adresse_identique" value="adresse_identique">
-                                    {% endif %}
+                                    <input type="hidden" id="adresse_identique" name="adresse_identique" value="{% if adresses_identiques %}adresse_identique{% endif %}">
                                     
                                     <!-- Sélection d'adresse de facturation (toujours visible) -->
                                     <div>
                                         <label for="id_adresse_facturation" class="block text-sm font-medium text-gray-300 mb-2">Choisir une adresse :</label>
-                                        <select id="id_adresse_facturation" name="adresse_facturation_id" onchange="this.form.submit()" class="block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:ring-accent-blue focus:border-accent-blue">
+                                        <select id="id_adresse_facturation" name="adresse_facturation_id" class="block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:ring-accent-blue focus:border-accent-blue">
                                             {% for adresse in adresses %}
-                                                <option value="{{ adresse.id_adresse }}" {% if request.values.get('adresse_facturation_id') == adresse.id_adresse|string or (not request.values.get('adresse_facturation_id') and id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse) %}selected{% endif %}>
-                                                    {{ adresse.nom }} {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}(favori){% endif %} - {{ adresse.rue }} {{ adresse.code_postal }} {{ adresse.ville }}
-                                                </option>
+                                                {% if adresse.est_valide %}
+                                                    {% set selected = false %}
+                                                    {% if request.values.get('adresse_facturation_id') == adresse.id_adresse|string %}
+                                                        {% set selected = true %}
+                                                    {% elif not request.values.get('adresse_facturation_id') and id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}
+                                                        {% set selected = true %}
+                                                    {% endif %}
+                                                    
+                                                    <option value="{{ adresse.id_adresse }}" {% if selected %}selected{% endif %}>
+                                                        {{ adresse.nom }} 
+                                                        {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}(favori){% endif %} 
+                                                        - {{ adresse.rue }} {{ adresse.code_postal }} {{ adresse.ville }}
+                                                    </option>
+                                                {% endif %}
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -80,7 +101,8 @@
                             </div>
                         </div>
                         
-                        <div class="mt-8 flex justify-center">
+                        <div class="mt-6 flex justify-center">
+                            <!-- Bouton pour finaliser la commande -->
                             <button type="submit" name="finaliser" value="1" class="rounded-md bg-accent-blue hover:bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors duration-200 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
@@ -88,6 +110,9 @@
                                 Finaliser ma commande
                             </button>
                         </div>
+                        
+                        <!-- Champ caché pour indiquer l'étape -->
+                        <input type="hidden" name="validation_etape" value="adresse">
                     </form>
                 </div>
             </div>
@@ -116,4 +141,38 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const adresseLivraisonSelect = document.getElementById('id_adresse_livraison');
+        const adresseFacturationSelect = document.getElementById('id_adresse_facturation');
+        const messageIdentique = document.getElementById('msgIdentique');
+        const hiddenInput = document.getElementById('adresse_identique');
+        
+        // Fonction pour vérifier si les adresses sont identiques
+        function checkIfAddressesAreIdentical() {
+            const livraisonValue = adresseLivraisonSelect.value;
+            const facturationValue = adresseFacturationSelect.value;
+            
+            if (livraisonValue === facturationValue) {
+                // Les adresses sont identiques
+                messageIdentique.classList.remove('hidden');
+                hiddenInput.value = 'adresse_identique';
+            } else {
+                // Les adresses sont différentes
+                messageIdentique.classList.add('hidden');
+                hiddenInput.value = '';
+            }
+        }
+        
+        // Vérifier au chargement de la page
+        checkIfAddressesAreIdentical();
+        
+        // Ajouter des écouteurs d'événements pour les changements de sélection
+        adresseLivraisonSelect.addEventListener('change', checkIfAddressesAreIdentical);
+        adresseFacturationSelect.addEventListener('change', checkIfAddressesAreIdentical);
+    });
+</script>
 {% endblock %}
