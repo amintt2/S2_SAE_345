@@ -62,6 +62,7 @@ def admin_commande_show():
             INNER JOIN special sp ON d.special_id = sp.id_special
             INNER JOIN commande ON ligne_commande.commande_id = commande.id_commande
             WHERE ligne_commande.commande_id = %s
+            ORDER BY commande.etat_id
         '''
         mycursor.execute(sql, (id_commande,))
         articles_commande = mycursor.fetchall()
