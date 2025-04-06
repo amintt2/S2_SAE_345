@@ -145,6 +145,22 @@ def valid_edit_declinaison_article():
     prix = request.form.get('prix')
 
     mycursor = get_db().cursor()
+
+    sql = '''
+    SELECT COUNT(*) as nb_declinaisons
+    FROM declinaison
+    WHERE skin_id = %s 
+    AND usure_id = %s 
+    AND special_id = %s 
+    AND id_declinaison != %s
+    '''
+    mycursor.execute(sql, (id_article, usure_id, special_id, id_declinaison_article))
+    result = mycursor.fetchone()
+
+    if result and result['nb_declinaisons'] > 0:
+        flash(u'Cette combinaison état/type existe déjà pour cet article', 'alert-warning')
+        return redirect(f'/admin/article/edit?id_article={id_article}')
+
     sql = '''
     UPDATE declinaison 
     SET stock = %s, usure_id = %s, special_id = %s, prix_declinaison = %s

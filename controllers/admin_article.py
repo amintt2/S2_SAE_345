@@ -26,7 +26,11 @@ def show_article():
         type_skin.libelle_type_skin AS libelle,
         MIN(declinaison.prix_declinaison) AS prix_min,
         MAX(declinaison.prix_declinaison) AS prix_max,
-        SUM(declinaison.stock) AS stock_total,
+        (
+            SELECT SUM(d2.stock)
+            FROM declinaison d2
+            WHERE d2.skin_id = skin.id_skin
+        ) AS stock_total,
         MIN(declinaison.stock) AS min_stock,
         COUNT(DISTINCT commande.id_commande) AS nb_commandes,
         COUNT(DISTINCT declinaison.id_declinaison) AS nb_declinaisons,
@@ -36,8 +40,8 @@ def show_article():
         AVG(note.note) AS note_moyenne,
         COUNT(DISTINCT note.skin_id, note.utilisateur_id) AS nb_notes
     FROM skin
-    LEFT JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
     LEFT JOIN declinaison ON skin.id_skin = declinaison.skin_id
+    LEFT JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
     LEFT JOIN ligne_commande ON declinaison.id_declinaison = ligne_commande.declinaison_id
     LEFT JOIN commande ON ligne_commande.commande_id = commande.id_commande
     LEFT JOIN ligne_panier ON declinaison.id_declinaison = ligne_panier.declinaison_id
@@ -135,6 +139,25 @@ def delete_article():
         return redirect('/admin/article/show')
 
     sql = '''
+    DELETE FROM commentaire 
+    WHERE skin_id = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+
+    sql = '''
+    DELETE FROM note 
+    WHERE skin_id = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+
+    sql = '''
+    DELETE lp FROM ligne_panier lp
+    JOIN declinaison d ON lp.declinaison_id = d.id_declinaison
+    WHERE d.skin_id = %s
+    '''
+    mycursor.execute(sql, (id_article,))
+
+    sql = '''
     DELETE FROM declinaison 
     WHERE skin_id = %s
     '''
@@ -147,8 +170,8 @@ def delete_article():
     mycursor.execute(sql, (id_article,))
 
     get_db().commit()
-    flash(u'Article supprimé', 'alert-success')
-
+    flash(u'Article supprimé, id : ' + id_article, 'alert-success')
+    
     return redirect('/admin/article/show')
 
 

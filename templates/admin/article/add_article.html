@@ -46,7 +46,7 @@
                             <div>
                                 <label class="block mb-2">État de l'article</label>
                                 <select name="usure_id" required
-                                        class="w-full rounded px-3 py-2 border bg-transparent text-inherit focus:ring-1">
+                                        class="w-full rounded px-3 py-2 border bg-white text-black focus:ring-1">
                                     <option value="">Sélectionner un état</option>
                                     {% for usure in usures %}
                                         <option value="{{ usure.id_usure }}">{{ usure.libelle_usure }}</option>
@@ -57,7 +57,7 @@
                             <div>
                                 <label class="block mb-2">Type spécial</label>
                                 <select name="special_id" required
-                                        class="w-full rounded px-3 py-2 border bg-transparent text-inherit focus:ring-1">
+                                        class="w-full rounded px-3 py-2 border bg-white text-black focus:ring-1">
                                     <option value="">Sélectionner un type spécial</option>
                                     {% for special in specials %}
                                         <option value="{{ special.id_special }}">{{ special.libelle_special }}</option>
@@ -70,7 +70,7 @@
                             <div>
                                 <label class="block mb-2">Type de l'article</label>
                                 <select name="type_article_id" required
-                                        class="w-full rounded px-3 py-2 border bg-transparent text-inherit focus:ring-1">
+                                        class="w-full rounded px-3 py-2 border bg-white text-black focus:ring-1">
                                     <option value="">Sélectionner un type</option>
                                     {% for type in types_article %}
                                         <option value="{{ type.id_type_article }}">{{ type.libelle }}</option>
@@ -104,3 +104,4 @@
     </div>
 </div>
 {% endblock %}
+
