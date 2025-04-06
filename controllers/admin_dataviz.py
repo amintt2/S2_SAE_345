@@ -161,3 +161,38 @@ def show_dataviz_map():
                           )
 
 
+@admin_dataviz.route('/admin/dataviz/stock')
+def dataviz_stock():
+    mycursor = get_db().cursor()
+    
+    sql = '''
+    SELECT 
+        CONCAT(s.nom_skin, ' - ', u.libelle_usure, ' - ', sp.libelle_special) as declinaison,
+        d.stock as quantite,
+        d.stock * d.prix_declinaison AS valeur_stock
+    FROM declinaison d
+    JOIN skin s ON d.skin_id = s.id_skin
+    JOIN usure u ON d.usure_id = u.id_usure
+    JOIN special sp ON d.special_id = sp.id_special
+    ORDER BY valeur_stock DESC
+    '''
+    mycursor.execute(sql)
+    stocks = mycursor.fetchall()
+
+    # Préparer les données pour les graphiques
+    labels = [item['declinaison'] for item in stocks]
+    quantities = [float(item['quantite']) for item in stocks]
+    values = [float(item['valeur_stock']) for item in stocks]
+    
+    # Calculer les totaux
+    total_items = sum(quantities)
+    total_value = sum(values)
+
+    return render_template('admin/dataviz/dataviz_etat_stock.html',
+                         labels=labels,
+                         quantities=quantities,
+                         values=values,
+                         total_items=total_items,
+                         total_value=total_value)
+
+

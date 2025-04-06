@@ -1,0 +1,120 @@
+{% extends 'admin/layout_admin.html' %}
+
+{% block javascripts %}
+    {{ super() }}
+{% endblock %}
+
+{% block javascripts_head %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+{% endblock %}
+
+{% block title %}
+    <title>État des stocks</title>
+{% endblock %}
+
+
+{% block body %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg p-6">
+        <h2 class="text-xl font-bold text-white mb-6">Visualisation des stocks</h2>
+
+        <!-- Résumé des stocks -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gray-700 rounded-lg p-4">
+                <h3 class="text-lg font-medium text-white mb-4">Valeur totale du stock</h3>
+                <p class="text-3xl font-bold text-green-400">{{ "{:,.2f} €".format(total_value) }}</p>
+            </div>
+            <div class="bg-gray-700 rounded-lg p-4">
+                <h3 class="text-lg font-medium text-white mb-4">Articles en stock</h3>
+                <p class="text-3xl font-bold text-blue-400">{{ total_items }}</p>
+            </div>
+        </div>
+
+        <!-- Tableau des stocks -->
+        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-blue-800 mb-8">
+            <table class="min-w-full text-sm text-center text-gray-500 dark:text-gray-300">
+                <thead class="uppercase bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th class="px-4 py-2">Déclinaison</th>
+                        <th class="px-4 py-2">Quantité en stock</th>
+                        <th class="px-4 py-2">Valeur du stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(labels|length) %}
+                        <tr class="border-t dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <td class="px-4 py-2">{{ labels[i] }}</td>
+                            <td class="px-4 py-2">{{ quantities[i] }}</td>
+                            <td class="px-4 py-2">{{ "{:,.2f} €".format(values[i]) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Graphiques -->
+        <div class="space-y-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-blue-800">
+                <p class="text-center text-blue-400 font-medium mt-2">Quantités en stock par déclinaison</p>
+                <canvas id="stockChart" class="w-full h-96"></canvas>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-blue-800">
+                <p class="text-center text-blue-400 font-medium mt-2">Valeur du stock par déclinaison</p>
+                <canvas id="valueChart" class="w-full h-96"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function make_chart(ctx, labels, values, type = "bar") {
+    return new Chart(ctx, {
+        type: type,
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                fill: false,
+                backgroundColor: "rgba(54, 162, 235, 0.6)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: { 
+                display: false 
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        fontColor: '#E5E7EB',
+                        callback: function(value) {
+                            return value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+                        }
+                    },
+                    gridLines: {
+                        color: "rgba(255, 255, 255, 0.1)"
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: '#E5E7EB'
+                    },
+                    gridLines: {
+                        color: "rgba(255, 255, 255, 0.1)"
+                    }
+                }]
+            }
+        }
+    });
+}
+
+const stockChart = make_chart(document.getElementById("stockChart").getContext("2d"), {{ labels | safe }}, {{ quantities | safe }});
+
+const valueChart = make_chart(document.getElementById("valueChart").getContext("2d"), {{ labels | safe }}, {{ values | safe }});
+</script>
+{% endblock %}
