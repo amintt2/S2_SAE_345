@@ -365,20 +365,7 @@ INSERT INTO ligne_commande (declinaison_id, commande_id, prix, quantite) VALUES
 INSERT INTO ligne_panier (declinaison_id, utilisateur_id, quantite, date_ajout) VALUES
    (1, 2, 1, '2024-03-20 10:30:00'),
    (2, 2, 4, '2023-06-24'),
-   (2, 3, 3, '2023-06-24'),
-   (3, 8, 2, '2024-04-02 09:15:00'),
-   (7, 8, 1, '2024-04-02 09:30:00'),
-   (5, 9, 1, '2024-04-02 14:45:00'),
-   (11, 9, 3, '2024-04-02 15:00:00'),
-   (9, 10, 1, '2024-04-03 10:20:00'),
-   (15, 10, 2, '2024-04-03 10:35:00'),
-   (8, 4, 1, '2024-03-25 09:45:00'),
-   (12, 5, 1, '2024-03-26 14:15:00'),
-   (17, 5, 2, '2024-03-26 14:30:00'),
-   (20, 6, 1, '2024-03-27 11:20:00'),
-   (21, 6, 1, '2024-03-27 11:35:00'),
-   (23, 7, 1, '2024-03-28 16:10:00'),
-   (24, 7, 2, '2024-03-28 16:25:00');
+   (2, 3, 3, '2023-06-24');
 
 
 INSERT INTO note (utilisateur_id, skin_id, note) VALUES
@@ -454,10 +441,6 @@ INSERT INTO commentaire (utilisateur_id, skin_id, date_publication, commentaire,
    (1, 5, '2024-03-24 08:30:00', 'Vous avez raison concernant l\'AK-47 Gold Arabesque, c\'est un skin qui prend de la valeur avec le temps. Merci pour votre analyse pertinente !', 1, 21),
    (1, 6, '2024-03-25 10:45:00', 'Nous sommes ravis que la Butterfly Marble Fade améliore vos streams ! C\'est effectivement un couteau très apprécié pour ses animations fluides.', 1, 7),
    (1, 12, '2024-03-26 13:20:00', 'Félicitations pour votre investissement judicieux ! L\'AWP Gungnir continue en effet de prendre de la valeur sur le marché.', 1, 14);
-
-(1, 2, 1, '2024-03-20 10:30:00'),
-(2, 2, 4, '2023-06-24'),
-(2, 3, 3, '2023-06-24');
 
 INSERT INTO liste_envie (skin_id, utilisateur_id, date_update) VALUES
 (1, 2, '2024-03-20 10:30:00'),
