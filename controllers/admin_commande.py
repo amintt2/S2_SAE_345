@@ -31,7 +31,7 @@ def admin_commande_show():
         LEFT JOIN etat AS e ON c.etat_id = e.id_etat
         LEFT JOIN utilisateur ON c.utilisateur_id = utilisateur.id_utilisateur
         GROUP BY c.id_commande, c.date_achat, e.libelle_etat, e.id_etat, utilisateur.login
-        ORDER BY c.date_achat DESC
+        ORDER BY e.id_etat ASC, c.date_achat DESC
     '''
     mycursor.execute(sql)
     commandes = mycursor.fetchall()
