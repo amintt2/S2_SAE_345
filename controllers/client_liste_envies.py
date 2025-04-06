@@ -303,22 +303,23 @@ def client_liste_envies_first():
     id_client = session['id_user']
     id_skin = request.args.get('id_article')
     
-    sql = '''SELECT skin_id, date_update 
-             FROM liste_envie 
-             WHERE utilisateur_id = %s 
-             ORDER BY date_update DESC 
-             LIMIT 1'''
-    mycursor.execute(sql, (id_client,))
-    current_first = mycursor.fetchone()
+    # 1. D'abord, mettre l'article sélectionné à une date temporaire très ancienne
+    sql = '''UPDATE liste_envie 
+             SET date_update = DATE_SUB(NOW(), INTERVAL 2 YEAR)
+             WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql, (id_client, id_skin))
     
-    if current_first and current_first['skin_id'] != id_skin:
-        sql = '''UPDATE liste_envie 
-                 SET date_update = CASE 
-                     WHEN skin_id = %s THEN %s
-                     WHEN skin_id = %s THEN %s
-                 END
-                 WHERE utilisateur_id = %s AND skin_id IN (%s, %s)'''
-        mycursor.execute(sql, (id_skin, current_first['date_update'], current_first['skin_id'], 'NOW()', id_client, id_skin, current_first['skin_id']))
+    # 2. Mettre à jour tous les autres articles avec des dates uniques
+    sql = '''UPDATE liste_envie 
+             SET date_update = DATE_SUB(NOW(), INTERVAL skin_id SECOND)
+             WHERE utilisateur_id = %s AND skin_id != %s'''
+    mycursor.execute(sql, (id_client, id_skin))
+    
+    # 3. Finalement, mettre l'article sélectionné en premier
+    sql = '''UPDATE liste_envie 
+             SET date_update = NOW()
+             WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql, (id_client, id_skin))
     
     get_db().commit()
     return redirect('/client/envies/show')
@@ -329,22 +330,23 @@ def client_liste_envies_last():
     id_client = session['id_user']
     id_skin = request.args.get('id_article')
     
-    sql = '''SELECT skin_id, date_update 
-             FROM liste_envie 
-             WHERE utilisateur_id = %s 
-             ORDER BY date_update ASC 
-             LIMIT 1'''
-    mycursor.execute(sql, (id_client,))
-    current_last = mycursor.fetchone()
+    # 1. D'abord, mettre l'article sélectionné à une date temporaire très future
+    sql = '''UPDATE liste_envie 
+             SET date_update = DATE_ADD(NOW(), INTERVAL 2 YEAR)
+             WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql, (id_client, id_skin))
     
-    if current_last and current_last['skin_id'] != id_skin:
-        sql = '''UPDATE liste_envie 
-                 SET date_update = CASE 
-                     WHEN skin_id = %s THEN %s
-                     WHEN skin_id = %s THEN %s
-                 END
-                 WHERE utilisateur_id = %s AND skin_id IN (%s, %s)'''
-        mycursor.execute(sql, (id_skin, current_last['date_update'], current_last['skin_id'], 'NOW()', id_client, id_skin, current_last['skin_id']))
+    # 2. Mettre à jour tous les autres articles avec des dates uniques
+    sql = '''UPDATE liste_envie 
+             SET date_update = DATE_SUB(NOW(), INTERVAL skin_id SECOND)
+             WHERE utilisateur_id = %s AND skin_id != %s'''
+    mycursor.execute(sql, (id_client, id_skin))
+    
+    # 3. Finalement, mettre l'article sélectionné en dernier
+    sql = '''UPDATE liste_envie 
+             SET date_update = DATE_SUB(NOW(), INTERVAL 1 HOUR)
+             WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql, (id_client, id_skin))
     
     get_db().commit()
     return redirect('/client/envies/show')
