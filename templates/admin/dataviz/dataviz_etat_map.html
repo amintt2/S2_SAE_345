@@ -73,7 +73,7 @@
 
 {# Hidden data for JavaScript #}
 <div id="mapData" 
-     data-adresses="{{ adresses|tojson }}" 
+     data-adresses='{{ adresses|tojson }}' 
      data-is-revenue-view="{{ 'true' if type_viz == 'ca' else 'false' }}" 
      style="display:none;"></div>
 

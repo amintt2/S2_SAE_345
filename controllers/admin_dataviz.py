@@ -164,12 +164,30 @@ def show_dataviz_map():
     # Calcul d'un coefficient de 0 à 1 pour chaque département
     if max_nombre != 0 and max_ca != 0:
         for element in adresses:
+            # Ensure 'ca' is a float for calculations and JSON
+            ca_float = float(element['ca']) 
+            # Overwrite the original Decimal 'ca' with a float for JSON serialization
+            element['ca'] = ca_float
             indice_nombre = element['nombre'] / max_nombre
-            indice_ca = element['ca'] / max_ca
+            # Cast max_ca to float for division
+            indice_ca = ca_float / float(max_ca) 
             element['indice_nombre'] = round(indice_nombre, 2)
             element['indice_ca'] = round(indice_ca, 2)
-            element['ca_format'] = "{:,.2f}".format(element['ca'])
-    
+            # Keep original 'ca' as float (or let tojson handle it if it was already float/int)
+            # Add 'ca_format' specifically for display
+            element['ca_format'] = "{:,.2f}".format(ca_float) 
+    else:
+         # Handle cases where max_nombre or max_ca is 0 to avoid division errors
+         # And ensure keys exist even if indices are 0
+         for element in adresses:
+             element['indice_nombre'] = 0
+             element['indice_ca'] = 0
+             # Ensure 'ca' is float and format it
+             ca_float = float(element.get('ca', 0)) 
+             element['ca_format'] = "{:,.2f}".format(ca_float)
+             # Ensure 'ca' itself is present and is a float
+             element['ca'] = ca_float
+
     # Récupérer le type de visualisation (CA ou nombre de commandes)
     type_viz = request.args.get('type_viz', 'nombre')  # Par défaut: nombre de commandes
     
@@ -215,12 +233,30 @@ def show_dataviz_adresses():
     # Calcul d'un coefficient de 0 à 1 pour chaque département
     if max_nombre != 0 and max_ca != 0:
         for element in adresses:
+            # Ensure 'ca' is a float for calculations and JSON
+            ca_float = float(element['ca'])
+            # Overwrite the original Decimal 'ca' with a float for JSON serialization
+            element['ca'] = ca_float
             indice_nombre = element['nombre'] / max_nombre
-            indice_ca = element['ca'] / max_ca
+            # Cast max_ca to float for division
+            indice_ca = ca_float / float(max_ca) 
             element['indice_nombre'] = round(indice_nombre, 2)
             element['indice_ca'] = round(indice_ca, 2)
-            element['ca_format'] = "{:,.2f}".format(element['ca'])
-    
+            # Keep original 'ca' as float (or let tojson handle it if it was already float/int)
+            # Add 'ca_format' specifically for display
+            element['ca_format'] = "{:,.2f}".format(ca_float)
+    else:
+         # Handle cases where max_nombre or max_ca is 0
+         # And ensure keys exist even if indices are 0
+         for element in adresses:
+             element['indice_nombre'] = 0
+             element['indice_ca'] = 0
+             # Ensure 'ca' is float and format it
+             ca_float = float(element.get('ca', 0))
+             element['ca_format'] = "{:,.2f}".format(ca_float)
+             # Ensure 'ca' itself is present and is a float
+             element['ca'] = ca_float
+
     return render_template('admin/dataviz/dataviz_adresses.html',
                            adresses=adresses,
                            type_viz=type_viz)

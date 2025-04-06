@@ -529,5 +529,138 @@ def fct_fixtures_load():
      '''
      mycursor.execute(sql)
 
+     sql = '''
+     INSERT INTO adresse (est_favori, est_valide, nom, rue, code_postal, ville, date_utilisation, utilisateur_id) VALUES
+          (1, 1, 'Domicile', '123 Rue de la Paix', '75001', 'Paris', '2024-03-15 10:30:00', 2),
+          (0, 1, 'Bureau', '45 Avenue des Champs-Élysées', '75008', 'Paris', '2024-03-10 08:15:00', 2),
+          (0, 1, 'Adresse secondaire', '8 Place de la Concorde', '75001', 'Paris', '2024-02-20 14:45:00', 2),
+          (1, 1, 'Maison principale', '27 Boulevard Haussmann', '75009', 'Paris', '2024-03-18 16:30:00', 3),
+          (0, 1, 'Adresse de livraison', '14 Rue de Rivoli', '75004', 'Paris', '2024-03-05 11:20:00', 3),
+          (1, 1, 'Résidence principale', '36 Avenue Montaigne', '75008', 'Paris', '2024-03-20 09:45:00', 4),
+          (0, 1, 'Adresse professionnelle', '5 Rue du Faubourg Saint-Honoré', '75008', 'Paris', '2024-02-28 13:10:00', 4),
+          (1, 1, 'Domicile', '22 Rue de la Pompe', '75116', 'Paris', '2024-03-12 10:00:00', 5),
+          (0, 1, 'Adresse temporaire', '17 Quai des Grands Augustins', '75006', 'Paris', '2024-01-15 17:30:00', 5),
+          (1, 1, 'Résidence principale', '3 Rue Crébillon', '44000', 'Nantes', '2024-03-17 12:20:00', 6),
+          (0, 1, 'Adresse de livraison', '8 Rue Kervégan', '44000', 'Nantes', '2024-02-10 09:15:00', 6),
+          (1, 1, 'Domicile', '25 Rue du Château', '29200', 'Brest', '2024-03-19 14:30:00', 7),
+          (0, 1, 'Adresse professionnelle', '10 Rue Jean Macé', '29200', 'Brest', '2024-02-25 11:45:00', 7),
+          (1, 1, 'Résidence principale', '42 Boulevard Gambetta', '33000', 'Bordeaux', '2024-03-16 10:10:00', 8),
+          (0, 1, 'Adresse de livraison', '15 Rue Sainte-Catherine', '33000', 'Bordeaux', '2024-03-01 16:40:00', 8),
+          (1, 1, 'Domicile', '7 Rue de la République', '69001', 'Lyon', '2024-03-14 13:50:00', 9),
+          (0, 1, 'Adresse secondaire', '20 Rue Mercière', '69002', 'Lyon', '2024-02-18 10:30:00', 9),
+          (1, 1, 'Résidence principale', '18 Rue d''Antibes', '06400', 'Cannes', '2024-03-11 11:15:00', 10),
+          (0, 1, 'Adresse professionnelle', '5 Boulevard de la Croisette', '06400', 'Cannes', '2024-02-22 15:20:00', 10),
+          (0, 0, 'Ancienne adresse', '12 Rue Obsolète', '13001', 'Marseille', '2023-12-10 09:30:00', 2),
+          (0, 0, 'Adresse erronée', '9 Avenue Introuvable', '31000', 'Toulouse', '2023-11-05 14:45:00', 3),
+          (0, 0, 'Adresse périmée', '33 Boulevard Invalide', '59000', 'Lille', '2023-10-20 16:30:00', 4);
+     '''
+     mycursor.execute(sql)
+
+     # Update commande to include address information
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 1, adresse_facturation_id = 2 
+     WHERE id_commande = 1;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 1, adresse_facturation_id = 1 
+     WHERE id_commande = 2;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 4, adresse_facturation_id = 4 
+     WHERE id_commande = 3;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 5, adresse_facturation_id = 4 
+     WHERE id_commande = 4;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 1, adresse_facturation_id = 3 
+     WHERE id_commande = 5;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 6, adresse_facturation_id = 6 
+     WHERE id_commande = 6;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 8, adresse_facturation_id = 8 
+     WHERE id_commande = 7;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 10, adresse_facturation_id = 10 
+     WHERE id_commande = 8;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 12, adresse_facturation_id = 13 
+     WHERE id_commande = 9;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 14, adresse_facturation_id = 14 
+     WHERE id_commande = 10;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 16, adresse_facturation_id = 17 
+     WHERE id_commande = 11;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 18, adresse_facturation_id = 18 
+     WHERE id_commande = 12;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 1, adresse_facturation_id = 2 
+     WHERE id_commande = 13;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 4, adresse_facturation_id = 5 
+     WHERE id_commande = 14;
+     '''
+     mycursor.execute(sql)
+
+     sql = '''
+     UPDATE commande 
+     SET adresse_livraison_id = 10, adresse_facturation_id = 11 
+     WHERE id_commande = 15;
+     '''
+     mycursor.execute(sql)
+
      get_db().commit()
      return redirect('/')
