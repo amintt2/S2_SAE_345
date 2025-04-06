@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 from flask import Blueprint
 from flask import Flask, request, render_template, redirect, abort, flash, session, g
+import datetime
 
 from connexion_db import get_db
 
@@ -122,7 +123,7 @@ def client_liste_envies_show():
              INNER JOIN declinaison d ON d.skin_id = s.id_skin
              WHERE le.utilisateur_id = %s
              GROUP BY s.id_skin, s.nom_skin, s.image, t.libelle_type_skin, le.date_update
-             ORDER BY le.date_update DESC'''
+             ORDER BY le.date_update DESC, s.id_skin DESC'''
     mycursor.execute(sql, (id_client,))
     articles_liste_envies = mycursor.fetchall()
     
@@ -301,52 +302,124 @@ def client_liste_envies_down():
 def client_liste_envies_first():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    id_skin = request.args.get('id_article')
-    
-    # 1. D'abord, mettre l'article sélectionné à une date temporaire très ancienne
-    sql = '''UPDATE liste_envie 
-             SET date_update = DATE_SUB(NOW(), INTERVAL 2 YEAR)
-             WHERE utilisateur_id = %s AND skin_id = %s'''
-    mycursor.execute(sql, (id_client, id_skin))
-    
-    # 2. Mettre à jour tous les autres articles avec des dates uniques
-    sql = '''UPDATE liste_envie 
-             SET date_update = DATE_SUB(NOW(), INTERVAL skin_id SECOND)
-             WHERE utilisateur_id = %s AND skin_id != %s'''
-    mycursor.execute(sql, (id_client, id_skin))
-    
-    # 3. Finalement, mettre l'article sélectionné en premier
-    sql = '''UPDATE liste_envie 
-             SET date_update = NOW()
-             WHERE utilisateur_id = %s AND skin_id = %s'''
-    mycursor.execute(sql, (id_client, id_skin))
-    
+    target_skin_id = request.args.get('id_article')
+
+    if not target_skin_id:
+        flash(u'ID Article manquant.', 'alert-warning')
+        return redirect('/client/envies/show')
+
+    try:
+        target_skin_id = int(target_skin_id)
+    except ValueError:
+        flash(u'ID Article invalide.', 'alert-warning')
+        return redirect('/client/envies/show')
+
+    # Get target item's current date
+    sql_get_target = '''SELECT date_update FROM liste_envie 
+                          WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_get_target, (id_client, target_skin_id))
+    target_item = mycursor.fetchone()
+    if not target_item:
+        flash(u'Article non trouvé dans la liste.', 'alert-danger')
+        return redirect('/client/envies/show')
+    target_date = target_item['date_update']
+
+    # Get the current first item (max date)
+    sql_get_first = '''SELECT skin_id, date_update FROM liste_envie 
+                       WHERE utilisateur_id = %s 
+                       ORDER BY date_update DESC 
+                       LIMIT 1'''
+    mycursor.execute(sql_get_first, (id_client,))
+    first_item = mycursor.fetchone()
+
+    if not first_item or first_item['skin_id'] == target_skin_id:
+        # It's already the first item or list is empty/only has this item
+        return redirect('/client/envies/show')
+
+    first_skin_id = first_item['skin_id']
+    first_date = first_item['date_update']
+
+    # Perform the swap using a temporary date to avoid conflicts
+    temp_date = datetime.datetime.now() + datetime.timedelta(days=365) # Far future date
+
+    # 1. Move target item to temp date
+    sql_update_target_temp = '''UPDATE liste_envie SET date_update = %s 
+                                WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_update_target_temp, (temp_date, id_client, target_skin_id))
+
+    # 2. Move original first item to target's original date
+    sql_update_first_to_target = '''UPDATE liste_envie SET date_update = %s 
+                                    WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_update_first_to_target, (target_date, id_client, first_skin_id))
+
+    # 3. Move target item (now at temp date) to the original first date
+    sql_update_target_final = '''UPDATE liste_envie SET date_update = %s 
+                                 WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_update_target_final, (first_date, id_client, target_skin_id))
+
     get_db().commit()
+    flash(u'Article déplacé en première position.', 'alert-success')
     return redirect('/client/envies/show')
 
 @client_liste_envies.route('/client/envies/last', methods=['get'])
 def client_liste_envies_last():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    id_skin = request.args.get('id_article')
+    target_skin_id = request.args.get('id_article')
+
+    if not target_skin_id:
+        flash(u'ID Article manquant.', 'alert-warning')
+        return redirect('/client/envies/show')
     
-    # 1. D'abord, mettre l'article sélectionné à une date temporaire très future
-    sql = '''UPDATE liste_envie 
-             SET date_update = DATE_ADD(NOW(), INTERVAL 2 YEAR)
-             WHERE utilisateur_id = %s AND skin_id = %s'''
-    mycursor.execute(sql, (id_client, id_skin))
-    
-    # 2. Mettre à jour tous les autres articles avec des dates uniques
-    sql = '''UPDATE liste_envie 
-             SET date_update = DATE_SUB(NOW(), INTERVAL skin_id SECOND)
-             WHERE utilisateur_id = %s AND skin_id != %s'''
-    mycursor.execute(sql, (id_client, id_skin))
-    
-    # 3. Finalement, mettre l'article sélectionné en dernier
-    sql = '''UPDATE liste_envie 
-             SET date_update = DATE_SUB(NOW(), INTERVAL 1 HOUR)
-             WHERE utilisateur_id = %s AND skin_id = %s'''
-    mycursor.execute(sql, (id_client, id_skin))
-    
+    try:
+        target_skin_id = int(target_skin_id)
+    except ValueError:
+        flash(u'ID Article invalide.', 'alert-warning')
+        return redirect('/client/envies/show')
+
+    # Get target item's current date
+    sql_get_target = '''SELECT date_update FROM liste_envie 
+                          WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_get_target, (id_client, target_skin_id))
+    target_item = mycursor.fetchone()
+    if not target_item:
+        flash(u'Article non trouvé dans la liste.', 'alert-danger')
+        return redirect('/client/envies/show')
+    target_date = target_item['date_update']
+
+    # Get the current last item (min date)
+    sql_get_last = '''SELECT skin_id, date_update FROM liste_envie 
+                      WHERE utilisateur_id = %s 
+                      ORDER BY date_update ASC 
+                      LIMIT 1'''
+    mycursor.execute(sql_get_last, (id_client,))
+    last_item = mycursor.fetchone()
+
+    if not last_item or last_item['skin_id'] == target_skin_id:
+        # It's already the last item or list is empty/only has this item
+        return redirect('/client/envies/show')
+
+    last_skin_id = last_item['skin_id']
+    last_date = last_item['date_update']
+
+    # Perform the swap using a temporary date to avoid conflicts
+    temp_date = datetime.datetime.now() - datetime.timedelta(days=365) # Far past date
+
+    # 1. Move target item to temp date
+    sql_update_target_temp = '''UPDATE liste_envie SET date_update = %s 
+                                WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_update_target_temp, (temp_date, id_client, target_skin_id))
+
+    # 2. Move original last item to target's original date
+    sql_update_last_to_target = '''UPDATE liste_envie SET date_update = %s 
+                                   WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_update_last_to_target, (target_date, id_client, last_skin_id))
+
+    # 3. Move target item (now at temp date) to the original last date
+    sql_update_target_final = '''UPDATE liste_envie SET date_update = %s 
+                                 WHERE utilisateur_id = %s AND skin_id = %s'''
+    mycursor.execute(sql_update_target_final, (last_date, id_client, target_skin_id))
+
     get_db().commit()
+    flash(u'Article déplacé en dernière position.', 'alert-success')
     return redirect('/client/envies/show')
