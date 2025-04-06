@@ -91,7 +91,11 @@ def admin_commande_valider():
     commande_id = request.form.get('id_commande', None)
     if commande_id != None:
         print(commande_id)
-        sql = 'UPDATE commande SET etat_id = 2 WHERE id_commande = %s'
+        sql = '''
+        UPDATE commande 
+        SET etat_id = 2 
+        WHERE id_commande = %s
+        '''
         mycursor.execute(sql, commande_id)
         get_db().commit()
     return redirect('/admin/commande/show')

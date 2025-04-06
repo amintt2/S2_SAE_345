@@ -26,9 +26,11 @@ def add_declinaison_article():
     mycursor.execute(sql, (id_article,))
     article = mycursor.fetchone()
 
-    sql = '''SELECT id_usure, libelle_usure 
+    sql = '''
+    SELECT id_usure, libelle_usure 
     FROM usure 
-    ORDER BY libelle_usure'''
+    ORDER BY libelle_usure
+    '''
     mycursor.execute(sql)
     tailles = mycursor.fetchall()
 
@@ -111,11 +113,17 @@ def edit_declinaison_article():
     mycursor.execute(sql, (id_article,))
     declinaisons = mycursor.fetchall()
 
-    sql = "SELECT id_usure, libelle_usure FROM usure"
+    sql = '''
+    SELECT id_usure, libelle_usure 
+    FROM usure
+    '''
     mycursor.execute(sql)
     tailles = mycursor.fetchall() 
 
-    sql = "SELECT id_special, libelle_special FROM special"
+    sql = '''
+    SELECT id_special, libelle_special 
+    FROM special
+    '''
     mycursor.execute(sql)
     couleurs = mycursor.fetchall()  
 
@@ -170,7 +178,10 @@ def delete_declinaison_article():
         flash(u'Impossible de supprimer une déclinaison qui a été commandée', 'alert-warning')
         return redirect(f'/admin/article/edit?id_article={id_article}')
 
-    sql = "DELETE FROM declinaison WHERE id_declinaison = %s"
+    sql = '''
+    DELETE FROM declinaison 
+    WHERE id_declinaison = %s
+    '''
     mycursor.execute(sql, (id_declinaison,))
     get_db().commit()
 

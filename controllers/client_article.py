@@ -15,7 +15,6 @@ def client_article_show():                                 # remplace client_ind
     id_client = session['id_user']
     list_param = []
 
-    # V1
     sql = '''
         SELECT 
             skin.nom_skin AS nom,
@@ -106,11 +105,10 @@ def client_article_show():                                 # remplace client_ind
             sql += ' AND prix_declinaison <= %s'
             list_param.append(int(session['filter_prix_max']))
             
-    # Group by
+
     sql += ' GROUP BY skin.nom_skin, moyenne_notes, nb_notes, nb_commentaires' 
     
 
-    # Récupération des articles depuis la requête principale
     mycursor.execute(sql, tuple(list_param) if list_param else None)
     articles = mycursor.fetchall()
 
@@ -119,7 +117,6 @@ def client_article_show():                                 # remplace client_ind
     if articles:
         for article in articles:
             declinaisons = get_declinaison(article['nom'])
-            # Inclut uniquement les articles ayant des déclinaisons disponibles
             if declinaisons:
                 article['declinaisons'] = declinaisons
                 article['prix_min'] = declinaisons[0]['prix_min']
@@ -142,8 +139,6 @@ def client_article_show():                                 # remplace client_ind
     types_skin = mycursor.fetchall()
     types_article = types_skin
     
-    
-    # Requête refactorisée pour les articles dans le panier
     sql = '''
         SELECT 
             ligne_panier.quantite,

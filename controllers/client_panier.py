@@ -9,12 +9,14 @@ client_panier = Blueprint('client_panier', __name__,
                         template_folder='templates')
 
 
-# --- Refactored Helper Functions for Declinaison Stock ---
 
 def _get_declinaison_stock(declinaison_id):
     """Fetches the current stock for a specific declinaison."""
     mycursor = get_db().cursor()
-    sql = 'SELECT stock FROM declinaison WHERE id_declinaison = %s'
+    sql = '''
+    SELECT stock 
+    FROM declinaison 
+    WHERE id_declinaison = %s'''
     mycursor.execute(sql, (declinaison_id,))
     result = mycursor.fetchone()
     return result['stock'] if result else 0
@@ -28,8 +30,6 @@ def _update_declinaison_stock(declinaison_id, quantity_change):
         WHERE id_declinaison = %s
     '''
     mycursor.execute(sql, (quantity_change, declinaison_id))
-    # Note: We might want to add checks here to prevent stock going below zero
-    # if the database doesn't enforce it.
 
 def _decrease_declinaison_stock(declinaison_id, quantity_to_remove):
     """Decreases stock for a declinaison, ensuring stock doesn't go below zero. 
@@ -44,10 +44,8 @@ def _decrease_declinaison_stock(declinaison_id, quantity_to_remove):
 
 def _restore_declinaison_stock(declinaison_id, quantity_to_add):
     """Increases stock for a declinaison (e.g., when removing from cart)."""
-    # Simple addition, assumes stock can increase indefinitely for now
     _update_declinaison_stock(declinaison_id, quantity_to_add)
 
-# --- End Refactored Helpers ---
 
 @client_panier.route('/client/panier/add', methods=['POST'])
 def client_panier_add():
@@ -97,18 +95,16 @@ def client_panier_add():
 @client_panier.route('/client/panier/update', methods=['POST'])
 def client_panier_update():
     id_client = session['id_user']
-    # Use declinaison_id from form  
     declinaison_id = request.form.get('declinaison_id')
     
     new_quantity = int(request.form.get('quantite', 1))
     declinaison_id = int(declinaison_id)
-    if new_quantity < 0: # Cannot have negative quantity
+    if new_quantity < 0: 
         flash(u"Quantité ne peut pas être négative", "alert-warning")
         return redirect('/client/article/show')
 
     mycursor = get_db().cursor()
 
-    # Get current quantity in cart
     sql_get_cart = '''
         SELECT quantite 
         FROM ligne_panier 
@@ -125,10 +121,9 @@ def client_panier_update():
     quantity_diff = new_quantity - current_quantity_in_cart
 
     if quantity_diff == 0:
-        return redirect('/client/article/show') # No change needed
+        return redirect('/client/article/show') 
 
     if new_quantity == 0:
-        # If new quantity is 0, effectively delete the line
         _restore_declinaison_stock(declinaison_id, current_quantity_in_cart)
         sql_delete = '''
             DELETE FROM ligne_panier 
@@ -136,12 +131,10 @@ def client_panier_update():
         '''
         mycursor.execute(sql_delete, (declinaison_id, id_client))
     elif quantity_diff > 0:
-        # Increase quantity: Check stock and decrease it
         actual_removed = _decrease_declinaison_stock(declinaison_id, quantity_diff)
         if actual_removed < quantity_diff:
             message = f'Stock insuffisant. {actual_removed} article(s) ajouté(s) au lieu de {quantity_diff}.'
             flash(message, 'alert-warning')
-            # Adjust the quantity to update in the cart based on actual stock removed
             quantity_to_update = current_quantity_in_cart + actual_removed
         else:
             quantity_to_update = new_quantity
@@ -154,7 +147,6 @@ def client_panier_update():
         mycursor.execute(sql_update, (quantity_to_update, declinaison_id, id_client))
         
     elif quantity_diff < 0:
-        # Decrease quantity: Restore stock and update cart
         quantity_to_restore = abs(quantity_diff)
         _restore_declinaison_stock(declinaison_id, quantity_to_restore)
         
@@ -176,8 +168,6 @@ def client_panier_delete():
     id_article = request.form.get('id_article','')
     quantite = int(request.form.get('quantite', 1))
 
-    # ---------
-    # partie 2 : on supprime une déclinaison de l'article
     id_declinaison_article = request.form.get('id_declinaison_article', None)
 
     if id_declinaison_article:
@@ -191,10 +181,8 @@ def client_panier_delete():
     return redirect('/client/article/show')
 
 
-# Refactored helper to delete a line and restore stock
 def _delete_line_and_restore_stock(declinaison_id, utilisateur_id):
     mycursor = get_db().cursor()
-    # First, find the quantity in the cart to restore stock
     sql_get_qty = '''
         SELECT quantite 
         FROM ligne_panier 
@@ -205,26 +193,22 @@ def _delete_line_and_restore_stock(declinaison_id, utilisateur_id):
 
     if cart_item:
         quantity_to_restore = cart_item['quantite']
-        
-        # Delete the line
         sql_delete = '''
             DELETE FROM ligne_panier 
             WHERE declinaison_id = %s AND utilisateur_id = %s
         '''
         mycursor.execute(sql_delete, (declinaison_id, utilisateur_id))
 
-        # Restore the stock for the specific declinaison
         _restore_declinaison_stock(declinaison_id, quantity_to_restore)
         
-        return True # Indicate success
-    return False # Indicate item not found
+        return True 
+    return False 
 
 
 @client_panier.route('/client/panier/vider', methods=['POST'])
 def client_panier_vider():
     mycursor = get_db().cursor()
     client_id = session['id_user']
-    # Fetch declinaison_id and quantity from the cart
     sql = ''' 
         SELECT declinaison_id, quantite 
         FROM ligne_panier
@@ -235,9 +219,8 @@ def client_panier_vider():
     
     if items_panier:
         for item in items_panier:
-            # Use the helper to delete line and restore stock
             _delete_line_and_restore_stock(item['declinaison_id'], client_id)
-        get_db().commit() # Commit once after processing all items
+        get_db().commit() 
         flash(u'Panier vidé.', 'alert-success')
     else:
         flash(u'Le panier est déjà vide.', 'alert-info')
@@ -248,12 +231,10 @@ def client_panier_vider():
 @client_panier.route('/client/panier/delete/line', methods=['POST'])
 def client_panier_delete_line():
     id_client = session['id_user']
-    # Use declinaison_id from form
     declinaison_id = request.form.get('declinaison_id')
 
     declinaison_id = declinaison_id
 
-    # Use the helper function to delete the line and restore stock
     deleted = _delete_line_and_restore_stock(declinaison_id, id_client)
 
     if deleted:

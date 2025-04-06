@@ -65,19 +65,8 @@ def client_commande_add():
 
     # Création de la commande
     requete_sql = '''
-        INSERT INTO commande(
-            date_achat,
-            etat_id,
-            utilisateur_id,
-            adresse_livraison_id,
-            adresse_facturation_id
-        ) VALUES (
-            NOW(),
-            1,
-            %s,
-            %s,
-            %s
-        )
+        INSERT INTO commande(date_achat, etat_id, utilisateur_id, adresse_livraison_id, adresse_facturation_id) 
+        VALUES (NOW(), 1, %s, %s, %s)
     '''
     curseur.execute(requete_sql, (identifiant_client, identifiant_adresse_livraison, identifiant_adresse_facturation))
     
@@ -86,21 +75,10 @@ def client_commande_add():
     curseur.execute(requete_sql)
     identifiant_commande = curseur.fetchone()['identifiant_derniere_insertion']
 
-    # Traitement des articles du panier
     for article in articles_panier:
-        # Ajout d'une ligne de commande
         requete_sql = '''
-            INSERT INTO ligne_commande(
-                declinaison_id,
-                commande_id,
-                prix,
-                quantite
-            ) VALUES (
-                %s,
-                %s,
-                %s,
-                %s
-            )
+            INSERT INTO ligne_commande(declinaison_id, commande_id, prix, quantite) 
+            VALUES (%s, %s, %s, %s)
         '''
         curseur.execute(requete_sql, (
             article['identifiant_declinaison'],

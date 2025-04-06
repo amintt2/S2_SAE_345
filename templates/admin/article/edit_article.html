@@ -21,7 +21,6 @@ types_article : tableau de dictionnaires
     <h2 class="text-3xl font-bold mb-6">Modifier un article</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Image Preview -->
         <div class="space-y-4">
             {%  if article.image is not none %}
                 <img class="w-64 h-64 object-contain mx-auto border-2 border-gray-300 rounded-lg p-4"
@@ -31,7 +30,6 @@ types_article : tableau de dictionnaires
             {% endif %}
         </div>
 
-        <!-- Form -->
         <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
             <form method="post" action="/admin/article/edit" enctype="multipart/form-data" class="space-y-4">
                 <input type="hidden" value="{{ article.id_article }}" name="id_article">
@@ -189,17 +187,5 @@ types_article : tableau de dictionnaires
             </table>
         </div>
     </div>
-
-    {% if pb_taille_uniq is defined and pb_taille_uniq==1 %}
-        <div class="mt-4 p-4 bg-yellow-100 text-yellow-700 rounded-lg">
-            ⚠️ Attention : une taille unique est définie avec d'autres tailles
-        </div>
-    {% endif %}
-    
-    {% if pb_couleur_uniq is defined and pb_couleur_uniq==1 %}
-        <div class="mt-4 p-4 bg-yellow-100 text-yellow-700 rounded-lg">
-            ⚠️ Attention : une couleur unique est définie avec d'autres couleurs
-        </div>
-    {% endif %}
 </div>
 {% endblock %}
