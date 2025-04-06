@@ -20,12 +20,26 @@ L'application implémente un flux de travail e-commerce complet comprenant la na
 
 ### Structure du Projet
 - **app.py** : Point d'entrée principal de l'application et enregistrement des routes
-- **connexion_db.py** : Gestion de la connexion à la base de données
+- **connexion_db.py** : Gestion de la connexion à la base de données (note : les connexions sont maintenant gérées directement dans les contrôleurs)
 - **controllers/** : Contient tous les gestionnaires de routes organisés par fonctionnalité
-  - **auth_security.py** : Fonctions d'authentification et de sécurité
-  - **client_*.py** : Fonctionnalités destinées aux clients
-  - **admin_*.py** : Fonctionnalités d'administration
-  - **fixtures_load.py** : Initialisation de la base de données et données de test
+  - **Core**:
+    - `auth_security.py`: Authentification et sécurité
+    - `fixtures_load.py`: Initialisation de la base de données et données de test
+  - **Client**:
+    - `client_article.py`: Navigation et affichage des articles
+    - `client_panier.py`: Gestion du panier
+    - `client_commande.py`: Gestion des commandes client
+    - `client_commentaire.py`: Gestion des commentaires client
+    - `client_coordonnee.py`: Gestion des adresses client
+    - `client_liste_envies.py`: Gestion de la liste d'envies
+  - **Admin**:
+    - `admin_article.py`: Gestion des articles
+    - `admin_declinaison_article.py`: Gestion des déclinaisons d'articles
+    - `admin_commande.py`: Gestion des commandes
+    - `admin_type_article.py`: Gestion des types d'articles
+    - `admin_dataviz.py`: Visualisation des données
+    - `admin_commentaire.py`: Gestion des commentaires
+    - `admin_liste_envie.py`: Gestion des listes d'envies
 - **templates/** : Templates HTML organisés par rôle d'utilisateur et fonctionnalité
   - **admin/** : Templates d'interface administrateur
   - **client/** : Templates d'interface client

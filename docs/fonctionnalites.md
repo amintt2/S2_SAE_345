@@ -2,6 +2,8 @@
 
 Ce document liste les fonctionnalités implémentées et celles qui restent à développer dans le projet, conformément au fichier contexte.txt.
 
+*Note : Cette liste est basée sur les fichiers contrôleurs présents (`/controllers`) et la documentation initiale. Le statut détaillé (✅, ⚠️, ❌) de chaque sous-fonctionnalité n'a pas été vérifié par une analyse approfondie du code récent.*
+
 ## Fonctionnalités Implémentées
 
 ### Système d'Authentification

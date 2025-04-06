@@ -1,3 +1,29 @@
+# Projet E-Commerce Flask - Skins CS:GO
+
+Bienvenue dans le projet E-Commerce pour la vente de skins CS:GO.
+
+Ce projet est une application web construite avec Flask et MySQL, permettant aux utilisateurs de parcourir, acheter et gérer des skins CS:GO, avec une interface d'administration dédiée.
+
+## Documentation Détaillée
+
+Pour une documentation complète sur l'architecture, l'installation, la structure de la base de données et les fonctionnalités, veuillez consulter le dossier `/docs` :
+
+- **[Documentation Principale](./docs/README.md)**
+- [Liste des Fonctionnalités](./docs/fonctionnalites.md)
+- [Guide de Développement](./docs/guide_developpement.md)
+- [Structure de la Base de Données](./docs/structure_bdd.md)
+
+## Démarrage Rapide
+
+1.  Clonez le dépôt.
+2.  Configurez un environnement virtuel Python.
+3.  Installez les dépendances : `pip install -r requirements.txt`
+4.  Configurez les variables d'environnement dans un fichier `.env` (voir `docs/README.md` pour les détails).
+5.  Démarrez l'application : `python app.py`
+6.  Initialisez la base de données via `http://localhost:5000/base/init` (si nécessaire).
+
+Les comptes par défaut sont disponibles dans `docs/README.md`.
+
 # SAE1.03-1.04
 
 
