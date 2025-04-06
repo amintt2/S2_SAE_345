@@ -41,7 +41,6 @@ def admin_commande_show():
     id_commande = request.args.get('id_commande', None)
     print(id_commande)
     if id_commande != None:
-        # Get order details
         sql = '''
             SELECT 
                 skin.nom_skin AS nom,
@@ -67,7 +66,6 @@ def admin_commande_show():
         mycursor.execute(sql, (id_commande,))
         articles_commande = mycursor.fetchall()
 
-        # Get customer information
         sql = '''
             SELECT 
                 utilisateur.login,

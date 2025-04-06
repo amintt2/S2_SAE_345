@@ -1,34 +1,6 @@
 {% extends "admin/layout_admin.html" %}
 {% block body %}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!--
-            <div class="mb-8 bg-gray-800 p-6 rounded-lg shadow-sm ring-1 ring-gray-700">
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-4 items-end">
-                    <div>
-                        <label for="from_date" class="block text-sm font-medium text-gray-200 mb-2">DATE DE DÉBUT</label>
-                        <input type="date" id="from_date" name="from_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
-                    </div>
-                    <div>
-                        <label for="to_date" class="block text-sm font-medium text-gray-200 mb-2">DATE DE FIN</label>
-                        <input type="date" id="to_date" name="to_date" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
-                    </div>
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-200 mb-2">STATUT</label>
-                        <select id="status" name="status" class="block w-full rounded-md border-0 py-1.5 px-3 bg-gray-700 text-gray-200 shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6">
-                            <option value="">Sélectionner...</option>
-                            <option value="submitted">En attente</option>
-                            <option value="invoiced">Facturée</option>
-                        </select>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="button" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-gray-200 shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600">EFFACER</button>
-                        <button type="button" class="rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">RECHERCHER</button>
-                    </div>
-                </div>
-            </div>
-
-        -->
-
 
         {% if articles_commande %}
         <div class="flex justify-between items-center mb-6">
@@ -38,7 +10,6 @@
             </a>
         </div>
 
-        <!-- Client Information -->
         {% if commande_adresses %}
         <div class="mb-8 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
             <div class="px-4 py-5 sm:p-6">
@@ -52,7 +23,6 @@
         </div>
         {% endif %}
 
-        <!-- Order Details Table -->
         <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
             <thead>
                 <tr>

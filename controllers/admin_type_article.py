@@ -49,7 +49,6 @@ def delete_type_article():
     id_type_article = request.args.get('id_type_article', '')
     mycursor = get_db().cursor()
     
-    # Vérifier si le type est utilisé
     sql = '''
     SELECT COUNT(*) as nb_articles
     FROM skin

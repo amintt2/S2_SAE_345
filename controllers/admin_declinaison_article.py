@@ -14,7 +14,6 @@ def add_declinaison_article():
     id_article=request.args.get('id_article')
     mycursor = get_db().cursor()
     
-    # Get article info
     sql = '''
     SELECT 
         s.id_skin as id_article,
@@ -27,17 +26,17 @@ def add_declinaison_article():
     mycursor.execute(sql, (id_article,))
     article = mycursor.fetchone()
 
-    if not article:
-        flash(u'Article non trouvé', 'alert-warning')
-        return redirect('/admin/article/show')
-
-    # Get usures (tailles)
-    sql = "SELECT id_usure, libelle_usure FROM usure ORDER BY libelle_usure"
+    sql = '''SELECT id_usure, libelle_usure 
+    FROM usure 
+    ORDER BY libelle_usure'''
     mycursor.execute(sql)
     tailles = mycursor.fetchall()
 
-    # Get specials (couleurs)
-    sql = "SELECT id_special, libelle_special FROM special ORDER BY libelle_special"
+    sql = '''
+    SELECT id_special, libelle_special 
+    FROM special 
+    ORDER BY libelle_special
+    '''
     mycursor.execute(sql)
     couleurs = mycursor.fetchall()
 
@@ -71,7 +70,6 @@ def edit_declinaison_article():
     id_article = request.args.get('id_article')
     mycursor = get_db().cursor()
     
-    # Get article info
     sql = '''
     SELECT 
         s.id_skin as article_id,
@@ -83,7 +81,6 @@ def edit_declinaison_article():
     mycursor.execute(sql, (id_article,))
     declinaison_article = mycursor.fetchone()
     
-    # Get declinations
     sql = '''
     SELECT 
         d.id_declinaison as id_declinaison_article,
@@ -102,15 +99,13 @@ def edit_declinaison_article():
     mycursor.execute(sql, (id_article,))
     declinaisons = mycursor.fetchall()
 
-    # Get all states options
     sql = "SELECT id_usure, libelle_usure FROM usure"
     mycursor.execute(sql)
-    tailles = mycursor.fetchall()  # Keep original variable name
+    tailles = mycursor.fetchall() 
 
-    # Get all special options
     sql = "SELECT id_special, libelle_special FROM special"
     mycursor.execute(sql)
-    couleurs = mycursor.fetchall()  # Keep original variable name
+    couleurs = mycursor.fetchall()  
 
     return render_template('admin/article/edit_declinaison_article.html',
                          declinaison_article=declinaison_article,
@@ -125,13 +120,9 @@ def valid_edit_declinaison_article():
     id_declinaison_article = request.form.get('id_declinaison_article')
     id_article = request.form.get('id_article')
     stock = request.form.get('stock')
-    usure_id = request.form.get('id_taille')  # Keep form field names consistent
-    special_id = request.form.get('id_couleur')  # Keep form field names consistent
+    usure_id = request.form.get('id_taille')  
+    special_id = request.form.get('id_couleur')  
     prix = request.form.get('prix')
-    
-    if not all([id_declinaison_article, id_article, stock, usure_id, special_id, prix]):
-        flash(u'Tous les champs sont obligatoires', 'alert-warning')
-        return redirect(f'/admin/article/edit?id_article={id_article}')
 
     mycursor = get_db().cursor()
     sql = '''
@@ -155,7 +146,6 @@ def delete_declinaison_article():
     id_declinaison = request.args.get('id_declinaison')
     id_article = request.args.get('id_article')
 
-    # Vérifier si la déclinaison est commandée
     sql = '''
     SELECT COUNT(*) as nb_commandes
     FROM ligne_commande
@@ -168,7 +158,6 @@ def delete_declinaison_article():
         flash(u'Impossible de supprimer une déclinaison qui a été commandée', 'alert-warning')
         return redirect(f'/admin/article/edit?id_article={id_article}')
 
-    # Supprimer la déclinaison
     sql = "DELETE FROM declinaison WHERE id_declinaison = %s"
     mycursor.execute(sql, (id_declinaison,))
     get_db().commit()
