@@ -68,9 +68,9 @@
 </div>
 
 <script>
-function make_chart(ctx, labels, values, type = "bar") {
+function makeStockChart(ctx, labels, values) {
     return new Chart(ctx, {
-        type: type,
+        type: 'bar',
         data: {
             labels: labels,
             datasets: [{
@@ -78,6 +78,48 @@ function make_chart(ctx, labels, values, type = "bar") {
                 fill: false,
                 backgroundColor: "rgba(54, 162, 235, 0.6)",
                 borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: { 
+                display: false 
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        fontColor: '#E5E7EB'
+                    },
+                    gridLines: {
+                        color: "rgba(255, 255, 255, 0.1)"
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: '#E5E7EB'
+                    },
+                    gridLines: {
+                        color: "rgba(255, 255, 255, 0.1)"
+                    }
+                }]
+            }
+        }
+    });
+}
+
+function makeValueChart(ctx, labels, values) {
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                fill: false,
+                backgroundColor: "rgba(34, 197, 94, 0.6)",
+                borderColor: "rgba(34, 197, 94, 1)",
                 borderWidth: 1
             }]
         },
@@ -113,8 +155,7 @@ function make_chart(ctx, labels, values, type = "bar") {
     });
 }
 
-const stockChart = make_chart(document.getElementById("stockChart").getContext("2d"), {{ labels | safe }}, {{ quantities | safe }});
-
-const valueChart = make_chart(document.getElementById("valueChart").getContext("2d"), {{ labels | safe }}, {{ values | safe }});
+const stockChart = makeStockChart(document.getElementById("stockChart").getContext("2d"), {{ labels | safe }}, {{ quantities | safe }});
+const valueChart = makeValueChart(document.getElementById("valueChart").getContext("2d"), {{ labels | safe }}, {{ values | safe }});
 </script>
 {% endblock %}

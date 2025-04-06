@@ -161,6 +161,10 @@ def show_dataviz_map():
                           )
 
 
+##################
+##### Stock ######
+##################
+
 @admin_dataviz.route('/admin/dataviz/stock')
 def dataviz_stock():
     mycursor = get_db().cursor()
@@ -179,12 +183,10 @@ def dataviz_stock():
     mycursor.execute(sql)
     stocks = mycursor.fetchall()
 
-    # Préparer les données pour les graphiques
     labels = [item['declinaison'] for item in stocks]
     quantities = [float(item['quantite']) for item in stocks]
     values = [float(item['valeur_stock']) for item in stocks]
     
-    # Calculer les totaux
     total_items = sum(quantities)
     total_value = sum(values)
 
