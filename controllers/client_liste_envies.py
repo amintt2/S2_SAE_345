@@ -314,7 +314,6 @@ def client_liste_envies_first():
         flash(u'ID Article invalide.', 'alert-warning')
         return redirect('/client/envies/show')
 
-    # Get target item's current date
     sql_get_target = '''SELECT date_update FROM liste_envie 
                           WHERE utilisateur_id = %s AND skin_id = %s'''
     mycursor.execute(sql_get_target, (id_client, target_skin_id))
@@ -324,7 +323,6 @@ def client_liste_envies_first():
         return redirect('/client/envies/show')
     target_date = target_item['date_update']
 
-    # Get the current first item (max date)
     sql_get_first = '''SELECT skin_id, date_update FROM liste_envie 
                        WHERE utilisateur_id = %s 
                        ORDER BY date_update DESC 
@@ -333,26 +331,21 @@ def client_liste_envies_first():
     first_item = mycursor.fetchone()
 
     if not first_item or first_item['skin_id'] == target_skin_id:
-        # It's already the first item or list is empty/only has this item
         return redirect('/client/envies/show')
 
     first_skin_id = first_item['skin_id']
     first_date = first_item['date_update']
 
-    # Perform the swap using a temporary date to avoid conflicts
-    temp_date = datetime.datetime.now() + datetime.timedelta(days=365) # Far future date
+    temp_date = datetime.datetime.now() + datetime.timedelta(days=365)
 
-    # 1. Move target item to temp date
     sql_update_target_temp = '''UPDATE liste_envie SET date_update = %s 
                                 WHERE utilisateur_id = %s AND skin_id = %s'''
     mycursor.execute(sql_update_target_temp, (temp_date, id_client, target_skin_id))
 
-    # 2. Move original first item to target's original date
     sql_update_first_to_target = '''UPDATE liste_envie SET date_update = %s 
                                     WHERE utilisateur_id = %s AND skin_id = %s'''
     mycursor.execute(sql_update_first_to_target, (target_date, id_client, first_skin_id))
 
-    # 3. Move target item (now at temp date) to the original first date
     sql_update_target_final = '''UPDATE liste_envie SET date_update = %s 
                                  WHERE utilisateur_id = %s AND skin_id = %s'''
     mycursor.execute(sql_update_target_final, (first_date, id_client, target_skin_id))
