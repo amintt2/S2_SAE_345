@@ -10,7 +10,7 @@ client_commande = Blueprint('client_commande', __name__,
 
 
 # validation de la commande : partie 2 -- vue pour choisir les adresses (livraision et facturation)
-@client_commande.route('/client/commande/valide', methods=['POST'])
+@client_commande.route('/client/commande/valide', methods=['GET', 'POST'])
 def client_commande_valide():
     curseur = get_db().cursor()
     identifiant_client = session['id_user']

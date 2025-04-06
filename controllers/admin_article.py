@@ -195,20 +195,26 @@ def edit_article():
 
     sql = '''
     SELECT 
-        d.id_declinaison,
-        d.prix_declinaison,
-        d.stock,
-        d.usure_id,
-        d.special_id,
-        u.libelle_usure,
-        s.libelle_special,
+        declinaison.id_declinaison,
+        declinaison.prix_declinaison,
+        declinaison.stock,
+        declinaison.usure_id,
+        declinaison.special_id,
+        usure.libelle_usure,
+        special.libelle_special,
         COUNT(lc.declinaison_id) as nb_commandes
-    FROM declinaison d
-    JOIN usure u ON d.usure_id = u.id_usure
-    JOIN special s ON d.special_id = s.id_special
-    LEFT JOIN ligne_commande lc ON d.id_declinaison = lc.declinaison_id
-    WHERE d.skin_id = %s
-    GROUP BY d.id_declinaison
+    FROM declinaison 
+    JOIN usure ON declinaison.usure_id = usure.id_usure
+    JOIN special ON declinaison.special_id = special.id_special
+    LEFT JOIN ligne_commande lc ON declinaison.id_declinaison = lc.declinaison_id
+    WHERE declinaison.skin_id = %s
+    GROUP BY declinaison.id_declinaison
+            , declinaison.prix_declinaison
+            , declinaison.stock
+            , declinaison.usure_id
+            , declinaison.special_id
+            , usure.libelle_usure
+            , special.libelle_special
     '''
     mycursor.execute(sql, (id_article,))
     declinaisons = mycursor.fetchall()
