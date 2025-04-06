@@ -104,9 +104,9 @@ def show_type_article_avis():
     
     datas_show = mycursor.fetchall()
     labels = [row['libelle'] for row in datas_show if row['libelle'] is not None]
-    moyenne_notes = [row['note_moyenne'] for row in datas_show if row['note_moyenne'] is not None]
-    nb_notes = [row['nb_notes'] for row in datas_show if row['nb_notes'] is not None]
-    nb_commentaires = [row['nb_commentaires'] for row in datas_show if row['nb_commentaires'] is not None]
+    moyenne_notes = [float(row['note_moyenne']) for row in datas_show if row['note_moyenne'] is not None]
+    nb_notes = [int(row['nb_notes']) for row in datas_show if row['nb_notes'] is not None]
+    nb_commentaires = [int(row['nb_commentaires']) for row in datas_show if row['nb_commentaires'] is not None]
 
 
 
