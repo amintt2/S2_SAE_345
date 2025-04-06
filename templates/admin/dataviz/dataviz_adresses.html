@@ -1,0 +1,295 @@
+{% extends 'admin/layout_admin.html' %}
+
+{% block javascripts %}
+    {{ super() }}
+{% endblock %}
+
+{% block javascripts_head %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+{% endblock %}
+
+{% block title %}
+    <title>Statistiques par départements</title>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-center mb-4">Statistiques des commandes par départements</h1>
+            
+            <div class="d-flex justify-content-center mb-4">
+                <a href="/admin/dataviz/adresses" class="btn btn-primary me-2 {% if type_viz != 'ca' %}active{% endif %}">Par nombre de commandes</a>
+                <a href="/admin/dataviz/adresses?type_viz=ca" class="btn btn-success {% if type_viz == 'ca' %}active{% endif %}">Par chiffre d'affaires</a>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Top 10 des départements - {% if type_viz == 'ca' %}Chiffre d'affaires{% else %}Nombre de commandes{% endif %}</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="departmentsChart" height="300"></canvas>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Répartition des commandes</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="ordersPieChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Répartition du chiffre d'affaires</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="revenuePieChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Tableau des données par département</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Département</th>
+                                <th>Nombre de commandes</th>
+                                <th>Chiffre d'affaires</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for element in adresses %}
+                            <tr>
+                                <td>{{ element.dep }}</td>
+                                <td>{{ element.nombre }}</td>
+                                <td>{{ element.ca_format }} €</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="/admin/dataviz/etat2" class="btn btn-primary">Voir la carte</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Hidden data for JavaScript #}
+<div id="jsData" 
+     data-adresses="{{ adresses|tojson }}" 
+     data-is-revenue-view="{{ 'true' if type_viz == 'ca' else 'false' }}" 
+     style="display:none;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get data from HTML
+    var jsDataElement = document.getElementById('jsData');
+    var adressesData = JSON.parse(jsDataElement.getAttribute('data-adresses'));
+    var isRevenueView = jsDataElement.getAttribute('data-is-revenue-view') === 'true';
+    
+    // Extract data arrays
+    var departments = [];
+    var orderCounts = [];
+    var revenues = [];
+    
+    adressesData.forEach(function(item) {
+        departments.push(item.dep);
+        orderCounts.push(parseInt(item.nombre));
+        revenues.push(parseFloat(item.ca));
+    });
+    
+    // Get top 10 data
+    var top10Data = adressesData.slice(0, 10);
+    var top10Departments = [];
+    var top10Values = [];
+    
+    top10Data.forEach(function(item) {
+        top10Departments.push(item.dep);
+        if (isRevenueView) {
+            top10Values.push(parseFloat(item.ca));
+        } else {
+            top10Values.push(parseInt(item.nombre));
+        }
+    });
+    
+    // Calculate totals
+    var totalOrders = 0;
+    orderCounts.forEach(function(count) {
+        totalOrders += count;
+    });
+    
+    var totalRevenue = 0;
+    revenues.forEach(function(revenue) {
+        totalRevenue += revenue;
+    });
+    
+    // Get top 5 data
+    var top5Data = adressesData.slice(0, 5);
+    var top5Departments = [];
+    var top5OrderCounts = [];
+    var top5Revenues = [];
+    
+    top5Data.forEach(function(item) {
+        top5Departments.push(item.dep);
+        top5OrderCounts.push(parseInt(item.nombre));
+        top5Revenues.push(parseFloat(item.ca));
+    });
+    
+    // Calculate other values
+    var sumTop5Orders = 0;
+    top5OrderCounts.forEach(function(count) {
+        sumTop5Orders += count;
+    });
+    var otherOrdersCount = totalOrders - sumTop5Orders;
+    
+    var sumTop5Revenues = 0;
+    top5Revenues.forEach(function(revenue) {
+        sumTop5Revenues += revenue;
+    });
+    var otherRevenue = totalRevenue - sumTop5Revenues;
+    
+    // Create bar chart
+    var departmentsChartCtx = document.getElementById('departmentsChart').getContext('2d');
+    var departmentsChart = new Chart(departmentsChartCtx, {
+        type: 'bar',
+        data: {
+            labels: top10Departments,
+            datasets: [{
+                label: isRevenueView ? 'Chiffre d\'affaires (€)' : 'Nombre de commandes',
+                data: top10Values,
+                backgroundColor: isRevenueView ? 'rgba(40, 167, 69, 0.7)' : 'rgba(0, 123, 255, 0.7)',
+                borderColor: isRevenueView ? 'rgb(40, 167, 69)' : 'rgb(0, 123, 255)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+    
+    if (isRevenueView) {
+        departmentsChart.options.scales.yAxes[0].ticks.callback = function(value) {
+            return value.toLocaleString('fr-FR') + ' €';
+        };
+        departmentsChart.update();
+    }
+    
+    // Create orders pie chart
+    var orderLabels = top5Departments.slice();
+    orderLabels.push('Autres');
+    
+    var orderData = top5OrderCounts.slice();
+    orderData.push(otherOrdersCount);
+    
+    var ordersPieChartCtx = document.getElementById('ordersPieChart').getContext('2d');
+    var ordersPieChart = new Chart(ordersPieChartCtx, {
+        type: 'pie',
+        data: {
+            labels: orderLabels,
+            datasets: [{
+                data: orderData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(201, 203, 207, 0.7)'
+                ],
+                borderColor: [
+                    'rgb(255, 99, 132)',
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 206, 86)',
+                    'rgb(75, 192, 192)',
+                    'rgb(153, 102, 255)',
+                    'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var label = data.labels[tooltipItem.index] || '';
+                        var value = data.datasets[0].data[tooltipItem.index] || 0;
+                        var percentage = Math.round((value / totalOrders) * 100);
+                        return label + ': ' + value + ' (' + percentage + '%)';
+                    }
+                }
+            }
+        }
+    });
+    
+    // Create revenue pie chart
+    var revenueLabels = top5Departments.slice();
+    revenueLabels.push('Autres');
+    
+    var revenueData = top5Revenues.slice();
+    revenueData.push(otherRevenue);
+    
+    var revenuePieChartCtx = document.getElementById('revenuePieChart').getContext('2d');
+    var revenuePieChart = new Chart(revenuePieChartCtx, {
+        type: 'pie',
+        data: {
+            labels: revenueLabels,
+            datasets: [{
+                data: revenueData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(201, 203, 207, 0.7)'
+                ],
+                borderColor: [
+                    'rgb(255, 99, 132)',
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 206, 86)',
+                    'rgb(75, 192, 192)',
+                    'rgb(153, 102, 255)',
+                    'rgb(201, 203, 207)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var label = data.labels[tooltipItem.index] || '';
+                        var value = data.datasets[0].data[tooltipItem.index] || 0;
+                        var percentage = Math.round((value / totalRevenue) * 100);
+                        return label + ': ' + value.toLocaleString('fr-FR') + ' € (' + percentage + '%)';
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

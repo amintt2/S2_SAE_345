@@ -74,16 +74,31 @@
                 </tbody>
             </table>
                 <div class="mt-8 bg-dark-accent p-6 rounded-lg shadow-lg">
-                <strong class="text-accent-blue">Adresse livraison : </strong><span class="text-gray-300">{{ commande_adresses.nom_livraison }} {{ commande_adresses.rue_livraison }} {{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}</span>
-                <br>
-                <strong class="text-accent-blue">Adresse facturation : </strong>
-                <span class="text-gray-300">
-                {% if commande_adresses.adresse_identique == 'adresse_identique' %}
-                    adresse identique
-                {% else %}
-                    {{ commande_adresses.nom_facturation }} {{ commande_adresses.rue_facturation }} {{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}
-                {% endif %}
-                </span>
+                <h4 class="text-white font-semibold text-lg mb-4">Informations de livraison et facturation</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-dark-secondary p-4 rounded-md">
+                        <strong class="text-accent-blue font-medium block mb-2">Adresse de livraison :</strong>
+                        <div class="text-gray-300">
+                            <div>{{ commande_adresses.nom_livraison }}</div>
+                            <div>{{ commande_adresses.rue_livraison }}</div>
+                            <div>{{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-dark-secondary p-4 rounded-md">
+                        <strong class="text-accent-blue font-medium block mb-2">Adresse de facturation :</strong>
+                        {% if commande_adresses.adresse_identique == 'adresse_identique' %}
+                            <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30 mb-2">
+                                <span class="text-blue-300 font-medium">Identique à l'adresse de livraison</span>
+                            </div>
+                        {% endif %}
+                        <div class="text-gray-300">
+                            <div>{{ commande_adresses.nom_facturation }}</div>
+                            <div>{{ commande_adresses.rue_facturation }}</div>
+                            <div>{{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}</div>
+                        </div>
+                    </div>
+                </div>
                 </div>
             <hr class="my-8 border-gray-700">
             {% endif %}

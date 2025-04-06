@@ -135,30 +135,95 @@ def show_type_article_avis():
 
 @admin_dataviz.route('/admin/dataviz/etat2')
 def show_dataviz_map():
-    # mycursor = get_db().cursor()
-    # sql = '''    '''
-    # mycursor.execute(sql)
-    # adresses = mycursor.fetchall()
+    mycursor = get_db().cursor()
+    
+    # Récupérer les départements (2 premiers chiffres du code postal) avec nombre de ventes et chiffre d'affaires
+    sql = '''
+    SELECT 
+        LEFT(a.code_postal, 2) as dep,
+        COUNT(DISTINCT c.id_commande) as nombre,
+        SUM(lc.prix * lc.quantite) as ca
+    FROM commande c
+    JOIN adresse a ON c.adresse_livraison_id = a.id_adresse
+    JOIN ligne_commande lc ON c.id_commande = lc.commande_id
+    GROUP BY dep
+    ORDER BY dep
+    '''
+    mycursor.execute(sql)
+    adresses = mycursor.fetchall()
+    
+    # Recherche de la valeur maximale pour le nombre de ventes et le CA
+    max_nombre = 0
+    max_ca = 0
+    for element in adresses:
+        if element['nombre'] > max_nombre:
+            max_nombre = element['nombre']
+        if element['ca'] > max_ca:
+            max_ca = element['ca']
+    
+    # Calcul d'un coefficient de 0 à 1 pour chaque département
+    if max_nombre != 0 and max_ca != 0:
+        for element in adresses:
+            indice_nombre = element['nombre'] / max_nombre
+            indice_ca = element['ca'] / max_ca
+            element['indice_nombre'] = round(indice_nombre, 2)
+            element['indice_ca'] = round(indice_ca, 2)
+            element['ca_format'] = "{:,.2f}".format(element['ca'])
+    
+    # Récupérer le type de visualisation (CA ou nombre de commandes)
+    type_viz = request.args.get('type_viz', 'nombre')  # Par défaut: nombre de commandes
+    
+    return render_template('admin/dataviz/dataviz_etat_map.html',
+                           adresses=adresses,
+                           type_viz=type_viz)
 
-    #exemples de tableau "résultat" de la requête
-    adresses =  [{'dep': '25', 'nombre': 1}, {'dep': '83', 'nombre': 1}, {'dep': '90', 'nombre': 3}]
 
-    # recherche de la valeur maxi "nombre" dans les départements
-    # maxAddress = 0
-    # for element in adresses:
-    #     if element['nbr_dept'] > maxAddress:
-    #         maxAddress = element['nbr_dept']
-    # calcul d'un coefficient de 0 à 1 pour chaque département
-    # if maxAddress != 0:
-    #     for element in adresses:
-    #         indice = element['nbr_dept'] / maxAddress
-    #         element['indice'] = round(indice,2)
-
-    print(adresses)
-
-    return render_template('admin/dataviz/dataviz_etat_map.html'
-                           , adresses=adresses
-                          )
+@admin_dataviz.route('/admin/dataviz/adresses')
+def show_dataviz_adresses():
+    mycursor = get_db().cursor()
+    
+    # Récupérer le type de visualisation (CA ou nombre de commandes)
+    type_viz = request.args.get('type_viz', 'nombre')  # Par défaut: nombre de commandes
+    
+    # Déterminer l'ordre en fonction du type de visualisation
+    order_by = "ca DESC" if type_viz == 'ca' else "nombre DESC"
+    
+    # Récupérer les départements (2 premiers chiffres du code postal) avec nombre de ventes et chiffre d'affaires
+    sql = f'''
+    SELECT 
+        LEFT(a.code_postal, 2) as dep,
+        COUNT(DISTINCT c.id_commande) as nombre,
+        SUM(lc.prix * lc.quantite) as ca
+    FROM commande c
+    JOIN adresse a ON c.adresse_livraison_id = a.id_adresse
+    JOIN ligne_commande lc ON c.id_commande = lc.commande_id
+    GROUP BY dep
+    ORDER BY nombre DESC
+    '''
+    mycursor.execute(sql)
+    adresses = mycursor.fetchall()
+    
+    # Recherche de la valeur maximale pour le nombre de ventes et le CA
+    max_nombre = 0
+    max_ca = 0
+    for element in adresses:
+        if element['nombre'] > max_nombre:
+            max_nombre = element['nombre']
+        if element['ca'] > max_ca:
+            max_ca = element['ca']
+    
+    # Calcul d'un coefficient de 0 à 1 pour chaque département
+    if max_nombre != 0 and max_ca != 0:
+        for element in adresses:
+            indice_nombre = element['nombre'] / max_nombre
+            indice_ca = element['ca'] / max_ca
+            element['indice_nombre'] = round(indice_nombre, 2)
+            element['indice_ca'] = round(indice_ca, 2)
+            element['ca_format'] = "{:,.2f}".format(element['ca'])
+    
+    return render_template('admin/dataviz/dataviz_adresses.html',
+                           adresses=adresses,
+                           type_viz=type_viz)
 
 
 ##################

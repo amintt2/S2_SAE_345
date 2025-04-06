@@ -21,6 +21,38 @@
                 </div>
             </div>
         </div>
+        
+        <div class="mb-8 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h4 class="text-lg font-medium text-gray-200 mb-4">Adresses de la commande</h4>
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <!-- Adresse de livraison -->
+                    <div class="bg-gray-700 p-4 rounded-md">
+                        <h5 class="text-md font-medium text-gray-200 mb-2">Adresse de livraison</h5>
+                        <div class="text-sm text-gray-300">
+                            <p>{{ commande_adresses.nom_livraison }}</p>
+                            <p>{{ commande_adresses.rue_livraison }}</p>
+                            <p>{{ commande_adresses.code_postal_livraison }} {{ commande_adresses.ville_livraison }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Adresse de facturation -->
+                    <div class="bg-gray-700 p-4 rounded-md">
+                        <h5 class="text-md font-medium text-gray-200 mb-2">Adresse de facturation</h5>
+                        {% if commande_adresses.adresse_identique == 'adresse_identique' %}
+                            <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30 mb-2">
+                                <span class="text-blue-300 font-medium">Identique à l'adresse de livraison</span>
+                            </div>
+                        {% endif %}
+                        <div class="text-sm text-gray-300">
+                            <p>{{ commande_adresses.nom_facturation }}</p>
+                            <p>{{ commande_adresses.rue_facturation }}</p>
+                            <p>{{ commande_adresses.code_postal_facturation }} {{ commande_adresses.ville_facturation }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endif %}
 
         <table class="min-w-full divide-y divide-gray-700 bg-gray-800 shadow-sm ring-1 ring-gray-700 sm:rounded-lg">

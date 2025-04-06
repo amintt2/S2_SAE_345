@@ -70,9 +70,26 @@ def admin_commande_show():
             SELECT 
                 utilisateur.login,
                 utilisateur.email,
-                utilisateur.nom
+                utilisateur.nom,
+                adresse_livraison.id_adresse AS id_adresse_livraison,
+                adresse_livraison.nom AS nom_livraison,
+                adresse_livraison.rue AS rue_livraison,
+                adresse_livraison.code_postal AS code_postal_livraison,
+                adresse_livraison.ville AS ville_livraison,
+                adresse_facturation.id_adresse AS id_adresse_facturation,
+                adresse_facturation.nom AS nom_facturation,
+                adresse_facturation.rue AS rue_facturation,
+                adresse_facturation.code_postal AS code_postal_facturation,
+                adresse_facturation.ville AS ville_facturation,
+                CASE 
+                    WHEN commande.adresse_livraison_id = commande.adresse_facturation_id 
+                    THEN 'adresse_identique' 
+                    ELSE 'adresse_differente' 
+                END AS adresse_identique
             FROM commande
             INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
+            INNER JOIN adresse AS adresse_livraison ON commande.adresse_livraison_id = adresse_livraison.id_adresse
+            INNER JOIN adresse AS adresse_facturation ON commande.adresse_facturation_id = adresse_facturation.id_adresse
             WHERE commande.id_commande = %s
         '''
         mycursor.execute(sql, (id_commande,))

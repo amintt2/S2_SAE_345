@@ -1,73 +1,119 @@
 {% extends "client/layout_client.html" %}
+{% block title %}
+    Panier - Validation des adresses
+{% endblock %}
+
 {% block body %}
-    <div class="container">
-        <div class="row align-self-right">
-            {% include('client/boutique/_panier.html') %}
-        </div>
-        <div class="row">
-             <br>
-            <a href="/client/coordonnee/show" class="btn btn-secondary mt-5 col-2"> ajouter une adresse (livrable 2)</a>
-            <form action="/client/commande/add"  style="display: inline-block;"  method="post" >
-            {% if adresses | length > 0 %}
-                <br>
-                    <h4>Choisisser l'adresse de livraison</h4>
-                    <select name="adresse_livraison_id" required class="form-select">
-                        <option value="">Sélectionner l'adresse de livraison</option>
-                        {% for adresse  in adresses %}
-
-                             <option value="{{ adresse.id_adresse }}"
-                             {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}
-                                 selected
-                             {% endif %}
-
-                             >{{ adresse.nom }} ({{ adresse.code_postal }})
-                                 {{ adresse.ville }} - {{ adresse.rue }}
-                             {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}
-                                 (f)
-                             {% endif %}
-
-                             </option>
-                        {% endfor %}
-                    </select>
-                    <br>
-
-                    <h4>Choisisser l'adresse de facturation</h4>
-                    adresse de facturation identique <input type="checkbox" name="adresse_identique" value="adresse_identique" id="adresse_identique" onclick="identique()">
-                <br>
-                    <select id="adresse_facturation_id" name="adresse_facturation_id" required class="form-select">
-                        <option value="">Sélectionner l'adresse de facturation</option>
-                        {% for adresse in adresses %}
-                             <option value="{{ adresse.id_adresse }}"
-                             {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}
-                                 selected
-                             {% endif %}
-                             >{{ adresse.nom }} ({{ adresse.code_postal }})
-                                 {{ adresse.ville }} - {{ adresse.rue }}
-                             </option>
-                        {% endfor %}
-                    </select>
-                {%  else %}
-                    Il faut une adresse de livraison et de facturation pour valider la commande (livrable 2)
-                    <a href="/client/coordonnee/show"  class="btn btn-primary">Ajouter une adresse (livrable 2)</a>
-                {% endif %}
-                <br>
-                <button class="btn btn-primary mt-4" > Passer ma commande </button>
-            </form>
-        </div>
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-dark-secondary rounded-lg shadow-lg p-6 mb-8">
+        <h2 class="text-2xl font-bold text-white mb-6">Validation de votre commande</h2>
+        
+        {% set nb_articles = articles_panier|length %}
+        
+        {% include "client/boutique/_panier.html" %}
+        
+        {% if nb_articles >= 1 and adresses|length >= 1 %}
+            <div class="mt-10">
+                <h3 class="text-xl font-semibold text-white mb-6">Sélection des adresses</h3>
+                
+                <div class="bg-dark-accent/30 rounded-lg p-6">
+                    <form id="formValideCommande" action="/client/commande/add" method="post">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Adresse de livraison -->
+                            <div class="bg-dark-accent/50 rounded-lg p-5 shadow">
+                                <h4 class="text-lg font-medium text-white mb-4 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-accent-blue" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                    </svg>
+                                    Adresse de livraison
+                                </h4>
+                                
+                                <div class="mb-4">
+                                    <label for="id_adresse_livraison" class="block text-sm font-medium text-gray-300 mb-2">Choisir une adresse :</label>
+                                    <select id="id_adresse_livraison" name="adresse_livraison_id" onchange="this.form.submit()" class="block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:ring-accent-blue focus:border-accent-blue">
+                                        {% for adresse in adresses %}
+                                            <option value="{{ adresse.id_adresse }}" {% if request.values.get('adresse_livraison_id') == adresse.id_adresse|string or (not request.values.get('adresse_livraison_id') and id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse) %}selected{% endif %}>
+                                                {{ adresse.nom }} {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}(favori){% endif %} - {{ adresse.rue }} {{ adresse.code_postal }} {{ adresse.ville }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <input type="hidden" name="validation_etape" value="adresse">
+                                </div>
+                            </div>
+                            
+                            <!-- Adresse de facturation -->
+                            <div class="bg-dark-accent/50 rounded-lg p-5 shadow">
+                                <h4 class="text-lg font-medium text-white mb-4 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-accent-blue" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                    </svg>
+                                    Adresse de facturation
+                                </h4>
+                                
+                                <div class="mb-4">
+                                    {% set adresse_livraison_id = request.values.get('adresse_livraison_id', id_adresse_fav|string if id_adresse_fav != 0 else '0') %}
+                                    {% set adresse_facturation_id = request.values.get('adresse_facturation_id', id_adresse_fav|string if id_adresse_fav != 0 else '0') %}
+                                    
+                                    <!-- Message indiquant que les adresses sont identiques -->
+                                    {% if adresse_livraison_id == adresse_facturation_id and adresse_livraison_id != '0' %}
+                                    <div class="mb-3 p-2 rounded-md bg-green-500/20 text-green-300 text-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                        L'adresse de facturation est identique à l'adresse de livraison
+                                    </div>
+                                    <input type="hidden" name="adresse_identique" value="adresse_identique">
+                                    {% endif %}
+                                    
+                                    <!-- Sélection d'adresse de facturation (toujours visible) -->
+                                    <div>
+                                        <label for="id_adresse_facturation" class="block text-sm font-medium text-gray-300 mb-2">Choisir une adresse :</label>
+                                        <select id="id_adresse_facturation" name="adresse_facturation_id" onchange="this.form.submit()" class="block w-full rounded-md bg-gray-800 border-gray-700 text-white shadow-sm focus:ring-accent-blue focus:border-accent-blue">
+                                            {% for adresse in adresses %}
+                                                <option value="{{ adresse.id_adresse }}" {% if request.values.get('adresse_facturation_id') == adresse.id_adresse|string or (not request.values.get('adresse_facturation_id') and id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse) %}selected{% endif %}>
+                                                    {{ adresse.nom }} {% if id_adresse_fav != 0 and id_adresse_fav == adresse.id_adresse %}(favori){% endif %} - {{ adresse.rue }} {{ adresse.code_postal }} {{ adresse.ville }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 flex justify-center">
+                            <button type="submit" name="finaliser" value="1" class="rounded-md bg-accent-blue hover:bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors duration-200 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                </svg>
+                                Finaliser ma commande
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="bg-dark-accent rounded-lg p-6 mt-10 text-center">
+                <p class="text-gray-300 mb-4">
+                    {% if nb_articles < 1 %}
+                        Vous n'avez aucun article dans votre panier.
+                    {% else %}
+                        Vous devez créer au moins une adresse avant de pouvoir valider votre commande.
+                    {% endif %}
+                </p>
+                
+                <div class="flex justify-center space-x-4">
+                    {% if nb_articles < 1 %}
+                        <a href="/client/article/show" class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
+                            Parcourir les articles
+                        </a>
+                    {% else %}
+                        <a href="/client/coordonnee/show" class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
+                            Gérer mes adresses
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
     </div>
-
-    <script>
-    function identique(){
-	if(document.getElementById('adresse_identique').checked == true)
-        {
-        document.getElementById("adresse_facturation_id").style.display = 'none';
-        document.getElementById("adresse_facturation_id").required = false;
-        }
-        else
-        {
-        document.getElementById("adresse_facturation_id").style.display = 'block';
-        document.getElementById("adresse_facturation_id").required = true;
-        }
-    };
-    </script>
+</div>
 {% endblock %}

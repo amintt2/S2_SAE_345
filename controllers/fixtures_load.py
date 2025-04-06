@@ -95,6 +95,8 @@ def fct_fixtures_load():
      sql='''
      CREATE TABLE adresse (
           id_adresse INT AUTO_INCREMENT,
+          est_favori BOOLEAN DEFAULT FALSE,
+          est_valide BOOLEAN DEFAULT TRUE,
           nom VARCHAR(255),
           rue VARCHAR(255),
           code_postal VARCHAR(255),

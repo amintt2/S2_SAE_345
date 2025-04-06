@@ -43,7 +43,8 @@
                             <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Rue</th>
                             <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Code Postal</th>
                             <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Ville</th>
-                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Nbr. utilisation commande</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Nbr. commandes</th>
+                            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-200">Statut</th>
                             <th class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                 <span class="sr-only">Actions</span>
                             </th>
@@ -51,26 +52,50 @@
                     </thead>
                     <tbody class="divide-y divide-gray-700">
                         {% for adresse in adresses %}
-                        <tr class="hover:bg-dark-accent transition-colors duration-200">
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6 text-gray-200">
+                        <tr class="{% if adresse.est_favori == 1 %}bg-blue-900/30 hover:bg-blue-900/50{% elif adresse.est_valide == 0 %}bg-yellow-900/30 hover:bg-yellow-900/50{% else %}hover:bg-dark-accent{% endif %} transition-colors duration-200">
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6 {% if adresse.est_favori == 1 %}text-blue-300 font-semibold{% elif adresse.est_valide == 0 %}text-yellow-300{% else %}text-gray-200{% endif %}">
                                 {{ adresse.nom }}
+                                {% if adresse.est_favori == 1 %}
+                                    <span class="ml-1 inline-flex items-center rounded-md bg-blue-500/30 px-2 py-1 text-xs font-medium text-blue-300">
+                                        Favorite
+                                    </span>
+                                {% endif %}
                             </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ adresse.rue }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ adresse.code_postal }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{{ adresse.ville }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
-                                {% if 'nbr_commandes' in adresse %}{{ adresse.nbr_commandes }}{% endif %}
+                            <td class="whitespace-nowrap px-3 py-4 text-sm {% if adresse.est_favori == 1 %}text-blue-300{% elif adresse.est_valide == 0 %}text-yellow-300{% else %}text-gray-300{% endif %}">
+                                {{ adresse.rue }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm {% if adresse.est_favori == 1 %}text-blue-300{% elif adresse.est_valide == 0 %}text-yellow-300{% else %}text-gray-300{% endif %}">
+                                {{ adresse.code_postal }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm {% if adresse.est_favori == 1 %}text-blue-300{% elif adresse.est_valide == 0 %}text-yellow-300{% else %}text-gray-300{% endif %}">
+                                {{ adresse.ville }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm {% if adresse.est_favori == 1 %}text-blue-300{% elif adresse.est_valide == 0 %}text-yellow-300{% else %}text-gray-300{% endif %}">
+                                {{ adresse.nbr_commandes if adresse.nbr_commandes else '0' }}
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                {% if adresse.est_valide == 0 %}
+                                    <span class="inline-flex items-center rounded-md bg-yellow-500/30 px-2 py-1 text-xs font-medium text-yellow-300">
+                                        Non valide
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center rounded-md bg-green-500/30 px-2 py-1 text-xs font-medium text-green-300">
+                                        Valide
+                                    </span>
+                                {% endif %}
                             </td>
                             <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                {% if adresse.est_valide == 1 %}
                                 <a href="/client/coordonnee/edit_adresse?id_adresse={{ adresse.id_adresse }}" 
                                    class="rounded-md bg-accent-blue hover:bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
                                     Modifier
                                 </a>
+                                {% endif %}
                                 <form action="/client/coordonnee/delete_adresse" method="post" class="inline-block ml-2">
                                     <input type="hidden" name="id_adresse" value="{{ adresse.id_adresse }}">
                                     <button type="submit" 
                                             class="rounded-md bg-red-600 hover:bg-red-700 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
-                                        Supprimer
+                                        {% if adresse.est_valide == 0 %}Supprimer{% else %}{% if adresse.nbr_commandes > 0 %}Invalider{% else %}Supprimer{% endif %}{% endif %}
                                     </button>
                                 </form>
                             </td>
@@ -87,10 +112,14 @@
                            class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
                             Ajouter une adresse
                         </a>
+                    {% else %}
+                        <p class="mt-4 text-sm text-red-400">
+                            Vous avez atteint le nombre maximum d'adresses valides (4)
+                        </p>
                     {% endif %}
                     
                     <p class="mt-4 text-sm text-accent-blue">
-                        (<strong>{{ nb_adresses }}</strong> / 4 adresses ; <strong>{{ nb_adresses_tot }}</strong> adresses pour l'utilisateur)
+                        <strong>{{ nb_adresses }}</strong> / 4 adresses valides (utilisables) ; <strong>{{ nb_adresses_tot }}</strong> adresses au total
                     </p>
                 {% else %}
                     <a href="/client/coordonnee/add_adresse" 

@@ -2,39 +2,117 @@
 
 
 {% block javascripts %}
-{#    attention il faut importer la bibliotheque chart.js avant de définir l'objet chart#}
     {{ super() }}
-   {# <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}" ></script>#}
 {% endblock %}
 
 {% block javascripts_head %}
-{#    attention il faut importer la bibliotheque chart.js avant de définir l'objet chart#}
-{#    <script src="{{ url_for('static', filename='chart.js') }}" ></script>#}
-      <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
 {% endblock %}
 
 {% block title %}
-    <title>test carte</title>
+    <title>Visualisation par département</title>
 {% endblock %}
 
 {% block body %}
-    <a href="https://github.com/regisenguehard/carte-france-svg/blob/master/carte-france-svg.html" target="_blank">exemple github carte</a>
-    <br>
-    <a href="https://www.youtube.com/watch?v=UZs8l50gxjU" target="_blank"> video graficart</a>
-    <br>
-    <a href="https://www.amcharts.com/svg-maps/?map=franceDepartments"> github carte svg</a>
-    <br>
-
-    <div class="text-center border w-50 m-auto">
-        <h2 class="text-center">Données sur les adresses clients</h2>
-        {% include 'admin/dataviz/franceMap.html' %}
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="text-center mb-4">Visualisation des commandes par départements</h1>
+                
+                <div class="d-flex justify-content-center mb-4">
+                    <a href="/admin/dataviz/etat2?type_viz=nombre" class="btn btn-primary me-2 {% if type_viz == 'nombre' %}active{% endif %}">Nombre de commandes</a>
+                    <a href="/admin/dataviz/etat2?type_viz=ca" class="btn btn-success {% if type_viz == 'ca' %}active{% endif %}">Chiffre d'affaires</a>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Carte de France - {% if type_viz == 'ca' %}Chiffre d'affaires{% else %}Nombre de commandes{% endif %}</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        {% include 'admin/dataviz/franceMap.html' %}
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Tableau des données par département</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Département</th>
+                                    <th>Nombre de commandes</th>
+                                    <th>Chiffre d'affaires</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for element in adresses %}
+                                <tr>
+                                    <td>{{ element.dep }}</td>
+                                    <td>{{ element.nombre }}</td>
+                                    <td>{{ element.ca_format }} €</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="/admin/dataviz/adresses" class="btn btn-primary">Voir les graphiques</a>
+                </div>
+            </div>
+        </div>
     </div>
 
+    {# Hidden data for JavaScript #}
+    <div id="mapData" 
+         data-adresses="{{ adresses|tojson }}" 
+         data-is-revenue-view="{{ 'true' if type_viz == 'ca' else 'false' }}" 
+         style="display:none;"></div>
+
     <script>
-    {% for element in adresses %}
-        document.getElementById({{ element['dep'] }}).style.fill= "#000000";
-        document.getElementById({{ element['dep'] }}).setAttribute("fill-opacity", {{ element['indice'] }});
-    {% endfor %}
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get data from hidden div
+        var mapDataElement = document.getElementById('mapData');
+        var adressesData = JSON.parse(mapDataElement.getAttribute('data-adresses'));
+        var isRevenueView = mapDataElement.getAttribute('data-is-revenue-view') === 'true';
+        
+        adressesData.forEach(function(element) {
+            var depId = element.dep;
+            var departement = document.getElementById(depId);
+            
+            if (departement) {
+                // Set fill color based on visualization type
+                var fillColor = isRevenueView ? "#28a745" : "#007bff";
+                departement.style.fill = fillColor;
+                
+                // Set opacity based on visualization type
+                var opacity = isRevenueView ? element.indice_ca : element.indice_nombre;
+                departement.setAttribute("fill-opacity", opacity);
+                
+                // Add tooltip
+                var tooltipText = "Département " + depId + ": ";
+                tooltipText += isRevenueView ? element.ca_format + " €" : element.nombre + " commandes";
+                
+                departement.setAttribute("data-toggle", "tooltip");
+                departement.setAttribute("data-placement", "top");
+                departement.setAttribute("title", tooltipText);
+                
+                // Add hover effect
+                departement.addEventListener("mouseover", function() {
+                    this.style.stroke = "#000";
+                    this.style.strokeWidth = "1";
+                });
+                
+                departement.addEventListener("mouseout", function() {
+                    this.style.stroke = "#fff";
+                    this.style.strokeWidth = "0.5";
+                });
+            }
+        });
+    });
     </script>
 
 {#    /* couleur avec transparence */#}

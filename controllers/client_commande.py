@@ -14,20 +14,82 @@ client_commande = Blueprint('client_commande', __name__,
 def client_commande_valide():
     curseur = get_db().cursor()
     identifiant_client = session['id_user']
-    sql = ''' selection des articles d'un panier 
+    
+    # Get cart items first to check if the cart is empty
+    sql = '''
+        SELECT 
+            ligne_panier.declinaison_id, 
+            ligne_panier.quantite, 
+            declinaison.prix_declinaison,
+            skin.nom_skin AS designation,
+            skin.id_skin AS id_article,
+            type_skin.libelle_type_skin,
+            usure.libelle_usure,
+            special.libelle_special,
+            declinaison.stock,
+            ligne_panier.quantite * declinaison.prix_declinaison AS prix_ligne
+        FROM ligne_panier
+        JOIN declinaison ON ligne_panier.declinaison_id = declinaison.id_declinaison
+        JOIN skin ON declinaison.skin_id = skin.id_skin
+        JOIN type_skin ON skin.type_skin_id = type_skin.id_type_skin
+        JOIN usure ON declinaison.usure_id = usure.id_usure
+        JOIN special ON declinaison.special_id = special.id_special
+        WHERE ligne_panier.utilisateur_id = %s
     '''
-    articles_panier = []
+    curseur.execute(sql, (identifiant_client,))
+    articles_panier = curseur.fetchall()
+    
+    # Check if cart is empty
+    if not articles_panier:
+        flash(u'Votre panier est vide', 'alert-warning')
+        return redirect('/client/article/show')
+    
+    # Check for favorite addresses
+    sql = ''' 
+        SELECT * FROM adresse WHERE utilisateur_id = %s AND est_favori = 1 AND est_valide = 1
+    '''
+    curseur.execute(sql, (identifiant_client,))
+    adresses = curseur.fetchall()
+    
+    # Check if there are any favorite addresses
+    if not adresses:
+        flash(u'Aucune adresse favorite trouvée. Veuillez en créer une.', 'alert-warning')
+        return redirect('/client/coordonnee/add_adresse')
+    
+    # Get all valid addresses for the user
+    sql = ''' 
+        SELECT * FROM adresse WHERE utilisateur_id = %s AND est_valide = 1
+    '''
+    curseur.execute(sql, (identifiant_client,))
+    adresses = curseur.fetchall()
+    
+    # Calculate total price
     if len(articles_panier) >= 1:
-        sql = ''' calcul du prix total du panier '''
-        prix_total = None
+        sql = '''
+            SELECT SUM(ligne_panier.quantite * declinaison.prix_declinaison) AS prix_total
+            FROM ligne_panier
+            JOIN declinaison ON ligne_panier.declinaison_id = declinaison.id_declinaison
+            WHERE ligne_panier.utilisateur_id = %s
+        '''
+        curseur.execute(sql, (identifiant_client,))
+        prix_total = curseur.fetchone()['prix_total']
     else:
         prix_total = None
+        
+    # Find the favorite address to preselect in the form
+    id_adresse_fav = 0
+    for adresse in adresses:
+        if adresse['est_favori'] == 1:
+            id_adresse_fav = adresse['id_adresse']
+            break
+        
     # etape 2 : selection des adresses
     return render_template('client/boutique/panier_validation_adresses.html'
                            , adresses=adresses
                            , articles_panier=articles_panier
-                           , prix_total= prix_total
+                           , prix_total=prix_total
                            , validation=1
+                           , est_favori=1
                            , id_adresse_fav=id_adresse_fav
                            )
 
@@ -37,15 +99,48 @@ def client_commande_add():
     curseur = get_db().cursor()
     identifiant_client = session['id_user']
     
+    # First check if there are favorite addresses
+    sql = '''SELECT COUNT(*) as count FROM adresse WHERE utilisateur_id = %s AND est_favori = 1 AND est_valide = 1'''
+    curseur.execute(sql, (identifiant_client,))
+    address_count = curseur.fetchone()['count']
+    
+    # If no favorite addresses, redirect to address creation
+    if address_count == 0:
+        flash(u'Aucune adresse favorite trouvée. Veuillez en créer une.', 'alert-warning')
+        return redirect('/client/coordonnee/add_adresse')
+    
     # Récupération des informations d'adresse
     identifiant_adresse_livraison = request.form.get('adresse_livraison_id', None)
     adresse_identique = request.form.get('adresse_identique', None)
+    
+    # Check if coming directly from cart (not from address selection)
+    if not identifiant_adresse_livraison:
+        # Redirect to address selection first
+        return redirect('/client/commande/valide')
+    
+    # Vérifier que l'adresse de livraison appartient bien à l'utilisateur et est valide
+    sql = "SELECT * FROM adresse WHERE id_adresse = %s AND utilisateur_id = %s AND est_valide = 1"
+    curseur.execute(sql, (identifiant_adresse_livraison, identifiant_client))
+    adresse_livraison = curseur.fetchone()
+    
+    if not adresse_livraison:
+        flash(u'L\'adresse de livraison sélectionnée n\'est pas valide.', 'alert-warning')
+        return redirect('/client/commande/valide')
     
     # Si l'adresse de facturation est identique à l'adresse de livraison
     if adresse_identique == 'adresse_identique':
         identifiant_adresse_facturation = identifiant_adresse_livraison
     else:
         identifiant_adresse_facturation = request.form.get('adresse_facturation_id', None)
+        
+        # Vérifier que l'adresse de facturation appartient bien à l'utilisateur et est valide
+        sql = "SELECT * FROM adresse WHERE id_adresse = %s AND utilisateur_id = %s AND est_valide = 1"
+        curseur.execute(sql, (identifiant_adresse_facturation, identifiant_client))
+        adresse_facturation = curseur.fetchone()
+        
+        if not adresse_facturation:
+            flash(u'L\'adresse de facturation sélectionnée n\'est pas valide.', 'alert-warning')
+            return redirect('/client/commande/valide')
     
     # Récupération des articles du panier
     requete_sql = ''' 
@@ -69,6 +164,17 @@ def client_commande_add():
         VALUES (NOW(), 1, %s, %s, %s)
     '''
     curseur.execute(requete_sql, (identifiant_client, identifiant_adresse_livraison, identifiant_adresse_facturation))
+    
+    # Mettre à jour la date d'utilisation des adresses
+    requete_sql = "UPDATE adresse SET date_utilisation = NOW() WHERE id_adresse IN (%s, %s)"
+    curseur.execute(requete_sql, (identifiant_adresse_livraison, identifiant_adresse_facturation))
+    
+    # Définir l'adresse de livraison comme adresse favorite
+    requete_sql = "UPDATE adresse SET est_favori = 0 WHERE utilisateur_id = %s"
+    curseur.execute(requete_sql, (identifiant_client,))
+    
+    requete_sql = "UPDATE adresse SET est_favori = 1 WHERE id_adresse = %s"
+    curseur.execute(requete_sql, (identifiant_adresse_livraison,))
     
     # Récupération de l'identifiant de la commande créée
     requete_sql = '''SELECT LAST_INSERT_ID() AS identifiant_derniere_insertion'''

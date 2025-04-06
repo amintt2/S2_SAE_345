@@ -1,67 +1,172 @@
-            <div class="col-7">
-            {% if articles_panier | length >= 1 %}
-                <h3>Liste des articles dans mon panier</h3>
-                <table class="table table-hover table-responsive">
-                    <tr>
-                        <th style="width: 300px">Nom</th>
-                        <th style="width: 50px">Quantité</th>
-                        <th style="width: 50px">Prix</th>
-                        <th style="width: 100px">Sous-Total</th>
-                        <th style="width: 400px">Action</th>
+<div>
+{% if articles_panier | length >= 1 %}
+    <h3 class="text-lg font-semibold text-white mb-4">Contenu de votre panier</h3>
+    <div class="overflow-x-auto rounded-lg">
+        <table class="min-w-full divide-y divide-gray-700">
+            <thead class="bg-dark-accent">
+                <tr>
+                    <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-200 sm:pl-6">Article</th>
+                    <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Quantité</th>
+                    <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Prix unitaire</th>
+                    <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Sous-Total</th>
+                    <th class="px-3 py-3.5 text-center text-sm font-semibold text-gray-200">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700 bg-dark-accent/30">
+                {% for item_panier in articles_panier %}
+                    <tr class="hover:bg-dark-accent transition-colors duration-200">
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-200 sm:pl-6">
+                            {% if item_panier.designation is defined %}
+                                {{item_panier.designation}}
+                            {% elif item_panier.nom is defined %}
+                                {{item_panier.nom}}
+                            {% else %}
+                                Article
+                            {% endif %}
+                            
+                            {% if item_panier.libelle_type_skin is defined %}
+                                <span class="inline-flex items-center ml-2 rounded-md bg-blue-500/30 px-2 py-0.5 text-xs font-medium text-blue-300">
+                                    {{ item_panier.libelle_type_skin }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if item_panier.libelle_usure is defined %}
+                                <span class="inline-flex items-center ml-2 rounded-md bg-green-500/30 px-2 py-0.5 text-xs font-medium text-green-300">
+                                    {{ item_panier.libelle_usure }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if item_panier.libelle_special is defined %}
+                                <span class="inline-flex items-center ml-2 rounded-md bg-purple-500/30 px-2 py-0.5 text-xs font-medium text-purple-300">
+                                    {{ item_panier.libelle_special }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if item_panier.id_couleur is defined and item_panier.id_couleur != None and item_panier.id_couleur > 1 %}
+                                <span class="inline-flex items-center ml-2 rounded-md bg-green-500/30 px-2 py-0.5 text-xs font-medium text-green-300">
+                                    {{ item_panier.libelle_couleur }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if item_panier.id_taille is defined and item_panier.id_taille != None and item_panier.id_taille > 1 %}
+                                <span class="inline-flex items-center ml-2 rounded-md bg-purple-500/30 px-2 py-0.5 text-xs font-medium text-purple-300">
+                                    {{ item_panier.libelle_taille }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-200 text-center">
+                            {{item_panier.quantite}}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-200 text-center">
+                            {% if item_panier.prix is defined %}
+                                {{"{:,.2f} €".format(item_panier.prix)}}
+                            {% elif item_panier.prix_declinaison is defined %}
+                                {{"{:,.2f} €".format(item_panier.prix_declinaison)}}
+                            {% elif item_panier.prix_ligne is defined %}
+                                {{"{:,.2f} €".format(item_panier.prix_ligne / item_panier.quantite)}}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-200 text-center font-semibold">
+                            {% if item_panier.prix is defined %}
+                                {{ "{:,.2f} €".format((item_panier.prix * item_panier.quantite)) }}
+                            {% elif item_panier.prix_declinaison is defined %}
+                                {{ "{:,.2f} €".format((item_panier.prix_declinaison * item_panier.quantite)) }}
+                            {% elif item_panier.prix_ligne is defined %}
+                                {{ "{:,.2f} €".format(item_panier.prix_ligne) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
+                            <div class="flex items-center justify-center space-x-2">
+                                {% if item_panier.stock is defined and item_panier.stock > 0 %}
+                                <form action="/client/panier/add" method="post">
+                                    {% if item_panier.id_declinaison_article is defined %}
+                                    <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
+                                    {% elif item_panier.declinaison_id is defined %}
+                                    <input type="hidden" name="id_declinaison" value="{{ item_panier.declinaison_id }}">
+                                    {% endif %}
+                                    <input type="hidden" name="quantite" value="1">
+                                    <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
+                                    <button class="rounded-md bg-accent-blue hover:bg-blue-600 px-2.5 py-1.5 text-sm font-medium text-white shadow-sm transition-colors duration-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                
+                                <form action="/client/panier/delete" method="post">
+                                    {% if item_panier.id_declinaison_article is defined %}
+                                    <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
+                                    {% elif item_panier.declinaison_id is defined %}
+                                    <input type="hidden" name="declinaison_id" value="{{ item_panier.declinaison_id }}">
+                                    {% endif %}
+                                    <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
+                                    <button class="rounded-md bg-gray-600 hover:bg-gray-700 px-2.5 py-1.5 text-sm font-medium text-white shadow-sm transition-colors duration-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </form>
+
+                                <form action="/client/panier/delete/line" method="post">
+                                    {% if item_panier.id_declinaison_article is defined %}
+                                    <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
+                                    {% elif item_panier.declinaison_id is defined %}
+                                    <input type="hidden" name="declinaison_id" value="{{ item_panier.declinaison_id }}">
+                                    {% endif %}
+                                    <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
+                                    <button class="rounded-md bg-red-600 hover:bg-red-700 px-2.5 py-1.5 text-sm font-medium text-white shadow-sm transition-colors duration-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
-                    {% for item_panier in articles_panier %}
-                        <tr>
-                            <td>{{item_panier.nom}}
-                            {% if item_panier.id_couleur is defined and item_panier.id_couleur != None and item_panier.id_couleur >1 %}
-                                <small style="color: #6dcea2">({{ item_panier.libelle_couleur }})</small>
-                            {% endif %}
-                            {% if item_panier.id_taille is defined and item_panier.id_taille != None and item_panier.id_taille >1 %}
-                                <small style="color: #d941c2">({{ item_panier.libelle_taille }})</small>
-                            {% endif %}
-                            </td>
-                            <td>{{item_panier.quantite}}</td>
-                            <td>{{item_panier.prix}}</td>
-                            <td>{{ "{:,.2f} €".format((item_panier.prix * item_panier.quantite)) }}{#{(panier.article.prix * panier.quantite)|number_format(2) }#}</td>
-                            <td>
-{# #}                            {% if item_panier.stock is defined %}
-{# #}                               {% if item_panier.stock > 0 %}
-                                <form action="/client/panier/add"  style="display: inline-block;"  method="post">
-{# #}                                   <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
-                                        <input type="hidden" name="quantite" value="1">
-                                        <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
-                                    <button class="btn btn-primary" > + </button>
-                                </form>
-{# #}                               {% endif %}
-{# #}                           {% endif %}
-                                <form action="/client/panier/delete"   style="display: inline-block;"  method="post">
-{# #}                               <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
-                                    <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
-                                    <button class="btn btn-primary" > - </button>
-                                </form>
-
-                                <form action="/client/panier/delete/line"  style="display: inline-block;"  method="post">
-{# #}                               <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
-                                    <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
-                                    <button class="btn btn-primary" >Supprimer</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-
-                </table>
-                    {% if validation is defined and validation == 1 %}
-                        <a href="/client/article/show" class="btn btn-primary" >Continuer ma commande</a>
-                    {% else %}
-                    <form action="/client/panier/vider"  style="display: inline-block;"  method="post" >
-                        <button class="btn btn-primary"  > Éffacer tout </button>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between">
+        <div class="mb-4 sm:mb-0">
+            {% if validation is defined and validation == 1 %}
+                <a href="/client/article/show" class="rounded-md bg-dark-accent hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-gray-300 shadow-sm transition-colors duration-200">
+                    Continuer mes achats
+                </a>
+            {% else %}
+                <div class="flex space-x-3">
+                    <form action="/client/panier/vider" method="post">
+                        <button class="rounded-md bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
+                            Vider le panier
+                        </button>
                     </form>
-                    <form action="/client/commande/valide"  style="display: inline-block;"  method="post" >
-                        <button class="btn btn-primary" > Passer ma commande </button>
+                    <form action="/client/commande/valide" method="post">
+                        <button class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
+                            Passer ma commande
+                        </button>
                     </form>
-                    {% endif %}
-                    {% if prix_total %}
-                    Total à payer : <strong>{{ "{:,.2f} €".format(prix_total) }}</strong>
-                    {% endif %}
-
+                </div>
             {% endif %}
+        </div>
+        
+        {% if prix_total %}
+            <div class="text-lg font-semibold bg-dark-accent rounded-lg px-4 py-2 shadow text-white">
+                Total à payer : <span class="text-green-300">{{ "{:,.2f} €".format(prix_total) }}</span>
             </div>
+        {% endif %}
+    </div>
+{% else %}
+    <div class="bg-dark-accent rounded-lg p-4 text-center">
+        <p class="text-gray-300 mb-4">Votre panier est vide</p>
+        <a href="/client/article/show" class="rounded-md bg-accent-blue hover:bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors duration-200">
+            Retour aux articles
+        </a>
+    </div>
+{% endif %}
+</div>
