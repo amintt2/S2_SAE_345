@@ -548,7 +548,7 @@ def fct_fixtures_load():
           (0, 1, 'Adresse de livraison', '15 Rue Sainte-Catherine', '33000', 'Bordeaux', '2024-03-01 16:40:00', 8),
           (1, 1, 'Domicile', '7 Rue de la République', '69001', 'Lyon', '2024-03-14 13:50:00', 9),
           (0, 1, 'Adresse secondaire', '20 Rue Mercière', '69002', 'Lyon', '2024-02-18 10:30:00', 9),
-          (1, 1, 'Résidence principale', '18 Rue d\'Antibes', '06400', 'Cannes', '2024-03-11 11:15:00', 10),
+          (1, 1, 'Résidence principale', '18 Rue d''Antibes', '06400', 'Cannes', '2024-03-11 11:15:00', 10),
           (0, 1, 'Adresse professionnelle', '5 Boulevard de la Croisette', '06400', 'Cannes', '2024-02-22 15:20:00', 10),
           (0, 0, 'Ancienne adresse', '12 Rue Obsolète', '13001', 'Marseille', '2023-12-10 09:30:00', 2),
           (0, 0, 'Adresse erronée', '9 Avenue Introuvable', '31000', 'Toulouse', '2023-11-05 14:45:00', 3),

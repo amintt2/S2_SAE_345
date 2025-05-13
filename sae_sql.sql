@@ -228,6 +228,29 @@ INSERT INTO etat (libelle_etat) VALUES
    ('Validé'),
    ('Refusée');
 
+INSERT INTO adresse (est_favori, est_valide, nom, rue, code_postal, ville, date_utilisation, utilisateur_id) VALUES
+     (1, 1, 'Domicile', '123 Rue de la Paix', '75001', 'Paris', '2024-03-15 10:30:00', 2),
+     (0, 1, 'Bureau', '45 Avenue du Prado', '13008', 'Marseille', '2024-03-10 08:15:00', 2),
+     (0, 1, 'Adresse secondaire', '8 Place de la Concorde', '71001', 'Paris', '2024-02-20 14:45:00', 2),
+     (1, 1, 'Maison principale', '27 Boulevard des Belges', '69006', 'Lyon', '2024-03-18 16:30:00', 3),
+     (0, 1, 'Adresse de livraison', '14 Rue de Rivoli', '75004', 'Paris', '2024-03-05 11:20:00', 3),
+     (1, 1, 'Résidence principale', '36 Promenade des Anglais', '06000', 'Nice', '2024-03-20 09:45:00', 4),
+     (0, 1, 'Adresse professionnelle', '5 Rue du Faubourg Saint-Honoré', '75008', 'Paris', '2024-02-28 13:10:00', 4),
+     (1, 1, 'Domicile', '22 Quai des Bateliers', '67000', 'Strasbourg', '2024-03-12 10:00:00', 5),
+     (0, 1, 'Adresse temporaire', '17 Quai des Grands Augustins', '75006', 'Paris', '2024-01-15 17:30:00', 5),
+     (1, 1, 'Résidence principale', '3 Rue Crébillon', '44000', 'Nantes', '2024-03-17 12:20:00', 6),
+     (0, 1, 'Adresse de livraison', '8 Rue Kervégan', '44000', 'Nantes', '2024-02-10 09:15:00', 6),
+     (1, 1, 'Domicile', '25 Rue du Château', '29200', 'Brest', '2024-03-19 14:30:00', 7),
+     (0, 1, 'Adresse professionnelle', '10 Rue Jean Macé', '29200', 'Brest', '2024-02-25 11:45:00', 7),
+     (1, 1, 'Résidence principale', '42 Boulevard Gambetta', '33000', 'Bordeaux', '2024-03-16 10:10:00', 8),
+     (0, 1, 'Adresse de livraison', '15 Rue Sainte-Catherine', '33000', 'Bordeaux', '2024-03-01 16:40:00', 8),
+     (1, 1, 'Domicile', '7 Rue de la République', '69001', 'Lyon', '2024-03-14 13:50:00', 9),
+     (0, 1, 'Adresse secondaire', '20 Rue Mercière', '69002', 'Lyon', '2024-02-18 10:30:00', 9),
+     (1, 1, 'Résidence principale', '18 Rue d''Antibes', '06400', 'Cannes', '2024-03-11 11:15:00', 10),
+     (0, 1, 'Adresse professionnelle', '5 Boulevard de la Croisette', '06400', 'Cannes', '2024-02-22 15:20:00', 10),
+     (0, 0, 'Ancienne adresse', '12 Rue Obsolète', '13001', 'Marseille', '2023-12-10 09:30:00', 2),
+     (0, 0, 'Adresse erronée', '9 Avenue Introuvable', '31000', 'Toulouse', '2023-11-05 14:45:00', 3),
+     (0, 0, 'Adresse périmée', '33 Boulevard Invalide', '59000', 'Lille', '2023-10-20 16:30:00', 4);
 
 INSERT INTO skin (nom_skin, disponible, type_skin_id, image, description) VALUES
    ('Karambit | Gamma Doppler', 1, 5, 'karambit_gamma_doppler.png', 'A knife with a curved blade resembling a claw with a mesmerizing gamma doppler finish.'),
@@ -408,39 +431,39 @@ INSERT INTO note (utilisateur_id, skin_id, note) VALUES
 INSERT INTO commentaire (utilisateur_id, skin_id, date_publication, commentaire, valide) VALUES
    (2, 1, '2024-03-15 14:30:00', 'Cette Karambit est magnifique, la finition est parfaite !', 1),
    (3, 1, '2024-03-16 09:45:00', 'Très beau skin mais un peu cher à mon goût.', 1),
-   (4, 2, '2024-03-16 13:20:00', 'La Dragon Lore est le meilleur skin pour AWP, un vrai chef-d\'œuvre.', 1),
-   (5, 2, '2024-03-17 10:15:00', 'Je rêve d\'avoir cette AWP un jour, mais les prix sont fous !', 1),
+   (4, 2, '2024-03-16 13:20:00', 'La Dragon Lore est le meilleur skin pour AWP, un vrai chef-d''œuvre.', 1),
+   (5, 2, '2024-03-17 10:15:00', 'Je rêve d''avoir cette AWP un jour, mais les prix sont fous !', 1),
    (6, 3, '2024-03-17 16:40:00', 'Ces gants sont superbes en jeu, les détails sont incroyables.', 1),
-   (2, 5, '2024-03-18 11:25:00', 'Un des plus beaux skins pour AK, j\'adore les motifs arabesques.', 1),
+   (2, 5, '2024-03-18 11:25:00', 'Un des plus beaux skins pour AK, j''adore les motifs arabesques.', 1),
    (7, 6, '2024-03-18 14:50:00', 'La Butterfly Marble Fade est mon couteau préféré, les animations sont fluides.', 1),
    (3, 9, '2024-03-19 09:10:00', 'Ce M9 est magnifique, les couleurs du Doppler sont vibrantes.', 1),
-   (4, 12, '2024-03-19 15:35:00', 'J\'ai investi dans une AWP Gungnir, aucun regret. Design nordique parfait.', 1),
+   (4, 12, '2024-03-19 15:35:00', 'J''ai investi dans une AWP Gungnir, aucun regret. Design nordique parfait.', 1),
    (5, 13, '2024-03-20 10:20:00', 'Ce sticker iBUYPOWER est une légende, le prix est justifié par sa rareté.', 1),
-   (2, 16, '2024-03-20 13:45:00', 'L\'AWP Wildfire est un excellent rapport qualité/prix.', 1),
+   (2, 16, '2024-03-20 13:45:00', 'L''AWP Wildfire est un excellent rapport qualité/prix.', 1),
    (6, 21, '2024-03-21 09:30:00', 'Les Specialist Gloves Fade se marient parfaitement avec mon M9 Fade.', 1),
    (7, 23, '2024-03-21 14:15:00', 'Le Skeleton Fade est magnifique, surtout en full fade !', 1),
    (3, 25, '2024-03-22 10:50:00', 'Ce skin M4A1-S est basique mais pratique pour les budgets limités.', 1),
-   (4, 26, '2024-03-22 16:25:00', 'Bon sticker pour les fans de Na\'Vi, pas cher en plus.', 1),
-   (8, 1, '2024-03-23 10:15:00', 'La valeur des Karambit Gamma Doppler ne cesse d\'augmenter, un excellent investissement à long terme.', 1),
-   (8, 5, '2024-03-23 14:30:00', 'L\'AK-47 Gold Arabesque est l\'un des meilleurs investissements actuels pour les collectionneurs sérieux.', 1),
-   (9, 2, '2024-03-24 09:45:00', 'J\'utilise la Dragon Lore pour tous mes streams, les viewers l\'adorent ! Ça ajoute vraiment une valeur à mon contenu.', 1),
+   (4, 26, '2024-03-22 16:25:00', 'Bon sticker pour les fans de Na''Vi, pas cher en plus.', 1),
+   (8, 1, '2024-03-23 10:15:00', 'La valeur des Karambit Gamma Doppler ne cesse d''augmenter, un excellent investissement à long terme.', 1),
+   (8, 5, '2024-03-23 14:30:00', 'L''AK-47 Gold Arabesque est l''un des meilleurs investissements actuels pour les collectionneurs sérieux.', 1),
+   (9, 2, '2024-03-24 09:45:00', 'J''utilise la Dragon Lore pour tous mes streams, les viewers l''adorent ! Ça ajoute vraiment une valeur à mon contenu.', 1),
    (9, 6, '2024-03-24 16:20:00', 'La Butterfly Marble Fade est si satisfaisante à manipuler en stream, parfaite pour les transitions entre les rounds.', 1),
-   (10, 12, '2024-03-25 11:35:00', 'J\'ai acheté l\'AWP Gungnir il y a un an et sa valeur a augmenté de 30%. Une des meilleures décisions d\'investissement.', 1),
+   (10, 12, '2024-03-25 11:35:00', 'J''ai acheté l''AWP Gungnir il y a un an et sa valeur a augmenté de 30%. Une des meilleures décisions d''investissement.', 1),
    (10, 14, '2024-03-25 15:50:00', 'Le sticker Titan Holo est le joyau de ma collection, son appréciation est constante même en période de baisse du marché.', 1),
    (2, 4, '2024-03-26 10:10:00', 'Le Skeleton Crimson Web est magnifique en jeu, surtout avec les bons patterns de toile.', 1),
-   (3, 11, '2024-03-26 14:25:00', 'L\'AK-47 Inheritance est sous-évalué selon moi, le design est très élégant et détaillé.', 1),
+   (3, 11, '2024-03-26 14:25:00', 'L''AK-47 Inheritance est sous-évalué selon moi, le design est très élégant et détaillé.', 1),
    (4, 8, '2024-03-27 09:40:00', 'Le M4A1-S Knight est mon skin préféré pour ce fusil, si propre et élégant.', 1),
-   (5, 20, '2024-03-27 16:15:00', 'Le Navaja Rust Coat a un charme rustique qui contraste avec les skins plus clinquants, j\'apprécie cette simplicité.', 1);
+   (5, 20, '2024-03-27 16:15:00', 'Le Navaja Rust Coat a un charme rustique qui contraste avec les skins plus clinquants, j''apprécie cette simplicité.', 1);
 
 
 INSERT INTO commentaire (utilisateur_id, skin_id, date_publication, commentaire, valide, commentaire_id_parent) VALUES
-   (1, 1, '2024-03-16 15:45:00', 'Merci pour votre retour ! Nous sommes ravis que vous appréciez la finition de cette Karambit. C\'est effectivement l\'un de nos produits phares.', 1, 1),
-   (1, 2, '2024-03-17 10:30:00', 'Nous sommes d\'accord, la Dragon Lore est un chef-d\'œuvre incontournable dans l\'univers des skins CS. Merci de partager votre enthousiasme !', 1, 3),
-   (1, 12, '2024-03-20 09:15:00', 'Excellent choix d\'investissement ! L\'AWP Gungnir est très prisée pour son design unique. N\'hésitez pas à nous contacter si vous cherchez d\'autres pièces de collection.', 1, 9),
-   (1, 13, '2024-03-21 11:40:00', 'Le sticker iBUYPOWER Katowice 2014 est effectivement une légende dans la communauté. Sa rareté en fait l\'un des items les plus convoités par les collectionneurs.', 1, 10),
-   (1, 5, '2024-03-24 08:30:00', 'Vous avez raison concernant l\'AK-47 Gold Arabesque, c\'est un skin qui prend de la valeur avec le temps. Merci pour votre analyse pertinente !', 1, 21),
-   (1, 6, '2024-03-25 10:45:00', 'Nous sommes ravis que la Butterfly Marble Fade améliore vos streams ! C\'est effectivement un couteau très apprécié pour ses animations fluides.', 1, 7),
-   (1, 12, '2024-03-26 13:20:00', 'Félicitations pour votre investissement judicieux ! L\'AWP Gungnir continue en effet de prendre de la valeur sur le marché.', 1, 14);
+   (1, 1, '2024-03-16 15:45:00', 'Merci pour votre retour ! Nous sommes ravis que vous appréciez la finition de cette Karambit. C''est effectivement l''un de nos produits phares.', 1, 1),
+   (1, 2, '2024-03-17 10:30:00', 'Nous sommes d''accord, la Dragon Lore est un chef-d''œuvre incontournable dans l''univers des skins CS. Merci de partager votre enthousiasme !', 1, 3),
+   (1, 12, '2024-03-20 09:15:00', 'Excellent choix d''investissement ! L''AWP Gungnir est très prisée pour son design unique. N''hésitez pas à nous contacter si vous cherchez d''autres pièces de collection.', 1, 9),
+   (1, 13, '2024-03-21 11:40:00', 'Le sticker iBUYPOWER Katowice 2014 est effectivement une légende dans la communauté. Sa rareté en fait l''un des items les plus convoités par les collectionneurs.', 1, 10),
+   (1, 5, '2024-03-24 08:30:00', 'Vous avez raison concernant l''AK-47 Gold Arabesque, c''est un skin qui prend de la valeur avec le temps. Merci pour votre analyse pertinente !', 1, 21),
+   (1, 6, '2024-03-25 10:45:00', 'Nous sommes ravis que la Butterfly Marble Fade améliore vos streams ! C''est effectivement un couteau très apprécié pour ses animations fluides.', 1, 7),
+   (1, 12, '2024-03-26 13:20:00', 'Félicitations pour votre investissement judicieux ! L''AWP Gungnir continue en effet de prendre de la valeur sur le marché.', 1, 14);
 
 INSERT INTO liste_envie (skin_id, utilisateur_id, date_update) VALUES
 (1, 2, '2024-03-20 10:30:00'),
@@ -485,3 +508,64 @@ INSERT INTO historique (skin_id, utilisateur_id, date_consultation) VALUES
 (18, 2, '2024-03-03 17:30:00'),
 (19, 2, '2024-03-02 16:30:00'),
 (20, 2, '2024-03-01 15:30:00');
+
+-- Update commande to include address information
+UPDATE commande 
+SET adresse_livraison_id = 1, adresse_facturation_id = 2 
+WHERE id_commande = 1;
+
+UPDATE commande 
+SET adresse_livraison_id = 1, adresse_facturation_id = 1 
+WHERE id_commande = 2;
+
+UPDATE commande 
+SET adresse_livraison_id = 4, adresse_facturation_id = 4 
+WHERE id_commande = 3;
+
+UPDATE commande 
+SET adresse_livraison_id = 5, adresse_facturation_id = 4 
+WHERE id_commande = 4;
+
+UPDATE commande 
+SET adresse_livraison_id = 1, adresse_facturation_id = 3 
+WHERE id_commande = 5;
+
+UPDATE commande 
+SET adresse_livraison_id = 6, adresse_facturation_id = 6 
+WHERE id_commande = 6;
+
+UPDATE commande 
+SET adresse_livraison_id = 8, adresse_facturation_id = 8 
+WHERE id_commande = 7;
+
+UPDATE commande 
+SET adresse_livraison_id = 10, adresse_facturation_id = 10 
+WHERE id_commande = 8;
+
+UPDATE commande 
+SET adresse_livraison_id = 12, adresse_facturation_id = 13 
+WHERE id_commande = 9;
+
+UPDATE commande 
+SET adresse_livraison_id = 14, adresse_facturation_id = 14 
+WHERE id_commande = 10;
+
+UPDATE commande 
+SET adresse_livraison_id = 16, adresse_facturation_id = 17 
+WHERE id_commande = 11;
+
+UPDATE commande 
+SET adresse_livraison_id = 18, adresse_facturation_id = 18 
+WHERE id_commande = 12;
+
+UPDATE commande 
+SET adresse_livraison_id = 1, adresse_facturation_id = 2 
+WHERE id_commande = 13;
+
+UPDATE commande 
+SET adresse_livraison_id = 4, adresse_facturation_id = 5 
+WHERE id_commande = 14;
+
+UPDATE commande 
+SET adresse_livraison_id = 10, adresse_facturation_id = 11 
+WHERE id_commande = 15;
